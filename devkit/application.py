@@ -16,10 +16,13 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QFrame, QLabe
     QPlainTextEdit, QComboBox, QMessageBox, QProgressBar, QLineEdit, QDialog, QCheckBox,
     QDialogButtonBox, QSplitter)
 from .core import ASSETS, Task, Cancelled, data_home, read_json, write_json
-from .firmware import import_firmware, TESTED_VERSION
-from .runtime import discover, setup
+from .library import import_firmware, is_camera
+from .runtime import discover, setup, discover_qemu, setup_qemu
 from .development import workspace, build, find_ndk
 from .session import Session
+from .generic_session import GenericSession
+from .boot import BOARDS, validate_profile, build_command
+from .support import create_support, export_support
 from .guest.prepare import network_supported
 from .models import MODELS, model_id, available_models
 from .theme import apply_theme, current_colors
@@ -42,7 +45,7 @@ class Screen(QWidget):
     def __init__(self):
         super().__init__()
         self.frame = None
-        self.message = 'X2D II'
+        self.message = 'QEMU Everything'
         self.caption = 'Import official firmware to begin'
         self.last_move = 0
         self.dragging = False
@@ -97,7 +100,7 @@ class DropArea(QFrame):
         layout.addWidget(self.title); layout.addWidget(self.caption)
     def dragEnterEvent(self, event):
         urls = event.mimeData().urls()
-        if len(urls) == 1 and urls[0].isLocalFile() and urls[0].toLocalFile().lower().endswith('.cim'):
+        if len(urls) == 1 and urls[0].isLocalFile() and Path(urls[0].toLocalFile()).is_file():
             event.acceptProposedAction()
     def dropEvent(self, event):
         self.dropped.emit(event.mimeData().urls()[0].toLocalFile())
@@ -116,10 +119,11 @@ class Window(QMainWindow):
         self.bindings = []
         self.job = self.session = None
         self.runtime = discover(home)
+        self.qemu_runtime = discover_qemu(home)
         self.devices = []; self.device = None
         self.last_frame = None
         self.closing = False
-        self.setWindowTitle('Hasselblad X System QEMU DevKit')
+        self.setWindowTitle('QEMU Everything')
         cat_logo = QPixmap(str(ASSETS / 'assets' / 'cat-logo.jpg'))
         if not cat_logo.isNull():
             self.setWindowIcon(QIcon(cat_logo))
@@ -138,18 +142,18 @@ class Window(QMainWindow):
         side.addWidget(brand)
         side.addSpacing(25)
         self.pages = QStackedWidget(); self.nav = []
-        for i, (en, zh) in enumerate([('Firmware library', '固件库'), ('Development', '开发工作区'), ('Console and logs', '控制台与日志'), ('Settings', '设置')]):
+        for i, (en, zh) in enumerate([('Firmware library', '固件库'), ('Development', '开发工作区'), ('Platform support', '平台适配'), ('Console and logs', '控制台与日志'), ('Settings', '设置')]):
             b = QToolButton(); b.setObjectName('nav'); b.setCheckable(True); b.setToolButtonStyle(Qt.ToolButtonTextOnly)
             self.bind(b.setText, en, zh); b.clicked.connect(lambda _=False, n=i: self.navigate(n))
             side.addWidget(b); self.nav.append(b)
         side.addStretch()
         side.addWidget(self.label('LOCAL WORKBENCH', '本地开发环境', 'eyebrow'))
-        host_label = 'macOS ARM64' if sys.platform == 'darwin' and platform.machine() == 'arm64' else ('macOS' if sys.platform == 'darwin' else 'Windows x64')
-        side.addWidget(self.label(f'ARM32 / ARM64 · Software rendering\n{host_label} · v0.2.0', f'ARM32 / ARM64 · 软件渲染\n{host_label} · v0.2.0', 'muted'))
-        self.official = self.button('Get official firmware ↗', '下载官方固件 ↗', lambda: QDesktopServices.openUrl(QUrl('https://www.hasselblad.com/x-system/firmware/')))
+        host_label = 'macOS ARM64' if sys.platform == 'darwin' and platform.machine() == 'arm64' else ('macOS' if sys.platform == 'darwin' else 'Windows x64' if os.name == 'nt' else platform.system())
+        side.addWidget(self.label(f'ARM · x86_64 · RISC-V\n{host_label} · v0.3.0', f'ARM · x86_64 · RISC-V\n{host_label} · v0.3.0', 'muted'))
+        self.official = self.button('Hasselblad firmware ↗', '哈苏官方固件 ↗', lambda: QDesktopServices.openUrl(QUrl('https://www.hasselblad.com/x-system/firmware/')))
         side.addWidget(self.official)
         row.addWidget(sidebar); row.addWidget(self.pages, 1)
-        self.make_library(); self.make_development(); self.make_console(); self.make_settings()
+        self.make_library(); self.make_development(); self.make_support(); self.make_console(); self.make_settings()
         self.navigate(0)
         self.progress = QProgressBar(); self.progress.setMaximumWidth(170); self.progress.setRange(0, 0); self.progress.hide()
         self.cancel = self.button('Cancel', '取消', self.cancel_job); self.cancel.hide()
@@ -177,11 +181,11 @@ class Window(QMainWindow):
         self.pages.addWidget(p); return layout
 
     def make_library(self):
-        layout = self.page('Hasselblad X System QEMU DevKit', 'Hasselblad X System QEMU DevKit',
-            'Bring your own firmware. Explore the original interface in a local QEMU guest.', '导入官方固件，在本地 QEMU 虚拟机中探索原厂界面。')
+        layout = self.page('QEMU Everything', 'QEMU Everything',
+            'Import firmware. Inspect its platform, configure a guest, and develop verified adapters.', '导入固件，识别平台，配置虚拟机，逐步建立并验证适配器。')
         self.drop = DropArea('', '')
-        self.bind(self.drop.title.setText, '↓  Drop official firmware here', '↓  将官方固件拖到这里')
-        self.bind(self.drop.caption.setText, '.cim · X1D / X1D II / X2D / X2D II / 907X 50C', '.cim · X1D / X1D II / X2D / X2D II / 907X 50C')
+        self.bind(self.drop.title.setText, '↓  Drop firmware or an image here', '↓  将固件或镜像拖到这里')
+        self.bind(self.drop.caption.setText, 'Any firmware file · Hasselblad UI adapters · Linux kernels and disk images', '任意固件文件 · 哈苏 UI 适配器 · Linux 内核与磁盘镜像')
         self.drop.clicked.connect(self.browse); self.drop.dropped.connect(self.import_file); layout.addWidget(self.drop)
         content = QHBoxLayout(); content.setSpacing(16); layout.addLayout(content, 1)
         list_card = QFrame(); list_card.setObjectName('card'); list_card.setFixedWidth(242)
@@ -191,12 +195,13 @@ class Window(QMainWindow):
         self.details = QLabel(); self.details.setWordWrap(True); self.details.setObjectName('muted'); left.addWidget(self.details)
         self.model_choice = QComboBox(); self.model_choice.currentIndexChanged.connect(self.select_model); left.addWidget(self.model_choice)
         self.folder = self.button('Open files', '打开文件目录', self.open_device); left.addWidget(self.folder)
+        left.addWidget(self.button('Inspect & configure', '分析与配置', lambda: self.navigate(2)))
         content.addWidget(list_card)
         preview = QFrame(); preview.setObjectName('card'); right = QVBoxLayout(preview); right.setContentsMargins(16, 14, 16, 16)
         header = QHBoxLayout(); header.addWidget(self.label('LIVE PREVIEW', '实时预览', 'eyebrow')); header.addStretch()
         self.badge = QLabel(); self.badge.setObjectName('badge'); header.addWidget(self.badge); right.addLayout(header)
         self.screen = Screen(); self.screen.touch.connect(self.send_touch); right.addWidget(self.screen, 1)
-        right.addWidget(self.label('Click to tap · Drag to swipe · Camera data is simulated', '鼠标点击 = 触控 · 拖动 = 滑动 · 相机数据为模拟值', 'muted'))
+        self.preview_hint = QLabel(); self.preview_hint.setObjectName('muted'); self.preview_hint.setWordWrap(True); right.addWidget(self.preview_hint)
         key_row = QHBoxLayout(); self.camera_keys = []
         for i in range(1,6):
             key = QPushButton(f'F{i}')
@@ -212,8 +217,8 @@ class Window(QMainWindow):
         content.addWidget(preview, 1)
 
     def make_development(self):
-        layout = self.page('Develop for your camera.', '为选中的机型开发应用。',
-            'Build and run a Wayland example for the selected firmware.', '按所选固件的架构编译 Wayland 示例，在虚拟机中运行。')
+        layout = self.page('Firmware development.', '固件开发工作区。',
+            'Camera app tools use the Hasselblad adapter. Generic platforms have a support workspace.', '相机应用工具使用哈苏适配器；通用平台提供独立的适配工作区。')
         card = self.card(layout)
         card.addWidget(self.label('01  Create your workspace', '01  创建开发工作区', 'subtitle'))
         card.addWidget(self.label('Create hello.c and a guide for the selected firmware. Existing edits are preserved.', '为选中的固件创建 hello.c 和开发说明，保留已有修改。', 'muted'))
@@ -246,12 +251,100 @@ class Window(QMainWindow):
         card.addWidget(self.label('Original Qt UI + a minimal Wayland compositor + mocked camera services. The included C app uses shared memory. Custom Qt apps need a toolchain matching the selected firmware’s ABI.', '原厂 Qt UI、精简 Wayland 合成器和模拟相机服务。附带的 C 示例使用共享内存绘制；自定义 Qt 应用另需与所选固件 ABI 匹配的工具链。', 'muted'))
         layout.addStretch()
 
+    def make_support(self):
+        layout = self.page('Build platform support.', '建立平台支持。',
+            'Detection provides evidence. Booting requires a compatible kernel, board and drivers.', '格式识别提供线索，实际启动还需要兼容的内核、板型与驱动。')
+        split = QSplitter(Qt.Horizontal); layout.addWidget(split, 1)
+        self.support_report = QPlainTextEdit(); self.support_report.setReadOnly(True); split.addWidget(self.support_report)
+        config = QWidget(); box = QVBoxLayout(config); split.addWidget(config)
+        box.addWidget(self.label('Generic boot configuration', '通用启动配置', 'subtitle'))
+        self.board_choice = QComboBox(); self.board_choice.addItem('Choose board / 选择板型', None)
+        for key, board in BOARDS.items(): self.board_choice.addItem(board['label'], key)
+        self.board_choice.activated.connect(self.use_board); box.addWidget(self.board_choice)
+        self.boot_editor = QPlainTextEdit(); self.boot_editor.setFont(QFont('Cascadia Mono', 10)); box.addWidget(self.boot_editor, 1)
+        row = QHBoxLayout()
+        self.component_buttons = []
+        for kind in ('kernel', 'initrd', 'disk'):
+            button = self.button(f'Add {kind}', {'kernel':'添加内核','initrd':'添加 initrd','disk':'添加磁盘'}[kind], lambda _=False, kind=kind:self.add_component(kind))
+            self.component_buttons.append(button); row.addWidget(button)
+        box.addLayout(row)
+        self.save_boot_button = self.button('Validate & save', '验证并保存配置', self.save_boot, True); box.addWidget(self.save_boot_button)
+        box.addWidget(self.label('Generic guests open a QEMU window. Serial I/O is in Console and logs. Disks use temporary snapshots; networking is disabled.', '通用虚拟机在独立 QEMU 窗口显示，串口输入输出在控制台中。磁盘使用临时快照，网络关闭。', 'muted'))
+        row = QHBoxLayout()
+        self.report_button = self.button('Refresh diagnosis', '刷新诊断', self.refresh_support)
+        self.export_button = self.button('Export support bundle', '导出适配资料', self.export_bundle)
+        row.addWidget(self.report_button); row.addWidget(self.export_button); row.addStretch(); layout.addLayout(row)
+
+    def refresh_support(self):
+        if not self.device: return
+        try:
+            root = create_support(self.device, self.qemu_runtime['qemu'] if self.qemu_runtime else None)
+            self.support_report.setPlainText((root / 'report.md').read_text(encoding='utf-8'))
+        except (OSError, ValueError, KeyError) as error: self.error(str(error))
+
+    def use_board(self, index):
+        key = self.board_choice.itemData(index)
+        if not key or not self.device: return
+        try:
+            data = json.loads(self.boot_editor.toPlainText() or '{}')
+            if not isinstance(data, dict): raise ValueError('Boot configuration must be a JSON object / 启动配置必须是 JSON 对象')
+            data.update(board=key, cpu=BOARDS[key]['default_cpu'], status='draft')
+            data['cmdline'] = f'console={BOARDS[key]["console"]},115200' if data.get('kernel') else ''
+            self.boot_editor.setPlainText(json.dumps(data, indent=2, ensure_ascii=False))
+        except (ValueError, TypeError) as error: self.error(str(error))
+
+    def save_boot(self):
+        if not self.device or self.busy(): return False
+        try:
+            data = validate_profile(json.loads(self.boot_editor.toPlainText()), self.device)
+            write_json(self.device / 'boot.json', data)
+            self.boot_editor.setPlainText(json.dumps(data, indent=2, ensure_ascii=False))
+            self.refresh_support(); self.update_controls()
+            self.log(self.tr('Configuration valid; guest boot still needs verification.', '配置验证通过，固件实际启动仍需验证。'))
+            return True
+        except (OSError, ValueError, TypeError, KeyError) as error:
+            self.error(str(error)); return False
+
+    def add_component(self, kind):
+        if not self.device or self.busy(): return
+        path, _ = QFileDialog.getOpenFileName(self, self.tr(f'Add {kind}', f'添加 {kind}'), '', 'All files (*)')
+        if not path: return
+        try:
+            data = json.loads(self.boot_editor.toPlainText())
+            if not isinstance(data, dict): raise ValueError('Boot configuration must be a JSON object / 启动配置必须是 JSON 对象')
+        except ValueError as error: return self.error(str(error))
+        device = self.device
+        def copy(task):
+            directory = device / 'components'; directory.mkdir(exist_ok=True)
+            target = directory / (kind + '.bin'); temporary = target.with_suffix('.part')
+            try:
+                with Path(path).open('rb') as source, temporary.open('wb') as dest:
+                    while block := source.read(1024**2): task.check(); dest.write(block)
+                task.check(); temporary.replace(target)
+            finally: temporary.unlink(missing_ok=True)
+            return target.relative_to(device).as_posix()
+        def done(relative):
+            data[kind] = relative
+            if kind == 'disk': data['disk_format'] = 'qcow2' if Path(path).suffix.lower() == '.qcow2' else 'raw'
+            self.boot_editor.setPlainText(json.dumps(data, indent=2, ensure_ascii=False))
+            self.log(self.tr('Component copied. Validate and save before boot.', '组件已复制，请验证并保存后启动。'))
+        self.run_job(copy, done)
+
+    def export_bundle(self):
+        if not self.device or self.busy(): return
+        path, _ = QFileDialog.getSaveFileName(self, self.tr('Export support bundle', '导出适配资料'), 'qemu-everything-support.zip', 'ZIP (*.zip)')
+        if path:
+            try:
+                export_support(self.device, path, self.qemu_runtime['qemu'] if self.qemu_runtime else None)
+                self.log(self.tr('Exported reports and bounded logs; firmware is excluded.', '已导出报告和限量日志，资料包不包含固件。'))
+            except (OSError, ValueError) as error: self.error(str(error))
+
     def make_console(self):
         layout = self.page('See what is happening.', '查看运行状态。', 'Commands run only inside the local development guest.', '命令只在本地开发虚拟机中执行。')
         self.logs = QPlainTextEdit(); self.logs.setReadOnly(True); self.logs.setMaximumBlockCount(2500); self.logs.setFont(QFont('Cascadia Mono', 10)); layout.addWidget(self.logs, 1)
         row = QHBoxLayout(); self.command = QLineEdit(); self.bind(self.command.setPlaceholderText, 'Guest shell command, e.g. uname -a', '虚拟机 Shell 命令，例如 uname -a')
         self.command.returnPressed.connect(self.send_command); row.addWidget(self.command, 1)
-        self.send_button = self.button('Run in guest', '在虚拟机执行', self.send_command); row.addWidget(self.send_button); layout.addLayout(row)
+        self.send_button = self.button('Send to guest', '发送到虚拟机', self.send_command); row.addWidget(self.send_button); layout.addLayout(row)
         row = QHBoxLayout(); row.addWidget(self.button('Open logs folder', '打开日志目录', self.open_device)); row.addWidget(self.button('Clear view', '清空显示', self.logs.clear)); row.addStretch(); layout.addLayout(row)
 
     def make_settings(self):
@@ -266,10 +359,12 @@ class Window(QMainWindow):
         card = self.card(layout); card.addWidget(self.label('Runtime', '运行环境', 'subtitle'))
         self.runtime_label = QLabel(); self.runtime_label.setWordWrap(True); self.runtime_label.setObjectName('muted'); card.addWidget(self.runtime_label)
         self.setup_button = self.button('Set up runtime', '安装运行环境', self.install_runtime, True); card.addWidget(self.setup_button)
+        self.setup_qemu_button = self.button('Set up QEMU only', '仅安装 QEMU', self.install_qemu); card.addWidget(self.setup_qemu_button)
         card.addWidget(self.label('Base setup downloads about 615 MB; X1D adds about 78 MB of Linux libraries. Reserve 8 GB, or 12 GB for X1D, plus space for each firmware. CPU emulation and Qt software rendering are used; GPU acceleration is unavailable in this ARM64 guest.', '基础环境下载约 615 MB，X1D 另需约 78 MB Linux 运行库。请预留 8 GB，X1D 建议 12 GB，多份固件需额外空间。当前使用 CPU 模拟与 Qt 软件渲染，此 ARM64 环境尚未提供 GPU 加速。', 'muted'))
         card.addWidget(self.button('Open DevKit data folder', '打开 DevKit 数据目录', lambda: self.open_path(self.home)))
         card = self.card(layout); card.addWidget(self.label('Credits & scope', '致谢与范围', 'subtitle'))
         card.addWidget(self.label('Material theme adapted from Derrick Yao’s tsla-infotainment-lab (MIT). Powered by QEMU, Android, Qt for Python and 7-Zip. Firmware is supplied by you and remains local. Unaffiliated with Hasselblad.', 'Material 主题改编自 Derrick Yao 的 tsla-infotainment-lab（MIT）。基于 QEMU、Android、Qt for Python 和 7-Zip。固件由你提供并保留在本地。本项目与哈苏无隶属关系。', 'muted'))
+        card.addWidget(self.button('Radium Wang · Hasselblad firmware research ↗', 'Radium Wang · 哈苏固件研究与致谢 ↗', lambda: QDesktopServices.openUrl(QUrl('https://github.com/radium-wang/Hasselblad-X-System-CIM-Firmware-Research-Feature-Extensions'))))
         card.addWidget(self.button('View source & documentation ↗', '查看源码与文档 ↗', lambda: QDesktopServices.openUrl(QUrl('https://github.com/derrickyau9/Hasselblad-X-System-QEMU-DevKit'))))
         layout.addStretch()
 
@@ -289,25 +384,25 @@ class Window(QMainWindow):
     def open_device(self):
         if self.device: self.open_path(self.device)
     def open_workspace(self):
-        if self.device: self.open_path(workspace(self.device))
+        if self.device: self.open_path(workspace(self.device) if is_camera(read_json(self.device / 'device.json')) else create_support(self.device))
         else: self.error(self.tr('Import and select a firmware first.', '请先导入并选择固件。'))
     def choose_ndk(self):
         path = QFileDialog.getExistingDirectory(self, 'Android NDK', self.ndk.text())
         if path:
             self.ndk.setText(path); self.preferences['ndk'] = path; self.save_preferences()
     def browse(self):
-        path, _ = QFileDialog.getOpenFileName(self, self.tr('Import official firmware', '导入官方固件'), '', 'Hasselblad firmware (*.cim)')
+        path, _ = QFileDialog.getOpenFileName(self, self.tr('Import firmware', '导入固件'), '', 'Firmware and images (*.cim *.dat *.bin *.img *.qcow2 *.elf *.zip *.gz *.xz);;All files (*)')
         if path: self.import_file(path)
     def dragEnterEvent(self, event):
         urls = event.mimeData().urls()
-        if len(urls) == 1 and urls[0].isLocalFile() and urls[0].toLocalFile().lower().endswith('.cim'): event.acceptProposedAction()
+        if len(urls) == 1 and urls[0].isLocalFile() and Path(urls[0].toLocalFile()).is_file(): event.acceptProposedAction()
     def dropEvent(self, event): self.import_file(event.mimeData().urls()[0].toLocalFile())
     def busy(self): return bool((self.job and self.job.isRunning()) or (self.session and self.session.isRunning()))
     def import_file(self, path):
         if self.busy(): return self.error(self.tr('Stop the current operation before importing.', '请先停止当前任务再导入。'))
         def done(device):
             self.refresh_library(device)
-            self.log(self.tr('Ready. Click Start original UI.', '已就绪，点击「启动原厂 UI」。'))
+            self.log(self.tr('Imported. Review support status before launching.', '已导入，请查看适配状态后启动。'))
         self.run_job(lambda task: import_firmware(path, self.home / 'library', task), done)
     def run_job(self, operation, done):
         if self.busy(): return
@@ -326,8 +421,16 @@ class Window(QMainWindow):
         if dialog.exec() != QDialog.Accepted: return
         def done(config):
             self.runtime = config
+            self.qemu_runtime = discover_qemu(self.home)
             if then: QTimer.singleShot(100, then)
         self.run_job(lambda task: setup(self.home, task), done)
+    def install_qemu(self, *_ , then=None, required=None):
+        if self.busy(): return
+        def done(config):
+            self.qemu_runtime = config
+            self.refresh_support()
+            if then: QTimer.singleShot(100, then)
+        self.run_job(lambda task: setup_qemu(self.home, task, required), done)
     def refresh_library(self, select=None):
         self.devices = sorted((self.home / 'library').glob('*/device.json'))
         self.library.blockSignals(True); self.library.clear()
@@ -344,8 +447,13 @@ class Window(QMainWindow):
         self.model_choice.blockSignals(True); self.model_choice.clear()
         if self.device:
             profile = read_json(self.device / 'device.json')
-            for model in available_models(profile): self.model_choice.addItem(MODELS[model]['label'],model)
-            self.model_choice.setCurrentIndex(self.model_choice.findData(model_id(profile)))
+            if is_camera(profile):
+                for model in available_models(profile): self.model_choice.addItem(MODELS[model]['label'],model)
+                self.model_choice.setCurrentIndex(self.model_choice.findData(model_id(profile)))
+            self.boot_editor.setPlainText(json.dumps(read_json(self.device / 'boot.json'), indent=2, ensure_ascii=False))
+            self.refresh_support()
+        else:
+            self.boot_editor.clear(); self.support_report.clear()
         self.model_choice.blockSignals(False)
         self.refresh_apps()
         self.update_controls()
@@ -361,7 +469,7 @@ class Window(QMainWindow):
     def refresh_apps(self, select=None):
         self.app_choice.clear()
         self.app_choice.addItem(self.tr('Built-in Hello example', '内置 Hello 示例'), None)
-        if self.device:
+        if self.device and is_camera(read_json(self.device / 'device.json')):
             from .packages import list_packages
             profile = read_json(self.device / 'device.json')
             abi = profile.get('abi') or MODELS[model_id(profile)]['abi']
@@ -387,6 +495,21 @@ class Window(QMainWindow):
         self.run_job(lambda task: remove_package(self.device, *key), lambda _: self.refresh_apps())
     def launch(self, checked=False, mode='live'):
         if self.busy() or not self.device: return
+        if not is_camera(read_json(self.device / 'device.json')):
+            if not self.save_boot(): return
+            boot = read_json(self.device / 'boot.json')
+            required = BOARDS[boot['board']]['binary']
+            self.qemu_runtime = discover_qemu(self.home, required)
+            if not self.qemu_runtime: return self.install_qemu(then=self.launch, required=required)
+            try:
+                build_command(read_json(self.device / 'boot.json'), self.device, self.qemu_runtime['qemu'])
+            except (OSError, ValueError, KeyError) as error: return self.error(str(error))
+            self.screen.frame = None; self.last_frame = None
+            self.session = GenericSession(self.device, self.qemu_runtime)
+            self.session.message.connect(self.log); self.session.console.connect(self.logs.appendPlainText)
+            self.session.phase.connect(self.on_phase); self.session.failed.connect(self.error)
+            self.session.finished.connect(self.update_controls)
+            self.session.start(); self.navigate(3); self.update_controls(); return
         if not self.runtime:
             return self.install_runtime(then=lambda: self.launch(mode=mode))
         network = mode == 'app' and self.app_network.isChecked()
@@ -427,7 +550,7 @@ class Window(QMainWindow):
             self.session.commands.put(self.command.text()); self.command.clear()
     def screenshot(self):
         if self.screen.frame is None: return
-        path, _ = QFileDialog.getSaveFileName(self, self.tr('Save screenshot', '保存截图'), 'x2dii-preview.png', 'PNG (*.png)')
+        path, _ = QFileDialog.getSaveFileName(self, self.tr('Save screenshot', '保存截图'), 'qemu-everything-preview.png', 'PNG (*.png)')
         if path and not self.screen.frame.save(path): self.error('Could not save screenshot')
     def tick(self):
         if self.closing:
@@ -442,33 +565,57 @@ class Window(QMainWindow):
                 self.last_frame = latest; self.screen.update(); self.shot.setEnabled(True)
     def update_controls(self):
         busy = self.busy(); live = bool(self.session and self.session.isRunning()); ready = bool(live and self.session.ready)
-        self.start.setEnabled(bool(self.device) and not busy); self.stop.setEnabled(live)
+        profile = read_json(self.device / 'device.json') if self.device else {}
+        camera = bool(self.device and is_camera(profile))
+        configured = False
+        if self.device and not camera:
+            try:
+                validate_profile(read_json(self.device / 'boot.json'), self.device); configured = True
+            except (OSError, ValueError, TypeError, KeyError): pass
+        self.start.setText(self.tr('Start original UI', '启动原厂 UI') if camera else self.tr('Start QEMU', '启动 QEMU'))
+        self.start.setEnabled((camera or configured) and not busy); self.stop.setEnabled(live)
         self.library.setEnabled(not busy); self.drop.setEnabled(not busy); self.folder.setEnabled(bool(self.device))
         self.model_choice.setEnabled(not busy and self.model_choice.count()>1)
-        for key in self.camera_keys: key.setEnabled(ready)
-        self.build_button.setEnabled(bool(self.device) and not busy); self.app_button.setEnabled(bool(self.device) and not busy)
-        self.app_choice.setEnabled(bool(self.device) and not busy)
-        self.import_app_button.setEnabled(bool(self.device) and not busy)
-        self.remove_app_button.setEnabled(bool(self.device) and not busy and self.app_choice.currentData() is not None)
-        supports_network = bool(self.device and network_supported(read_json(self.device / 'device.json'), 'app'))
+        self.model_choice.setVisible(camera)
+        for key in self.camera_keys: key.setEnabled(ready and camera); key.setVisible(camera)
+        self.build_button.setEnabled(camera and not busy); self.app_button.setEnabled(camera and not busy)
+        self.app_choice.setEnabled(camera and not busy)
+        self.import_app_button.setEnabled(camera and not busy)
+        self.remove_app_button.setEnabled(camera and not busy and self.app_choice.currentData() is not None)
+        supports_network = bool(camera and network_supported(profile, 'app'))
         if not supports_network and self.app_network.isChecked(): self.app_network.setChecked(False)
         self.app_network.setEnabled(supports_network and not busy)
-        self.setup_button.setEnabled(not busy); self.send_button.setEnabled(ready); self.command.setEnabled(ready)
+        self.setup_button.setEnabled(not busy); self.setup_qemu_button.setEnabled(not busy)
+        self.send_button.setEnabled(ready); self.command.setEnabled(ready)
+        self.save_boot_button.setEnabled(bool(self.device) and not camera and not busy)
+        self.boot_editor.setEnabled(bool(self.device) and not camera and not busy)
+        self.board_choice.setEnabled(bool(self.device) and not camera and not busy)
+        for button in self.component_buttons: button.setEnabled(bool(self.device) and not camera and not busy)
+        self.report_button.setEnabled(bool(self.device) and not busy); self.export_button.setEnabled(bool(self.device) and not busy)
         self.shot.setEnabled(self.screen.frame is not None)
         self.progress.setVisible(busy and not ready); self.cancel.setVisible(bool(self.job and self.job.isRunning()))
         phase = getattr(self, 'current_phase', 'stopped') if live else 'stopped'
         statuses = {'starting': ('Starting…', '启动中…'), 'running': ('Running', '运行中'), 'stopping': ('Stopping…', '停止中…'), 'stopped': ('Stopped', '已停止')}
-        self.badge.setText(self.tr(*statuses[phase])); self.badge.setProperty('phase', phase)
+        self.badge.setText(self.tr('QEMU running · boot unverified', 'QEMU 运行中 · 启动未验证') if live and not camera and phase == 'running' else self.tr(*statuses[phase])); self.badge.setProperty('phase', phase)
         self.badge.style().unpolish(self.badge); self.badge.style().polish(self.badge)
-        self.screen.caption = self.tr('Click Start original UI', '点击「启动原厂 UI」') if self.device else self.tr('Import official firmware to begin', '导入官方固件，开始开发')
-        if live and not ready: self.screen.caption = self.tr('Starting the ARM64 guest…', '正在启动 ARM64 虚拟机…')
+        self.screen.caption = self.tr('Click Start original UI', '点击「启动原厂 UI」') if camera else self.tr('Use Platform support to review and save a boot configuration.', '在「平台适配」中查看报告并保存启动配置。')
+        if not self.device: self.screen.caption = self.tr('Import firmware to begin', '导入固件，开始开发')
+        if live and not ready: self.screen.caption = self.tr('Starting guest…', '正在启动虚拟机…')
+        if live and not camera: self.screen.caption = self.tr('Display and input are in the QEMU window. Serial output is in Console and logs.', '显示与输入在 QEMU 独立窗口中，串口输出在控制台中。')
+        self.preview_hint.setText(self.tr('Click to tap · Drag to swipe · Camera data is simulated', '鼠标点击 = 触控 · 拖动 = 滑动 · 相机数据为模拟值') if camera else self.tr('Generic QEMU displays open in their own window.', '通用 QEMU 的画面在独立窗口显示。'))
         self.screen.update()
-        self.runtime_label.setText(self.tr('Runtime ready · QEMU + Android ARM64', '运行环境已就绪 · QEMU + Android ARM64') if self.runtime else self.tr('Runtime not installed. Setup runs once, then works offline.', '尚未安装运行环境，安装一次后可离线使用。'))
+        self.runtime_label.setText(self.tr('Camera runtime ready · QEMU + Android ARM64', '相机运行环境已就绪 · QEMU + Android ARM64') if self.runtime else self.tr('Camera runtime not installed.', '尚未安装相机运行环境。'))
+        self.runtime_label.setText(self.runtime_label.text() + '\n' + self.tr('Generic QEMU ready', '通用 QEMU 已就绪') if self.qemu_runtime else self.runtime_label.text() + '\n' + self.tr('Generic QEMU not installed', '尚未安装通用 QEMU'))
         if self.device:
-            profile = read_json(self.device / 'device.json'); model = model_id(profile)
-            status = self.tr('UI verified','UI 已验证') if profile.get('validated') and model == 'x2dii' else self.tr('UI development preview','UI 开发预览')
-            self.details.setText(f"{status}\n{MODELS[model]['abi']} · {profile['version']}")
-            self.screen.message = MODELS[model]['label'].removeprefix('Hasselblad ')
+            if camera:
+                model = model_id(profile)
+                status = self.tr('UI verified','UI 已验证') if profile.get('validated') and model == 'x2dii' else self.tr('UI development preview','UI 开发预览')
+                self.details.setText(f"{status}\n{MODELS[model]['abi']} · {profile['version']}")
+                self.screen.message = MODELS[model]['label'].removeprefix('Hasselblad ')
+            else:
+                status = self.tr('Configured · boot unverified', '配置有效 · 启动未验证') if configured else self.tr('Inspection · needs adaptation', '已分析 · 待适配')
+                self.details.setText(f"{status}\n{profile.get('architecture') or 'Unknown / 未知'} · {profile['version']}")
+                self.screen.message = 'QEMU Everything'
         else: self.details.setText(self.tr('Your imported firmware will appear here.', '导入的固件会显示在这里。'))
     def log(self, message):
         if message.strip():
@@ -489,7 +636,7 @@ def main():
     parser.add_argument('--home', type=Path)
     parser.add_argument('--smoke-test', type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
-    app = QApplication(sys.argv[:1]); app.setApplicationName('X System QEMU DevKit'); app.setOrganizationName('X2DII-DevKit')
+    app = QApplication(sys.argv[:1]); app.setApplicationName('QEMU Everything'); app.setOrganizationName('QEMU-Everything')
     window = Window((args.home or data_home()).resolve()); window.show()
     if args.smoke_test:
         # Packaged-executable verification without requiring UI automation software.

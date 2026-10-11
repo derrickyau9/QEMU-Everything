@@ -1,23 +1,32 @@
-# Hasselblad X System QEMU DevKit
+# QEMU Everything
 
-**A Windows workbench, with a source-run macOS ARM64 path, for exploring the original Hasselblad X System interfaces and developing guest apps.**
+**Inspect firmware, build a local support workspace, and run compatible kernels, disk images or original Hasselblad interfaces in QEMU.**
+
+Formerly **Hasselblad X System QEMU DevKit**. The existing camera UI adapters remain available. QEMU Everything adds a general firmware library and reviewed boot profiles; its name describes the project's direction, not a claim that every firmware already boots.
 
 [简体中文](README.zh-CN.md) · [Download Windows app](https://github.com/derrickyau9/Hasselblad-X-System-QEMU-DevKit/releases/latest)
 
-![DevKit workbench](docs/workbench.png)
+![QEMU Everything with the preserved Hasselblad original UI adapter](docs/workbench.png)
 
-## From firmware to a running UI
+## Start with your firmware
 
-1. Download **X2DII-DevKit-Windows-x64.zip** from Releases, extract it, and double-click **X2DII-DevKit.exe**. Python, Qt and WSL are not required on your computer.
-2. Download a supported **camera `.cim`** from Hasselblad. Drop it into the workbench or click the import area.
-3. Click **Start original UI**. On first use, review the Android SDK license and approve runtime setup. The app downloads and verifies its runtime, then boots the guest.
-4. Click to tap, drag to swipe. **Stop** shuts down the owned QEMU process. The next launch uses your cached firmware and runtime, offline.
+1. Run `Launch.cmd` from source. Portable builds use **QEMU-Everything.exe** in **QEMU-Everything-Windows-x64.zip**; older published releases may still have the previous name.
+2. Download firmware from its manufacturer and drop the local file into the workbench. Import records its SHA-256 and detectable format/architecture, then creates a library entry.
+3. A recognized Hasselblad `.cim` uses the existing **original UI** adapter. Compatible generic kernels and disk images use a **boot profile**. Unknown or encrypted updates remain available for inspection and support development.
+4. Review the selected boot profile, prepare the required runtime, and start. Generic guests use QEMU's own display window and the workbench console. Camera UI sessions retain embedded touch input and screenshots.
 
-Initial runtime download: approximately **615 MB**. Allow **8 GB free disk space**, a Windows x64 computer, and preferably at least 8 GB RAM. Runtime files are extracted into your user profile; no administrator privileges or system-wide installation is needed.
+[General firmware guide](docs/GENERAL_FIRMWARE.md) · [Architecture](docs/ARCHITECTURE.md)
+
+For a supported Hasselblad UI, first use prompts for the Android SDK license before downloading the guest runtime. Click to tap, drag to swipe, and use **Stop** to close the owned QEMU process. Later launches use cached firmware and runtime offline.
+
+The camera UI runtime download is approximately **615 MB**. Allow **8 GB free disk space**, a Windows x64 computer, and preferably at least 8 GB RAM. Generic guests can prepare QEMU independently and do not require the Android SDK. Runtime files are extracted into your user profile; no administrator privileges or system-wide installation is needed.
 
 ## What you get
 
-- Drag-and-drop firmware import, SHA-256 validation and a local firmware library.
+- Import files into a local library with SHA-256 identities and inspection reports.
+- Create support workspaces for new firmware instead of silently treating unknown packages as compatible.
+- Review JSON boot profiles for ARM64 `virt`, ARM `virt`, x86-64 `pc`, or RISC-V 64 `virt`; run compatible direct kernels or disk images with temporary disk writes and networking disabled.
+- Use the CLI to inspect, import, list boards, run and export support information.
 - Original firmware UI, streamed directly from a minimal Wayland compositor in QEMU.
 - Start/stop controls, correctly scaled mouse touch input and PNG screenshots.
 - English / Simplified Chinese; system / light / dark themes; Iris / Blue / Leaf accents.
@@ -27,7 +36,7 @@ Initial runtime download: approximately **615 MB**. Allow **8 GB free disk space
 - Build a [NetSurf browser prototype](docs/BROWSER_PROTOTYPE.md) for X1D or X2D II guest app sessions, with touch input and optional X2D II QEMU networking.
 - Disposable system writes and a separate data disk per imported firmware.
 
-## Compatibility and limits
+## Compatibility and support status
 
 | Item | Status |
 | --- | --- |
@@ -36,13 +45,17 @@ Initial runtime download: approximately **615 MB**. Allow **8 GB free disk space
 | X2D II 1.2.7.16 | Original UI, menu navigation and Display submenu verified |
 | X2D II 1.3.16.2 | See [verification record](docs/VERIFICATION.md) |
 | Additional profiles | X1D, X1D II, X2D and 907X 50C; see the preview matrix below |
-| Unknown packages | Exact hashes not listed by the importer are rejected |
-| Rendering | QEMU TCG + Qt Quick software backend |
-| Hardware acceleration | Not implemented for this ARM64 guest on x86-64 Windows |
+| Generic kernels / disk images | Boot profiles are available; each image must match the selected QEMU board |
+| Unknown / proprietary updates | Inspect and create a support workspace; no automatic boot claim |
+| Sony update `.DAT` | Inspection only; no verified Sony hardware or original UI adapter |
+| Camera UI rendering | QEMU TCG + Qt Quick software backend |
+| Camera guest hardware acceleration | Not implemented for this ARM64 guest on x86-64 Windows |
 | Capture, ISP, AF, lens, USB camera, real storage | Not emulated |
 | Physical camera installation / firmware flashing | Not provided |
 
 This runs the **original camera user interface in a development guest**, with Android ARM32, Android ARM64 or Linux ARMhf libraries selected for the firmware and simulated camera services. It does not boot the camera's original kernel or reproduce the complete camera hardware. UI responsiveness varies with the host CPU. Camera values are mocked and some actions are intentionally unsupported.
+
+A firmware signature or CPU architecture is only an inspection result. Booting the original system also requires an appropriate board, boot chain and drivers. Generic `virt`/`pc` profiles do not reproduce proprietary camera SoCs. Unrecognized firmware receives a draft support workspace so those requirements can be investigated and recorded. Verified camera UI compatibility remains in [the verification matrix](docs/VERIFICATION.md).
 
 Depending on the firmware, a local development copy adapts embedded QML image visibility or the legacy root window for software rendering. The original executable is retained, executable instructions are not patched, and no modified firmware is written back to the `.cim` file. See [architecture](docs/ARCHITECTURE.md).
 
@@ -83,13 +96,25 @@ python -m venv .venv
 .\.venv\Scripts\python scripts/build.py
 ```
 
-Data lives in `%LOCALAPPDATA%\X2DII-DevKit`. Set `X2DII_DEVKIT_HOME` or pass `--home <directory>` for a different location. Avoid commas in runtime/data paths. Firmware files, extracted assets, runtime downloads, logs and user workspaces are excluded from Git.
+New data lives in `%LOCALAPPDATA%\QEMU-Everything`. An existing `%LOCALAPPDATA%\X2DII-DevKit` library is reused automatically. Set `QEMU_EVERYTHING_HOME` or pass `--home <directory>` for a different location; the older `X2DII_DEVKIT_HOME` variable and launch aliases remain supported. Avoid commas in runtime/data paths. Firmware files, extracted assets, runtime downloads, logs and user workspaces are excluded from Git.
 
 On macOS Apple Silicon, use the source launcher after completing the [macOS setup](docs/MACOS.md):
 
 ```sh
-./Launch.sh --home "$HOME/Library/Application Support/X2DII-DevKit"
+./Launch.sh --home "$HOME/Library/Application Support/QEMU-Everything"
 ```
+
+CLI examples after installing from source:
+
+```powershell
+qemu-everything inspect C:\Firmware\update.dat
+qemu-everything boards
+qemu-everything import C:\Firmware\Image
+qemu-everything support <device-directory>
+qemu-everything run <device-directory>
+```
+
+Inspection never executes the supplied firmware. A generic run requires a valid boot profile and installed QEMU. See the [profile workflow](docs/GENERAL_FIRMWARE.md) before starting a new image.
 
 ## Additional camera profiles (v0.2.0)
 
@@ -115,9 +140,9 @@ See [verification details](docs/VERIFICATION.md). Menu controls backed by unimpl
 - Existing local X2D II QEMU/UI research and CIM container tools by Derrick Yao form the basis of the guest adapters and import pipeline.
 - [QEMU](https://www.qemu.org/), [Stefan Weil's Windows builds](https://qemu.weilnetz.de/), Android/AOSP, Qt for Python, 7-Zip, Dissect, pyfdt, pyelftools, Brotli and cryptography.
 
-DevKit is **AGPL-3.0-or-later**, including the requirements of its Dissect filesystem dependency. The adapted theme retains its MIT notice. The portable package includes project source and third-party license notices; Qt libraries remain separately replaceable in the distribution. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+QEMU Everything is **AGPL-3.0-or-later**, including the requirements of its Dissect filesystem dependency. The adapted theme retains its MIT notice. The portable package includes project source and third-party license notices; Qt libraries remain separately replaceable in the distribution. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-Hasselblad firmware, fonts, artwork, libraries and trademarks belong to their respective owners. They are **not distributed in this repository or release**. Users supply their own official firmware. This project is not affiliated with or endorsed by Hasselblad.
+Manufacturer firmware, fonts, artwork, libraries and trademarks belong to their respective owners. They are **not distributed in this repository or release**. Users supply their own official firmware. This project is not affiliated with or endorsed by Hasselblad or other firmware manufacturers.
 
 ## Disclaimer
 

@@ -39,7 +39,11 @@ class GuestLock:
 ASSETS = Path(__file__).resolve().parent
 
 def data_home():
-    return Path(os.environ.get("X2DII_DEVKIT_HOME", str(Path(os.environ.get("LOCALAPPDATA", Path.home())) / "X2DII-DevKit"))).resolve()
+    configured = os.environ.get('QEMU_EVERYTHING_HOME') or os.environ.get('X2DII_DEVKIT_HOME')
+    root = Path(os.environ.get('LOCALAPPDATA', Path.home()))
+    # Keep existing libraries and SDK downloads in place during the rename.
+    legacy = root / 'X2DII-DevKit'
+    return Path(configured or (legacy if legacy.is_dir() else root / 'QEMU-Everything')).resolve()
 
 def read_json(path, default=None):
     try:

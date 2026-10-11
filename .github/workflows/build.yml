@@ -1,4 +1,4 @@
-name: Windows DevKit
+name: QEMU Everything Windows
 on:
   push:
     branches: [main]
@@ -21,9 +21,9 @@ jobs:
       - run: python scripts/build.py
       - uses: actions/upload-artifact@v4
         with:
-          name: X2DII-DevKit-Windows-x64
+          name: QEMU-Everything-Windows-x64
           path: |
-            dist/X2DII-DevKit-Windows-x64.zip
+            dist/QEMU-Everything-Windows-x64.zip
             dist/SHA256SUMS.txt
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -35,7 +35,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: X2DII-DevKit-Windows-x64
+          name: QEMU-Everything-Windows-x64
           path: dist
       - env:
           GH_TOKEN: ${{ github.token }}
@@ -47,8 +47,8 @@ jobs:
           else
             NOTES="docs/releases/$RELEASE_TAG.md"
             if [ -f "$NOTES" ]; then
-              gh release create "$RELEASE_TAG" dist/* --title "Hasselblad X System QEMU DevKit $RELEASE_TAG" --notes-file "$NOTES"
+              gh release create "$RELEASE_TAG" dist/* --title "QEMU Everything $RELEASE_TAG" --notes-file "$NOTES"
             else
-              gh release create "$RELEASE_TAG" dist/* --title "Hasselblad X System QEMU DevKit $RELEASE_TAG" --generate-notes
+              gh release create "$RELEASE_TAG" dist/* --title "QEMU Everything $RELEASE_TAG" --generate-notes
             fi
           fi

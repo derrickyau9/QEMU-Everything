@@ -1,5 +1,18 @@
 # Verification record / 验证记录
 
+## QEMU Everything v0.3.0 — 2026-10-11
+
+- 146 host tests pass under Windows / Python 3.11.8 / PySide6 6.9.3. New tests cover bounded image identification, malformed headers, CRCs, generic boot validation, architecture mismatch, qcow2 external dependencies, library preservation, support exports, runtime selection, and camera/generic GUI separation.
+- `scripts/verify_generic.py` imported a project-authored 512-byte x86 BIOS image, selected the PC disk profile and booted it in the installed QEMU. Serial output contained `QEMU_EVERYTHING_BOOT_OK`. The source and copied disk hashes remained unchanged. The Qt session separately received the marker, stopped its QEMU process and released its guest lock.
+- ARM64 `virt`, ARM32 `virt`, x86-64 `pc` and RISC-V 64 `virt` accepted their configured machine/CPU/display/input options in real QEMU initialization checks. This establishes argument compatibility, not a completed firmware boot for all four architectures.
+- A local Sony A7R V 4.00 DAT (754,525,608 bytes; SHA-256 `51e1176a255a9a4b4782dfbcfa6c5f332b71173bdfe9ed2bcf4fca6bcbc6c2e2`) was identified and imported without modifying its source. It remains inspection-only, with a blank board and an adaptation plan. No Sony kernel or UI boot was verified.
+- The preserved Hasselblad X2D II 1.3.16.2 adapter displayed the original main menu under the new workbench. The guest frame and workbench screenshot were visually reviewed; the session shut down normally.
+- The Windows portable executable also completed its camera UI smoke check with `ok: true` and `frozen: true`; its original guest image was visually reviewed. The source workbench's Chinese platform-support page was checked for readable text and accessible configuration controls.
+
+中文摘要：通用导入、启动配置、Qt 会话与停止流程已验证；四种 QEMU 平台的参数可初始化。
+自写 x86 测试镜像实际启动成功，哈苏原厂主菜单复测正常。索尼升级包当前仅分析，
+没有宣称所有固件或所有专有硬件可直接启动。测试不需要附带厂商固件。
+
 Host: Windows x64 on AMD x86-64. Python 3.12, PySide6 6.9.3, QEMU Windows build
 20260811, Android API 28 ARM64 image revision 2, Android NDK r27.
 Recorded: 2026-09-29. These checks use local virtual machines only.

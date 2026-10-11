@@ -38,7 +38,7 @@ def download(name, cache, task):
         return target
     temporary = target.with_suffix(target.suffix + '.part')
     task.report(f"Downloading / 下载: {name}")
-    request = urllib.request.Request(spec['url'], headers={"User-Agent": "X2DII-DevKit/0.1"})
+    request = urllib.request.Request(spec['url'], headers={"User-Agent": "QEMU-Everything/0.3"})
     with urllib.request.urlopen(request, timeout=30) as response, temporary.open('wb') as output:
         size = int(response.headers.get('Content-Length', 0))
         downloaded, last_report = 0, -1
@@ -104,6 +104,70 @@ def discover(home):
         except (ValueError, FileNotFoundError):
             pass
     return None
+
+QEMU_BINARIES = ('qemu-system-aarch64', 'qemu-system-x86_64', 'qemu-system-arm', 'qemu-system-riscv64')
+
+def _has_qemu(directory, required=None):
+    names = (required,) if isinstance(required, str) else required
+    if names:
+        return all((Path(directory) / _host_binary(binary)).is_file() for binary in names)
+    return any((Path(directory) / _host_binary(binary)).is_file() for binary in QEMU_BINARIES)
+
+def discover_qemu(home, required=None):
+    """Generic guests need QEMU alone, without the Android SDK image."""
+    home = Path(home)
+    candidates = [read_json(home / 'qemu.json').get('qemu'),
+                  read_json(home / 'runtime.json').get('qemu'), home / 'runtime/qemu']
+    for binary in QEMU_BINARIES:
+        found = shutil.which(_host_binary(binary))
+        if found:
+            candidates.append(Path(found).parent)
+    for directory in candidates:
+        if directory and _has_qemu(directory, required):
+            return {'qemu': str(Path(directory).resolve())}
+    return None
+
+def setup_qemu(home, task=None, required=None):
+    task = task or Task()
+    home = Path(home)
+    required = required or QEMU_BINARIES
+    existing = discover_qemu(home, required)
+    if existing:
+        write_json(home / 'qemu.json', existing)
+        return existing
+    if os.name != 'nt':
+        raise FileNotFoundError('Install QEMU (for example: brew install qemu, or your Linux package manager).')
+    root, cache = home / 'runtime', home / 'downloads'
+    root.mkdir(parents=True, exist_ok=True)
+    for name in ('7zip', 'qemu'):
+        task.check()
+        destination = root / name
+        if (destination / '.complete').exists() and (name != 'qemu' or _has_qemu(destination, required)):
+            continue
+        with tempfile.TemporaryDirectory(prefix=f'{name}-', dir=root) as temp:
+            stage = Path(temp) / 'files'; stage.mkdir()
+            if name == '7zip':
+                small = download('7zr', cache, task)
+                archive = download(name, cache, task)
+                task.run([small, 'x', archive, '-o' + str(stage), '-y'])
+            else:
+                archive = download(name, cache, task)
+                task.run([root / '7zip/7z.exe', 'x', archive, '-o' + str(stage), '-y'], timeout=600)
+            if name == 'qemu' and not _has_qemu(stage, required):
+                raise FileNotFoundError('Downloaded QEMU bundle lacks a required system emulator')
+            (stage / '.complete').touch()
+            if destination.exists():
+                # Recoverable replacement of an incomplete extraction, within runtime.
+                backup = root / (name + '-incomplete-' + Path(temp).name)
+                if destination.resolve().parent != root.resolve() or backup.resolve().parent != root.resolve():
+                    raise ValueError('Runtime repair path escaped the runtime directory')
+                destination.rename(backup)
+            stage.rename(destination)
+    config = discover_qemu(home, required)
+    if not config:
+        raise FileNotFoundError('QEMU extraction did not contain a supported system emulator')
+    write_json(home / 'qemu.json', config)
+    return config
 
 def setup(home, task=None):
     task = task or Task()

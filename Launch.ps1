@@ -1,7 +1,10 @@
 param([string]$Firmware)
 $ErrorActionPreference = 'Stop'
 Set-Location -LiteralPath $PSScriptRoot
-$Packaged = Join-Path $PSScriptRoot 'X2DII-DevKit.exe'
+$Packaged = Join-Path $PSScriptRoot 'QEMU-Everything.exe'
+if (-not (Test-Path -LiteralPath $Packaged)) {
+    $Packaged = Join-Path $PSScriptRoot 'X2DII-DevKit.exe'
+}
 if (Test-Path -LiteralPath $Packaged) {
     if ($Firmware) { & $Packaged $Firmware } else { & $Packaged }
     exit
@@ -16,9 +19,10 @@ if (-not (Test-Path -LiteralPath $Python)) {
     if ($LASTEXITCODE -ne 0) { throw 'Could not create Python environment' }
 }
 $Stamp = Join-Path $PSScriptRoot '.venv\devkit-installed.txt'
-if (-not (Test-Path -LiteralPath $Stamp)) {
+$InstalledVersion = if (Test-Path -LiteralPath $Stamp) { (Get-Content -LiteralPath $Stamp -Raw).Trim() } else { '' }
+if ($InstalledVersion -ne '0.3.0') {
     & $Python -m pip install -e .
     if ($LASTEXITCODE -ne 0) { throw 'Dependency installation failed; rerun Launch.cmd to retry.' }
-    Set-Content -LiteralPath $Stamp -Value '0.1.0'
+    Set-Content -LiteralPath $Stamp -Value '0.3.0'
 }
 if ($Firmware) { & $Python run_app.py $Firmware } else { & $Python run_app.py }

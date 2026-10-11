@@ -8,7 +8,7 @@ import zipfile
 import argparse
 
 root=Path(__file__).resolve().parents[1]
-p=argparse.ArgumentParser();p.add_argument('--name',default='X2DII-DevKit');args=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--name',default='QEMU-Everything');args=p.parse_args()
 name=args.name
 if not name.replace('-','').isalnum(): raise SystemExit('Invalid build name')
 subprocess.run([sys.executable,'-m','PyInstaller','--noconfirm','--clean','--windowed','--onedir',
@@ -24,6 +24,7 @@ output=root/'dist'/name
 for file in ('LICENSE','README.md','README.zh-CN.md','THIRD_PARTY_NOTICES.md'):
     shutil.copy2(root/file,output/file)
 shutil.copytree(root/'third-party-licenses',output/'third-party-licenses',dirs_exist_ok=True)
+shutil.copytree(root/'docs',output/'docs',dirs_exist_ok=True)
 # Corresponding project source alongside the binary; no personal caches, firmware or SDK images.
 sources=subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','-z'],cwd=root).decode().split('\0')
 with zipfile.ZipFile(output/'DevKit-source.zip','w',zipfile.ZIP_DEFLATED) as z:
@@ -31,7 +32,7 @@ with zipfile.ZipFile(output/'DevKit-source.zip','w',zipfile.ZIP_DEFLATED) as z:
         if file and (root/file).is_file():z.write(root/file,file)
 archive=Path(shutil.make_archive(str(root/'dist'/f'{name}-Windows-x64'),'zip',root/'dist',name))
 digest=hashlib.sha256(archive.read_bytes()).hexdigest()
-checksum_name='SHA256SUMS.txt' if name=='X2DII-DevKit' else f'{name}-SHA256SUMS.txt'
+checksum_name='SHA256SUMS.txt' if name in ('QEMU-Everything','X2DII-DevKit') else f'{name}-SHA256SUMS.txt'
 (root/'dist'/checksum_name).write_text(f'{digest}  {archive.name}\n',encoding='ascii')
 print(archive)
 print(digest)

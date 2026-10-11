@@ -15,8 +15,13 @@ else
     fi
     "$PYTHON_BIN" -c 'import sys; assert sys.version_info >= (3, 11), "Python 3.11 or newer is required"'
     "$PYTHON_BIN" -m venv .venv-mac
-    .venv-mac/bin/python -m pip install -e .
     PYTHON=.venv-mac/bin/python
+fi
+
+STAMP=.venv-mac/devkit-installed.txt
+if [ ! -f "$STAMP" ] || [ "$(cat "$STAMP")" != '0.3.0' ]; then
+    "$PYTHON" -m pip install -e .
+    printf '%s\n' '0.3.0' > "$STAMP"
 fi
 
 exec "$PYTHON" run_app.py "$@"

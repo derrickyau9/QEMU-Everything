@@ -24,9 +24,28 @@ def test_generic_library_is_configurable_without_camera_identity(tmp_path):
         window.use_board(window.board_choice.findData('x86_64-pc'))
         assert json.loads(window.boot_editor.toPlainText())['board'] == 'x86_64-pc'
         errors = []; window.error = errors.append
-        window.boot_editor.setPlainText('[]')
-        window.use_board(window.board_choice.findData('arm64-virt'))
-        assert errors and 'JSON object' in errors[-1]
+        for invalid in ('[]', 'null'):
+            window.boot_editor.setPlainText(invalid)
+            window.use_board(window.board_choice.findData('arm64-virt'))
+            assert errors and 'JSON object' in errors[-1]
+    finally: window.close()
+
+def test_invalid_json_object_is_rejected_before_copying_a_component(tmp_path, monkeypatch):
+    app = QApplication.instance() or QApplication([])
+    source = tmp_path / 'unknown.bin'; source.write_bytes(b'not-a-camera-image')
+    device = import_firmware(source, tmp_path / 'home/library')
+    window = Window(tmp_path / 'home')
+    errors = []; window.error = errors.append
+    monkeypatch.setattr('devkit.application.QFileDialog.getOpenFileName', lambda *args: (str(source), ''))
+    def must_not_copy(*args):
+        raise AssertionError('Invalid boot JSON must be rejected before starting the copy')
+    window.run_job = must_not_copy
+    try:
+        for invalid in ('[]', 'null'):
+            window.boot_editor.setPlainText(invalid)
+            window.add_component('kernel')
+            assert errors and 'JSON object' in errors[-1]
+        assert not (device / 'components').exists()
     finally: window.close()
 
 def test_legacy_camera_entry_keeps_ui_start_and_app_tools(tmp_path):

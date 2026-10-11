@@ -8,10 +8,12 @@ version = "0.3.0"
 description = "A firmware inspection and QEMU development workbench with Hasselblad original UI adapters"
 requires-python = ">=3.11"
 license = "AGPL-3.0-or-later"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md", "third-party-licenses/*"]
 dependencies = ["PySide6==6.9.3", "cryptography==46.0.3", "pyelftools==0.33", "dissect.extfs==3.15", "brotli==1.2.0", "pyfdt==0.3"]
 
 [project.optional-dependencies]
 dev = ["pytest==8.4.2", "pyinstaller==6.16.0"]
+canon-lab = ["unicorn==2.1.4"]
 
 [project.gui-scripts]
 qemu-everything-gui = "devkit.application:main"
@@ -27,6 +29,14 @@ include = ["devkit*"]
 [tool.setuptools.package-data]
 devkit = ["assets/*", "helpers/*", "helpers/arm32/*", "helpers/linux-arm32/*", "guest/*.c", "guest/*.h", "guest/*.sh", "guest/*.conf", "*.json", "templates/*"]
 "devkit.camera_formats._sony_vendor" = ["LICENSE.txt"]
+
+[tool.setuptools.data-files]
+"share/qemu-everything/boards/canon" = ["scripts/boards/canon/*.md", "scripts/boards/canon/*.sh"]
+"share/qemu-everything/boards/insta360" = ["scripts/boards/insta360/*.py", "scripts/boards/insta360/*.c", "scripts/boards/insta360/*.dts", "scripts/boards/insta360/*.md", "scripts/boards/insta360/COPYING"]
+"share/qemu-everything/boards/nikon-z30" = ["scripts/boards/nikon-z30/*.py", "scripts/boards/nikon-z30/*.md", "scripts/boards/nikon-z30/*.sh"]
+"share/qemu-everything/boards/nikon-z6" = ["scripts/boards/nikon-z6/*.py", "scripts/boards/nikon-z6/*.md", "scripts/boards/nikon-z6/*.sh"]
+"share/qemu-everything/boards/ricoh" = ["scripts/boards/ricoh/*.py", "scripts/boards/ricoh/*.c", "scripts/boards/ricoh/*.dts", "scripts/boards/ricoh/*.md"]
+"share/qemu-everything/boards/sony" = ["scripts/boards/sony/*.py", "scripts/boards/sony/*.inc", "scripts/boards/sony/*.dts", "scripts/boards/sony/*.md"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

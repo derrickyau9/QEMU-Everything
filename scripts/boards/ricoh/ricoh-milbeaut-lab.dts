@@ -1,0 +1,58 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Copyright 2026 Derrick Yao. Deliberately minimal development DTB.
+// Exact original DTB is preserved in the extraction directory.
+// Assisted boot: one CPU, fixed clock, no RTOS/storage/display device nodes.
+/dts-v1/;
+/ {
+    #address-cells = <1>;
+    #size-cells = <1>;
+    compatible = "milbeaut,sc2000a", "socionext,milbeaut-evb";
+    model = "QEMU Everything Ricoh service-core lab";
+    interrupt-parent = <&gic>;
+    chosen { bootargs = "console=ttyUSI1,115200 loglevel=8 ignore_loglevel rdinit=/bin/sh maxcpus=1 panic=-1"; };
+    memory@40000000 { device_type = "memory"; reg = <0x40000000 0x10000000>; };
+    reserved-memory {
+        #address-cells = <1>; #size-cells = <1>; ranges;
+        // Keep the original RTOS control transport out of Linux allocations.
+        shmem@4fed0000 { reg = <0x4fed0000 0x30000>; };
+        commem@4ff00000 { reg = <0x4ff00000 0x100000>; };
+    };
+    // Original metadata pointer locations, with zeroed transport RAM. Values
+    // describe locations where an absent RTOS would publish its allocations.
+    shared_commem {
+        compatible = "socionext, shared-commem";
+        buf-addr = <0x4ff00004>; buf-size = <0x4ff00008>;
+        sync-addr = <0x4ff0000c>; sync-size = <0x4ff00010>;
+        rd-pointer-addr = <0x4ff00014>; rd-pointer-size = <0x4ff00018>;
+        wt-pointer-addr = <0x4ff0001c>; wt-pointer-size = <0x4ff00020>;
+        movie-rec-addr = <0x4ff00024>; movie-rec-size = <0x4ff00028>;
+        term-io-addr = <0x4ff0002c>; term-io-size = <0x4ff00030>;
+        string-addr = <0x4ff00034>; string-size = <0x4ff00038>;
+        ribery-addr = <0x4ff0003c>; ribery-size = <0x4ff00040>;
+        audio-addr = <0x4ff00044>; audio-size = <0x4ff00048>;
+        raw-addr = <0x4ff0004c>; raw-size = <0x4ff00050>;
+        yuv-addr = <0x4ff00054>; yuv-size = <0x4ff00058>;
+        hevc-addr = <0x4ff0005c>; hevc-size = <0x4ff00060>;
+        mjpeg-addr = <0x4ff00064>; mjpeg-size = <0x4ff00068>;
+        disp-addr = <0x4ffffc00>;
+    };
+    cpus {
+        #address-cells = <1>; #size-cells = <0>;
+        cpu@0 { device_type = "cpu"; compatible = "arm,cortex-a7"; reg = <0>; };
+    };
+    gic: interrupt-controller@1d000000 {
+        compatible = "arm,cortex-a7-gic";
+        interrupt-controller; #interrupt-cells = <3>; #address-cells = <0>;
+        reg = <0x1d001000 0x1000 0x1d002000 0x1000>;
+        // Vendor 4.4 requires a non-empty RTOS interrupt blacklist property.
+        // Only unused SPI0 is reserved in this isolated one-core lab.
+        black-list = <0>;
+    };
+    timer { compatible = "arm,armv7-timer"; interrupts = <1 13 0x104>, <1 14 0x104>, <1 11 0x104>, <1 10 0x104>; clock-frequency = <40000000>; always-on; arm,cpu-registers-not-fw-configured; };
+    uartclk: uart-clock { compatible = "fixed-clock"; #clock-cells = <0>; clock-frequency = <50000000>; };
+    usio_uart@1e700010 {
+        compatible = "socionext,m8m-usio-uart"; reg = <0x1e700010 0x10>;
+        interrupts = <0 0x8d 4>, <0 0x95 4>; interrupt-names = "rx", "tx";
+        clocks = <&uartclk>; index = <1>; flwen = <0>; status = "okay";
+    };
+};

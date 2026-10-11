@@ -173,6 +173,9 @@ def identify(source: Path, task: Task) -> dict | None:
     )
     if not info["legacy_xor"]:
         result["blockers"].insert(0, "Modern updater AES decryption needs a validated model-specific ROM oracle")
+    elif model_id == 0x80000261 and info["version"] == "1.0.9":
+        result["blockers"][0] = ("Main firmware needs a matching user-owned ROM1 seed from 0xF87C0000; "
+                                 "the optional canon-lab decrypt command validates it before writing")
     return result
 
 

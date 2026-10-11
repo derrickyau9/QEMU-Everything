@@ -1,0 +1,664 @@
+{
+  "schema_version": 1,
+  "report_id": "nikon-remaining-board-analysis-20261011",
+  "observed_utc_date": "2026-10-11",
+  "scope": "Finite read-only public-board availability and static production-module comparison for Nikon Z50 C2.60, Z7 II C1.70 and Z8 C3.11.",
+  "guest_execution": "none",
+  "physical_camera_access": false,
+  "firmware_modified": false,
+  "ui_verified": false,
+  "natural_power_on_verified": false,
+  "firmware_or_key_material_included": false,
+  "paths_relative_to_workspace_parent": true,
+  "workspace_repository": "Hasselblad-X-System-QEMU-DevKit",
+  "method": {
+    "production_modules": "Read existing production outputs; independently SHA-256 every source/module and compare extracted payloads with their exact decrypted-container extents.",
+    "crc16": "binascii.crc_hqx(payload, 0): polynomial 0x1021, initial value zero, no reflection/final XOR; original stored CRC is big-endian. Package CRC covers decrypted[32:-16].",
+    "static_instruction_decode": "Capstone; no firmware instructions were executed.",
+    "authentication_limit": "CRC checks confirm structural consistency, not authenticity. The keyed header digest was not authenticated in this report.",
+    "format_credit": {
+      "repository": "https://github.com/WonderLantern/nikon-fw-key-tool",
+      "production_manifest_declared_commit": "33426e892afd329a3b366b73776bcf53b9ac4ee8",
+      "license": "GPL-3.0",
+      "production_reader": "devkit/camera_formats/nikon.py"
+    }
+  },
+  "public_board_search": {
+    "org_api_source": "https://api.github.com/users/WonderLantern/repos?per_page=100",
+    "public_repository_count": 8,
+    "public_repositories": [
+      {
+        "html_url": "https://github.com/WonderLantern/.github",
+        "license_spdx_api": null,
+        "name": ".github",
+        "pushed_at": "2026-10-09T16:36:57Z"
+      },
+      {
+        "html_url": "https://github.com/WonderLantern/nikon-fw-key-tool",
+        "license_spdx_api": "GPL-3.0",
+        "name": "nikon-fw-key-tool",
+        "pushed_at": "2026-10-08T15:37:10Z"
+      },
+      {
+        "html_url": "https://github.com/WonderLantern/wonder-lantern-z30",
+        "license_spdx_api": "NOASSERTION",
+        "name": "wonder-lantern-z30",
+        "pushed_at": "2026-10-10T06:45:16Z"
+      },
+      {
+        "html_url": "https://github.com/WonderLantern/WonderLantern-z6",
+        "license_spdx_api": "NOASSERTION",
+        "name": "WonderLantern-z6",
+        "pushed_at": "2026-10-08T06:01:32Z"
+      },
+      {
+        "html_url": "https://github.com/WonderLantern/z30-qemu",
+        "license_spdx_api": "GPL-2.0",
+        "name": "z30-qemu",
+        "pushed_at": "2026-10-10T06:17:52Z"
+      },
+      {
+        "html_url": "https://github.com/WonderLantern/z6-qemu",
+        "license_spdx_api": "GPL-2.0",
+        "name": "z6-qemu",
+        "pushed_at": "2026-10-10T16:24:00Z"
+      },
+      {
+        "html_url": "https://github.com/WonderLantern/z7-qemu",
+        "license_spdx_api": "GPL-2.0",
+        "name": "z7-qemu",
+        "pushed_at": "2026-10-09T03:49:27Z"
+      },
+      {
+        "html_url": "https://github.com/WonderLantern/z9-qemu",
+        "license_spdx_api": "GPL-2.0",
+        "name": "z9-qemu",
+        "pushed_at": "2026-10-11T14:04:31Z"
+      }
+    ],
+    "repository_searches": [
+      {
+        "query": "nikon qemu",
+        "api_source": "https://api.github.com/search/repositories?q=nikon%20qemu&per_page=100",
+        "total_count": 4,
+        "repositories": [
+          "WonderLantern/z7-qemu",
+          "WonderLantern/z6-qemu",
+          "WonderLantern/z30-qemu",
+          "WonderLantern/z9-qemu"
+        ]
+      },
+      {
+        "query": "z50 qemu",
+        "api_source": "https://api.github.com/search/repositories?q=z50%20qemu&per_page=20",
+        "total_count": 0,
+        "repositories": []
+      },
+      {
+        "query": "z7ii qemu",
+        "api_source": "https://api.github.com/search/repositories?q=z7ii%20qemu&per_page=20",
+        "total_count": 0,
+        "repositories": []
+      },
+      {
+        "query": "z8 nikon qemu",
+        "api_source": "https://api.github.com/search/repositories?q=z8%20nikon%20qemu&per_page=20",
+        "total_count": 0,
+        "repositories": []
+      }
+    ],
+    "search_limit": "No matching exact public board was found within the recorded API queries. This is not a claim that no private, unindexed or differently named project exists."
+  },
+  "comparison_boards": [
+    {
+      "repository": "WonderLantern/z7-qemu",
+      "repository_url": "https://github.com/WonderLantern/z7-qemu",
+      "commit": "97abf0b81cd3211f8374a38987a0beaf4549b90f",
+      "commit_api_source": "https://api.github.com/repos/WonderLantern/z7-qemu/commits/main",
+      "license_api_source": "https://api.github.com/repos/WonderLantern/z7-qemu",
+      "github_license_spdx": "GPL-2.0",
+      "source_spdx": "GPL-2.0-or-later",
+      "license_note": "The per-file SPDX declaration is more specific than GitHub's license classifier.",
+      "local_checkout": ".local/camera-brand-research/nikon-ricoh/z7-qemu",
+      "tracked_checkout_clean": true,
+      "local_head_matches_live_main": true,
+      "board_file": "qemu/nikon-z7-lab.c",
+      "board_file_sha256": "a63fb79ed0d77b82b8091ab8bc5d71d59faccc87b09e600fe6146ed760a33dff",
+      "board_source_url": "https://github.com/WonderLantern/z7-qemu/blob/97abf0b81cd3211f8374a38987a0beaf4549b90f/qemu/nikon-z7-lab.c",
+      "supported_stock_firmware": "Z7 C3.80",
+      "supported_payload_size": 33052088,
+      "supported_payload_sha256": "e6df1764323fb1c287159dd3ce1c84ac93c72b96ba6eb09c070295c093fecbff",
+      "payload_convention": "CRC-stripped MAIN",
+      "load_entry": "0x10020000",
+      "application_ram_base": "0xa1800000",
+      "board_cpu_model": "cortex-a15",
+      "cpu_model_is_emulator_contract_not_physical_soc_identification": true
+    },
+    {
+      "repository": "WonderLantern/z30-qemu",
+      "repository_url": "https://github.com/WonderLantern/z30-qemu",
+      "commit": "0ba0c3547ccbec09e7c861eaca35db8e82795f15",
+      "commit_api_source": "https://api.github.com/repos/WonderLantern/z30-qemu/commits/main",
+      "license_api_source": "https://api.github.com/repos/WonderLantern/z30-qemu",
+      "github_license_spdx": "GPL-2.0",
+      "source_spdx": "GPL-2.0-or-later",
+      "license_note": "The per-file SPDX declaration is more specific than GitHub's license classifier.",
+      "local_checkout": ".local/camera-brand-research/nikon-ricoh/z30-qemu",
+      "tracked_checkout_clean": true,
+      "local_head_matches_live_main": true,
+      "board_file": "qemu/nikon-z30.c",
+      "board_file_sha256": "0d20bd467fd92d0d1c62ebb3516fad29e6bc43c53ea996d25d0ece2c8edbb83b",
+      "board_source_url": "https://github.com/WonderLantern/z30-qemu/blob/0ba0c3547ccbec09e7c861eaca35db8e82795f15/qemu/nikon-z30.c",
+      "supported_stock_firmware": "Z30 C1.20",
+      "supported_payload_size": 33939514,
+      "supported_payload_sha256": "8a99ced2d8220729ba067587b0624bf30c81757abc5d728768134b1c7fd457fa",
+      "payload_convention": "CRC-inclusive MAIN",
+      "load_entry": "0x10020000",
+      "application_ram_base": "0xc1800000",
+      "board_cpu_model": "cortex-a15",
+      "cpu_model_is_emulator_contract_not_physical_soc_identification": true
+    },
+    {
+      "repository": "WonderLantern/z9-qemu",
+      "repository_url": "https://github.com/WonderLantern/z9-qemu",
+      "commit": "deb3a75df1795924e9be8f814d9a24ce6b439a67",
+      "commit_api_source": "https://api.github.com/repos/WonderLantern/z9-qemu/commits/main",
+      "license_api_source": "https://api.github.com/repos/WonderLantern/z9-qemu",
+      "github_license_spdx": "GPL-2.0",
+      "source_spdx": "GPL-2.0-or-later",
+      "license_note": "The per-file SPDX declaration is more specific than GitHub's license classifier.",
+      "local_checkout": ".local/camera-brand-research/nikon-ricoh/z9-qemu",
+      "tracked_checkout_clean": true,
+      "local_head_matches_live_main": true,
+      "board_file": "qemu/nikon-z9-lab.c",
+      "board_file_sha256": "314c4910a5f2d44e4a6737893c3dcfc883c65efd5053d4604df6c50846395445",
+      "board_source_url": "https://github.com/WonderLantern/z9-qemu/blob/deb3a75df1795924e9be8f814d9a24ce6b439a67/qemu/nikon-z9-lab.c",
+      "supported_stock_firmware": "Z9 C5.32",
+      "supported_payload_size": 81823629,
+      "supported_payload_sha256": "6380ded18395ce11cb327c766721274c85127d2cf1a1e887ee60e3d156810bdd",
+      "payload_convention": "CRC-stripped MAIN",
+      "load_entry": "0x40160000",
+      "application_ram_base": "0xa00000000",
+      "board_cpu_model": "cortex-a53",
+      "cpu_model_is_emulator_contract_not_physical_soc_identification": true
+    }
+  ],
+  "models": [
+    {
+      "model": "Z7 II",
+      "firmware_version": "C1.70",
+      "official_package_local_path": ".local/camera-brand-research/nikon-ricoh/nikon-samples/Z7_2_0170.bin",
+      "official_package_size": 48494024,
+      "official_package_sha256": "fc0e94f57500a1f0e287c6b9a036c81a5ffceccb8432a377d645b3fa35a19b6a",
+      "production_manifest_local_path": ".local/camera-brand-research/nikon-ricoh/nikon-product-evidence.json",
+      "production_manifest_sha256": "ae86058c336e9c80bc69d8521fb1990e04238a9419246f95eb727e021655982d",
+      "decrypted_local_path": ".local/camera-brand-research/nikon-ricoh/product-Z7_2_0170/decrypted.bin",
+      "decrypted_size": 48494024,
+      "decrypted_sha256": "9bd569abf50dc408902b5a53009ccb28bcf081c725b27a56db57ec22e03e908a",
+      "package_crc16": "c71e",
+      "package_crc16_rechecked": true,
+      "all_module_crc16_rechecked": true,
+      "modules": [
+        {
+          "name": "ex1840_013000.bi",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z7_2_0170/module-001.bin",
+          "payload_size": 524288,
+          "payload_sha256": "1c1c0aed61b9f4abd145f076eefaff0777136c0f5c9db32592de287c3e907027",
+          "decrypted_file_offset": "0xf0",
+          "stored_size_with_original_crc": 524290,
+          "stored_sha256_with_original_crc": "cb10af00b9485567453d448020892836ea48637bd638f4cf7cc1c9777a128a9a",
+          "original_crc16": "eb60",
+          "recalculated_crc16": "eb60",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "_tpj01_v140.bin",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z7_2_0170/module-002.bin",
+          "payload_size": 57344,
+          "payload_sha256": "2458d520e543755a8191b16070470ba52dd33808169cdef66d90fc9c65d0b708",
+          "decrypted_file_offset": "0x800f2",
+          "stored_size_with_original_crc": 57346,
+          "stored_sha256_with_original_crc": "e60998537d46a15c430154aeeb589026aca015256d27e2d5990589d23a59c88e",
+          "original_crc16": "a0f2",
+          "recalculated_crc16": "a0f2",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "eg1840_mas_01700",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z7_2_0170/module-003.bin",
+          "payload_size": 38239096,
+          "payload_sha256": "a218daf0234cebc11ed3b9277208a884eace242a32af3a60ef25081ce6221ae6",
+          "decrypted_file_offset": "0x8e0f4",
+          "stored_size_with_original_crc": 38239098,
+          "stored_sha256_with_original_crc": "478caf02dba41fa9144c0c4b6e1a051dc556d40e51a79a308bdd1169efb9dbbe",
+          "original_crc16": "9d06",
+          "recalculated_crc16": "9d06",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "vr1840_010100.bi",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z7_2_0170/module-004.bin",
+          "payload_size": 838662,
+          "payload_sha256": "4db329f7ea94d0eb7ffc08a2f0aff7b8c75a843aa83235c29600c1158f1fb0f7",
+          "decrypted_file_offset": "0x2505c6e",
+          "stored_size_with_original_crc": 838664,
+          "stored_sha256_with_original_crc": "fd7c1f7518e3af79d15e193c744d36c357b1dabbb5ab528f0054ebb79a5623b2",
+          "original_crc16": "1394",
+          "recalculated_crc16": "1394",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "eg1840_sla_01700",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z7_2_0170/module-005.bin",
+          "payload_size": 8834368,
+          "payload_sha256": "3677d4663b6c2c648ccc0133600b3de9ddf796bfdd6b9bc9a888e358e361877c",
+          "decrypted_file_offset": "0x25d2876",
+          "stored_size_with_original_crc": 8834370,
+          "stored_sha256_with_original_crc": "e0d2589cf036bbf8ce6e4c32f5f2bab61fe35e863660bf6a0ee8082d8a64e1bb",
+          "original_crc16": "b691",
+          "recalculated_crc16": "b691",
+          "payload_matches_decrypted_extent": true
+        }
+      ],
+      "public_exact_board_found_in_recorded_search": false,
+      "exact_firmware_version_board_found_in_recorded_search": false,
+      "licensed_exact_board_available_in_recorded_search": false,
+      "guest_execution": "none",
+      "ui_verified": false,
+      "natural_power_on_verified": false,
+      "static_architecture": {
+        "instruction_set_observed": "A32 startup",
+        "load_base_used_for_disassembly": "0x10020000",
+        "first_instruction": {
+          "file_offset": "0x0",
+          "address": "0x10020000",
+          "decoded": "b #0x1002bc88"
+        },
+        "bootstrap_branch_destination": "0x1002bc88",
+        "application_ram_literal": {
+          "instruction_address": "0x1002be78",
+          "decoded": "ldr r1, [pc, #0x19c]",
+          "literal_file_offset": "0xc01c",
+          "literal_value": "0xb1800000"
+        },
+        "physical_cpu_model_not_identified": true
+      },
+      "z7_assisted_function_address_comparison": [
+        {
+          "z7_bound_function": "memory initialization",
+          "z7_cpu_address": "0x10123432",
+          "candidate_file_offset_under_same_load_base": "0x103432",
+          "comparison_length": 16,
+          "same_bytes_at_bound_address": false,
+          "z7_code_fragment_sha256": "e478c141169cdaa7a02678c42b8aadee2705a153a75f9fdf0c35edf21ab3e16e",
+          "candidate_fragment_sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+          "candidate_fragment_is_all_zero": true,
+          "comparison_is_not_function_identification": true
+        },
+        {
+          "z7_bound_function": "system state initialization",
+          "z7_cpu_address": "0x10058b90",
+          "candidate_file_offset_under_same_load_base": "0x38b90",
+          "comparison_length": 16,
+          "same_bytes_at_bound_address": false,
+          "z7_code_fragment_sha256": "f275b15e692a8a3bd3b1bb2b8bac0176cc934aa9453931ae308775bc57ba38d7",
+          "candidate_fragment_sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+          "candidate_fragment_is_all_zero": true,
+          "comparison_is_not_function_identification": true
+        },
+        {
+          "z7_bound_function": "application ready",
+          "z7_cpu_address": "0x1005cbf8",
+          "candidate_file_offset_under_same_load_base": "0x3cbf8",
+          "comparison_length": 16,
+          "same_bytes_at_bound_address": false,
+          "z7_code_fragment_sha256": "39db8d0e49ad1ec3fadc91debaa030673bc9f57ec275b797966d9bad872f62ba",
+          "candidate_fragment_sha256": "374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb",
+          "candidate_fragment_is_all_zero": true,
+          "comparison_is_not_function_identification": true
+        },
+        {
+          "z7_bound_function": "menu input",
+          "z7_cpu_address": "0x105230a6",
+          "candidate_file_offset_under_same_load_base": "0x5030a6",
+          "comparison_length": 16,
+          "same_bytes_at_bound_address": false,
+          "z7_code_fragment_sha256": "32b8109872e140fc11a06e15567555749531ae2f3073fc69a3a472d4e08c349b",
+          "candidate_fragment_sha256": "386e8f02cfff03ba5fde8d35be673c1a8c1e5a31c90dd10d6ef83cd4762ed46c",
+          "candidate_fragment_is_all_zero": false,
+          "comparison_is_not_function_identification": true
+        }
+      ],
+      "assisted_comparison_source_url": "https://github.com/WonderLantern/z7-qemu/blob/97abf0b81cd3211f8374a38987a0beaf4549b90f/tools/interactive.py",
+      "blocking_difference": "Different application RAM base and changed version-bound assisted call sites; dedicated board and startup validation are required.",
+      "additional_layout_difference": "Separate eg1840_mas_01700 and eg1840_sla_01700 executable modules. Their loading and peer contract have not been modeled in this work."
+    },
+    {
+      "model": "Z50",
+      "firmware_version": "C2.60",
+      "official_package_local_path": ".local/camera-brand-research/nikon-ricoh/nikon-samples/Z_50_0260.bin",
+      "official_package_size": 31972272,
+      "official_package_sha256": "69745c9e8f3156e936918e62a4a1fad18e7078e9ea3b95d8b8e08144b1542e49",
+      "production_manifest_local_path": ".local/camera-brand-research/nikon-ricoh/nikon-product-evidence.json",
+      "production_manifest_sha256": "ae86058c336e9c80bc69d8521fb1990e04238a9419246f95eb727e021655982d",
+      "decrypted_local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_50_0260/decrypted.bin",
+      "decrypted_size": 31972272,
+      "decrypted_sha256": "fdbe58e910378c27871e56f33d81dbb9d93c052dc086638a195a5674b7a0c72b",
+      "package_crc16": "233d",
+      "package_crc16_rechecked": true,
+      "all_module_crc16_rechecked": true,
+      "modules": [
+        {
+          "name": "ex1630_021000.bi",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_50_0260/module-001.bin",
+          "payload_size": 524288,
+          "payload_sha256": "245f6a293c3bc305ad7aabe317f9655e2f4dbdbb5f087b8ccb69418251d67d92",
+          "decrypted_file_offset": "0xb0",
+          "stored_size_with_original_crc": 524290,
+          "stored_sha256_with_original_crc": "f3fbb6b2c16e6c96194319114dd133b6d757426d3ee6728f30de72aa7e142973",
+          "original_crc16": "083e",
+          "recalculated_crc16": "083e",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "_tpt01_0091.bin",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_50_0260/module-002.bin",
+          "payload_size": 43698,
+          "payload_sha256": "4fdb22681cab0e78c24730862c2f451b07bbc97d2faed6996532524e872aee8e",
+          "decrypted_file_offset": "0x800b2",
+          "stored_size_with_original_crc": 43700,
+          "stored_sha256_with_original_crc": "3e5636be910e3659884fcf145880d068ad2d74817490698e4460880bb81be9b6",
+          "original_crc16": "0450",
+          "recalculated_crc16": "0450",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "eg1630_026000.bi",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_50_0260/module-003.bin",
+          "payload_size": 31404088,
+          "payload_sha256": "62c9d9ecd5db187456af72249aeef80b4f5e79e936c836f000d720a8c539efc2",
+          "decrypted_file_offset": "0x8ab66",
+          "stored_size_with_original_crc": 31404090,
+          "stored_sha256_with_original_crc": "57e834fac8f921c18c99abe0b1469edbaca71cb1957794bb9f138bd223d30fc1",
+          "original_crc16": "93c5",
+          "recalculated_crc16": "93c5",
+          "payload_matches_decrypted_extent": true
+        }
+      ],
+      "public_exact_board_found_in_recorded_search": false,
+      "exact_firmware_version_board_found_in_recorded_search": false,
+      "licensed_exact_board_available_in_recorded_search": false,
+      "guest_execution": "none",
+      "ui_verified": false,
+      "natural_power_on_verified": false,
+      "static_architecture": {
+        "instruction_set_observed": "A32 startup",
+        "load_base_used_for_disassembly": "0x10020000",
+        "first_instruction": {
+          "file_offset": "0x0",
+          "address": "0x10020000",
+          "decoded": "b #0x1002bc88"
+        },
+        "bootstrap_branch_destination": "0x1002bc88",
+        "application_ram_literal": {
+          "instruction_address": "0x1002be6c",
+          "decoded": "ldr r1, [pc, #0x19c]",
+          "literal_file_offset": "0xc010",
+          "literal_value": "0xc1800000"
+        },
+        "physical_cpu_model_not_identified": true
+      },
+      "z7_assisted_function_address_comparison": [
+        {
+          "z7_bound_function": "memory initialization",
+          "z7_cpu_address": "0x10123432",
+          "candidate_file_offset_under_same_load_base": "0x103432",
+          "comparison_length": 16,
+          "same_bytes_at_bound_address": false,
+          "z7_code_fragment_sha256": "e478c141169cdaa7a02678c42b8aadee2705a153a75f9fdf0c35edf21ab3e16e",
+          "candidate_fragment_sha256": "1f18a025add6bdea489a1f6140a5edab549dab3f9807318b99eb1bcd212cb98d",
+          "candidate_fragment_is_all_zero": false,
+          "comparison_is_not_function_identification": true
+        },
+        {
+          "z7_bound_function": "system state initialization",
+          "z7_cpu_address": "0x10058b90",
+          "candidate_file_offset_under_same_load_base": "0x38b90",
+          "comparison_length": 16,
+          "same_bytes_at_bound_address": false,
+          "z7_code_fragment_sha256": "f275b15e692a8a3bd3b1bb2b8bac0176cc934aa9453931ae308775bc57ba38d7",
+          "candidate_fragment_sha256": "9df934ca1987144e02c0e3566a6e1a2cf0fac8ea70eb04fd178ded49e3c2a3e0",
+          "candidate_fragment_is_all_zero": false,
+          "comparison_is_not_function_identification": true
+        },
+        {
+          "z7_bound_function": "application ready",
+          "z7_cpu_address": "0x1005cbf8",
+          "candidate_file_offset_under_same_load_base": "0x3cbf8",
+          "comparison_length": 16,
+          "same_bytes_at_bound_address": false,
+          "z7_code_fragment_sha256": "39db8d0e49ad1ec3fadc91debaa030673bc9f57ec275b797966d9bad872f62ba",
+          "candidate_fragment_sha256": "90efb4df6911eae583f687d428fd5f4932fd766d5750a1873425fd7d2edd424c",
+          "candidate_fragment_is_all_zero": false,
+          "comparison_is_not_function_identification": true
+        },
+        {
+          "z7_bound_function": "menu input",
+          "z7_cpu_address": "0x105230a6",
+          "candidate_file_offset_under_same_load_base": "0x5030a6",
+          "comparison_length": 16,
+          "same_bytes_at_bound_address": false,
+          "z7_code_fragment_sha256": "32b8109872e140fc11a06e15567555749531ae2f3073fc69a3a472d4e08c349b",
+          "candidate_fragment_sha256": "58a33772407b90548647d56237c7fb28838a7b40c111aa30f90bea1129a94fb4",
+          "candidate_fragment_is_all_zero": false,
+          "comparison_is_not_function_identification": true
+        }
+      ],
+      "assisted_comparison_source_url": "https://github.com/WonderLantern/z7-qemu/blob/97abf0b81cd3211f8374a38987a0beaf4549b90f/tools/interactive.py",
+      "blocking_difference": "Different application RAM base and changed version-bound assisted call sites; dedicated board and startup validation are required."
+    },
+    {
+      "model": "Z8",
+      "firmware_version": "C3.11",
+      "official_package_local_path": ".local/camera-brand-research/nikon-ricoh/nikon-samples/Z_8_0311.bin",
+      "official_package_size": 99051117,
+      "official_package_sha256": "d67413c2ede6b9ce8887175f20700bd9fbad2a973a4820968c45503d15d80d96",
+      "production_manifest_local_path": ".local/camera-brand-research/nikon-ricoh/nikon-product-evidence.json",
+      "production_manifest_sha256": "ae86058c336e9c80bc69d8521fb1990e04238a9419246f95eb727e021655982d",
+      "decrypted_local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_8_0311/decrypted.bin",
+      "decrypted_size": 99051117,
+      "decrypted_sha256": "7dec1be784812c32ea3b735f18b46e260b15b0a960f5a3dc40c4197d0b07fc0a",
+      "package_crc16": "c811",
+      "package_crc16_rechecked": true,
+      "all_module_crc16_rechecked": true,
+      "modules": [
+        {
+          "name": "ex2070_030000.bi",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_8_0311/module-001.bin",
+          "payload_size": 524288,
+          "payload_sha256": "8ce129fa3689d1d619f25ba1c44a3a9f1964c76fe77b95adeb4ea912463c8c63",
+          "decrypted_file_offset": "0xf0",
+          "stored_size_with_original_crc": 524290,
+          "stored_sha256_with_original_crc": "4b7ea2ea40360717ceffd3d8db6fe48f5fae9d5c13b69632dc750bdc41b571c2",
+          "original_crc16": "9b99",
+          "recalculated_crc16": "9b99",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "_tpj01_0210.bin",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_8_0311/module-002.bin",
+          "payload_size": 57344,
+          "payload_sha256": "809515c1a28b339b284c751663190135dcb6df778345f581a5f7c9c6ea8c054e",
+          "decrypted_file_offset": "0x800f2",
+          "stored_size_with_original_crc": 57346,
+          "stored_sha256_with_original_crc": "689f80feb0d271d73ac719e0c5872cfc0dac643097e528b6a1b156d4c55efe1a",
+          "original_crc16": "8f0d",
+          "recalculated_crc16": "8f0d",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "eg2070_0311b0.bi",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_8_0311/module-003.bin",
+          "payload_size": 81807709,
+          "payload_sha256": "2b43a31c9de838f84b12416de4348a7004e65be07f853ec56ec2b10f3a8e3853",
+          "decrypted_file_offset": "0x8e0f4",
+          "stored_size_with_original_crc": 81807711,
+          "stored_sha256_with_original_crc": "f85e0138e2f5e660ece8560de62e0d12cb795e0e14983e50f20b61dce906c46c",
+          "original_crc16": "201b",
+          "recalculated_crc16": "201b",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "vr2070_010100.bi",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_8_0311/module-004.bin",
+          "payload_size": 838662,
+          "payload_sha256": "bbeeb4df40731d8176d664973156f7147cf27e5b5657e86ece988399546972b8",
+          "decrypted_file_offset": "0x4e92a53",
+          "stored_size_with_original_crc": 838664,
+          "stored_sha256_with_original_crc": "30e363077655f9936894fdc00104263eac4a33892e621199f84bf8f4cecea3bb",
+          "original_crc16": "5bd4",
+          "recalculated_crc16": "5bd4",
+          "payload_matches_decrypted_extent": true
+        },
+        {
+          "name": "li2070_0311b0.bi",
+          "local_path": ".local/camera-brand-research/nikon-ricoh/product-Z_8_0311/module-005.bin",
+          "payload_size": 15822848,
+          "payload_sha256": "6da6352bec6b7a8686893f217c8c4bc7a3ca394ff9b781078885efa8a93b9925",
+          "decrypted_file_offset": "0x4f5f65b",
+          "stored_size_with_original_crc": 15822850,
+          "stored_sha256_with_original_crc": "804a55508cd6b323336fbba14034810e4b22fcc5fd1030d3a7dc08d62767cc55",
+          "original_crc16": "c731",
+          "recalculated_crc16": "c731",
+          "payload_matches_decrypted_extent": true
+        }
+      ],
+      "public_exact_board_found_in_recorded_search": false,
+      "exact_firmware_version_board_found_in_recorded_search": false,
+      "licensed_exact_board_available_in_recorded_search": false,
+      "guest_execution": "none",
+      "ui_verified": false,
+      "natural_power_on_verified": false,
+      "static_architecture": {
+        "instruction_set_observed": "AArch64",
+        "load_base_inferred_from_internal_absolute_entry_targets": "0x40160000",
+        "entry_target_constants": [
+          {
+            "file_offset": "0x668",
+            "value": "0xa028011c0"
+          },
+          {
+            "file_offset": "0x670",
+            "value": "0x40160250"
+          },
+          {
+            "file_offset": "0x678",
+            "value": "0x401601c0"
+          }
+        ],
+        "startup_instructions": [
+          {
+            "file_offset": "0x0",
+            "address": "0x40160000",
+            "decoded": "msr daifset, #0xf"
+          },
+          {
+            "file_offset": "0x20",
+            "address": "0x40160020",
+            "decoded": "mrs x0, mpidr_el1"
+          },
+          {
+            "file_offset": "0x28",
+            "address": "0x40160028",
+            "decoded": "mrs x1, currentel"
+          },
+          {
+            "file_offset": "0x54",
+            "address": "0x40160054",
+            "decoded": "mrs x0, icc_sre_el3"
+          },
+          {
+            "file_offset": "0x5c",
+            "address": "0x4016005c",
+            "decoded": "msr icc_sre_el3, x0"
+          },
+          {
+            "file_offset": "0x60",
+            "address": "0x40160060",
+            "decoded": "mrs x0, icc_sre_el2"
+          },
+          {
+            "file_offset": "0x68",
+            "address": "0x40160068",
+            "decoded": "msr icc_sre_el2, x0"
+          },
+          {
+            "file_offset": "0x6c",
+            "address": "0x4016006c",
+            "decoded": "mrs x0, icc_sre_el1"
+          },
+          {
+            "file_offset": "0x74",
+            "address": "0x40160074",
+            "decoded": "msr icc_sre_el1, x0"
+          },
+          {
+            "file_offset": "0x100",
+            "address": "0x40160100",
+            "decoded": "ldr x2, #0x40160668"
+          },
+          {
+            "file_offset": "0x104",
+            "address": "0x40160104",
+            "decoded": "add x2, x2, x1"
+          },
+          {
+            "file_offset": "0x108",
+            "address": "0x40160108",
+            "decoded": "mov sp, x2"
+          },
+          {
+            "file_offset": "0x1b4",
+            "address": "0x401601b4",
+            "decoded": "ldr x0, #0x40160678"
+          },
+          {
+            "file_offset": "0x1b8",
+            "address": "0x401601b8",
+            "decoded": "msr elr_el3, x0"
+          },
+          {
+            "file_offset": "0x1bc",
+            "address": "0x401601bc",
+            "decoded": "eret"
+          },
+          {
+            "file_offset": "0xeb0",
+            "address": "0x40160eb0",
+            "decoded": "mov x20, #1"
+          },
+          {
+            "file_offset": "0xeb4",
+            "address": "0x40160eb4",
+            "decoded": "cmp x0, #3"
+          },
+          {
+            "file_offset": "0xeb8",
+            "address": "0x40160eb8",
+            "decoded": "b.ne #0x40160ec0"
+          },
+          {
+            "file_offset": "0xebc",
+            "address": "0x40160ebc",
+            "decoded": "mov x20, #0"
+          }
+        ],
+        "core_role_evidence": "At 0x40160eb4 the MPIDR-derived core index is compared with 3. This is not an independent measurement of physical CPU count.",
+        "physical_cpu_model_not_identified": true
+      },
+      "blocking_difference": "AArch64 and ICC_SRE system-register setup cannot use Z7/Z30 A32 boards. Z9 uses the same entry-address family but its MCU inputs, breakpoints, resources and exact payload binding are specific to Z9 C5.32.",
+      "z9_bound_boot_source_url": "https://github.com/WonderLantern/z9-qemu/blob/deb3a75df1795924e9be8f814d9a24ce6b439a67/tools/boot.py"
+    }
+  ],
+  "conclusion": "All three firmware families are unpacked and CRC-verified. No exact publicly licensed board/version was found in the recorded search. Dedicated memory, device, startup and UI validation are required; existing Z7/Z30/Z9 profiles must not be relabeled as support for these firmware versions."
+}

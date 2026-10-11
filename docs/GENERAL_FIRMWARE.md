@@ -17,18 +17,20 @@ QEMU Everything 分别记录文件分析结果、配置的启动方法及实际�
 | Proprietary or encrypted update | Inspection and support workspace / 分析及支持工作区 | Container extraction, boot chain, hardware model and drivers / 解包、启动链、硬件模型及驱动 |
 
 Recognized Sony `.DAT` packages can now be decrypted and extracted offline;
-actual A7 IV 2.00 and A7R V 4.00 samples pass the container checks. The project does not
-include a verified Sony camera board or original Sony UI adapter. The Hasselblad
+actual A7 IV 2.00 and A7R V 4.00 samples pass the container checks. A separately
+built CXD90057 lab boots both original Linux kernels/rootfs to verified root
+shells; camera initialization and the original Sony UI remain incomplete. The Hasselblad
 adapter runs extracted original UI programs in a development guest; it does not
 boot the camera's original kernel.
 
 已识别的索尼 `.DAT` 可离线解密与提取，真实 A7 IV 2.00 和 A7R V 4.00 样本已通过校验；
-项目尚无已验证的索尼相机硬件或原厂 UI 适配器。
+单独构建的 CXD90057 实验已将两款原厂 Linux/根文件系统启动至经过验证的 root shell；
+相机初始化和索尼原厂 UI 尚未完成。
 哈苏路线是在开发虚拟机中运行提取的原厂 UI 程序，没有启动相机原厂内核。
 
-For checked camera components and the separately installed Nikon Z7 assisted UI
-lab, see [Camera firmware research](CAMERA_FIRMWARE.md).
-相机组件解包与单独配置的尼康 Z7 辅助启动实验见[多品牌固件记录](CAMERA_FIRMWARE.md)。
+For checked camera components, Nikon Z7/Z30/Z6 assisted menu labs and additional
+original Linux labs, see [Camera firmware research](CAMERA_FIRMWARE.md).
+相机组件解包、尼康 Z7/Z30/Z6 辅助菜单启动与其他原厂 Linux 实验见[多品牌固件记录](CAMERA_FIRMWARE.md)。
 
 ## Import and investigate / 导入与分析
 

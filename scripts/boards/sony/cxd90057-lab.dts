@@ -1,0 +1,48 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Copyright 2026 Derrick Yao. Independent, deliberately minimal development DTB.
+// Addresses verified against Sony's ILCE-7M4 Ver.2.00 GPL source. This excludes
+// camera peripherals; it is not the original camera hardware description.
+/dts-v1/;
+/ {
+    model = "QEMU Everything CXD90057 Linux laboratory";
+    compatible = "cxd,cxd90057";
+    #address-cells = <2>;
+    #size-cells = <2>;
+    interrupt-parent = <&gic>;
+    chosen {
+        bootargs = "earlycon=pl011,0xf1000000 console=ttyAMA0,460800 loglevel=8 ignore_loglevel nosmp panic=-1 root=/dev/ram0 init=/bin/sh initcall_blacklist=__boottime_sony_usb_init";
+        stdout-path = "serial0:460800n8";
+        linux,initrd-start = <4 0x18000000>;
+        linux,initrd-end = <4 0x184cc000>;
+    };
+    aliases { serial0 = &uart; };
+    memory@400000000 { device_type = "memory"; reg = <4 0 0 0x20000000>; };
+    // Original initrc passes phy_inst_area=0x4102e4000 to dma330. Sony's
+    // arch_phys_to_noncache requires a noncached linear mapping for this pool.
+    reserved-memory {
+        #address-cells = <2>; #size-cells = <2>; ranges;
+        dma-instructions@410200000 {
+            compatible = "arm,rmem"; reg = <4 0x10200000 0 0x200000>; memtype = <3>;
+        };
+    };
+    cpus {
+        #address-cells = <2>; #size-cells = <0>;
+        cpu@0 { device_type = "cpu"; compatible = "arm,cortex-a35", "arm,armv8"; reg = <0 0>; };
+    };
+    // Sony's Linux extension uses these static kernel virtual mappings.
+    iomem@f0000000 { device_type = "iomap"; phys = <0 0xf0000000>; virt = <0xffffffff 0xf0000000>; size = <0 0x0e000000>; memtype = <1>; };
+    esram@fe000000 { device_type = "iomap"; phys = <0 0xfe000000>; virt = <0xffffffff 0xfe000000>; size = <0 0x01000000>; memtype = <3>; };
+    iomem@ff000000 { device_type = "iomap"; phys = <0 0xff000000>; virt = <0xffffffff 0xff000000>; size = <0 0x01000000>; memtype = <1>; };
+    gic: interrupt-controller@f13a1000 {
+        compatible = "arm,gic-400"; #interrupt-cells = <3>;
+        interrupt-controller; linear-map;
+        reg = <0 0xf13a1000 0 0x1000>, <0 0xf13a2000 0 0x2000>;
+    };
+    timer { compatible = "arm,armv8-timer"; interrupts = <1 13 0x104>, <1 14 0x104>, <1 11 0x104>, <1 10 0x104>; clock-frequency = <2000000>; };
+    uartclk: clock { compatible = "fixed-clock"; #clock-cells = <0>; clock-frequency = <12000000>; };
+    uart: serial@f1000000 {
+        compatible = "arm,pl011", "arm,primecell";
+        reg = <0 0xf1000000 0 0x1000>; interrupts = <0 218 4>;
+        clocks = <&uartclk>, <&uartclk>; clock-names = "uartclk", "apb_pclk";
+    };
+};

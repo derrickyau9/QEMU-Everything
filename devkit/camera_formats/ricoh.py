@@ -275,6 +275,120 @@ def _valid_component(data, start: int, size: int, kind: str, task: Task):
             raise ValueError("ROMFS initramfs gzip/CPIO header is invalid")
 
 
+def _lz4_metadata(data: bytes, task: Task) -> bytes:
+    """Decode one bounded SquashFS LZ4 metadata block, without a native library."""
+    output, position = bytearray(), 0
+    while position < len(data):
+        task.check()
+        token = data[position]
+        position += 1
+        literal = token >> 4
+        if literal == 15:
+            while True:
+                if position >= len(data): raise ValueError("Truncated SquashFS LZ4 literal length")
+                extra = data[position]; position += 1; literal += extra
+                if extra != 255: break
+        if position + literal > len(data) or len(output) + literal > 8192:
+            raise ValueError("SquashFS metadata literal exceeds block bounds")
+        output.extend(data[position:position + literal]); position += literal
+        if position == len(data): break
+        if position + 2 > len(data): raise ValueError("Truncated SquashFS LZ4 distance")
+        distance = int.from_bytes(data[position:position + 2], "little")
+        position += 2
+        length = token & 15
+        if length == 15:
+            while True:
+                if position >= len(data): raise ValueError("Truncated SquashFS LZ4 match length")
+                extra = data[position]; position += 1; length += extra
+                if extra != 255: break
+        length += 4
+        if not 0 < distance <= len(output) or len(output) + length > 8192:
+            raise ValueError("SquashFS metadata reference exceeds block bounds")
+        for _ in range(length): output.append(output[-distance])
+    if not output: raise ValueError("Empty SquashFS metadata block")
+    return bytes(output)
+
+
+def _squashfs_extent(data, base: int, task: Task) -> dict:
+    """Validate the exact SquashFS 4/LZ4 extent and its root/table metadata.
+
+    Layout comes from Linux fs/squashfs/squashfs_fs.h in Ricoh's public GPL
+    source release. This reader never extracts filesystem paths on the host.
+    Complete Ricoh checksums cover every compressed data byte; this structural
+    check does not claim to decompress all regular files or authenticate them.
+    """
+    if base + 96 > len(data): raise ValueError("Truncated SquashFS superblock")
+    values = struct.unpack_from("<5I6H8Q", data, base)
+    magic, inodes, _, block, fragments, compression, block_log, flags, ids, major, minor, root, used, id_table, xattr_table, inode_table, directory_table, fragment_table, export_table = values
+    absent = 0xFFFFFFFFFFFFFFFF
+    if (magic != 0x73717368 or (major, minor) != (4, 0) or compression != 5
+            or not 1 <= inodes <= 100000 or fragments > inodes or not 1 <= ids <= 65535
+            or not 12 <= block_log <= 20 or block != 1 << block_log
+            or not 96 < used <= len(data) - base or flags & ~0x1FFF
+            or not 96 <= inode_table < directory_table < used):
+        raise ValueError("Invalid SquashFS version, codec or extent")
+    if xattr_table != absent:
+        raise ValueError("SquashFS xattr table is outside this bounded reader's coverage")
+
+    def metadata(offset):
+        task.check()
+        if not 96 <= offset <= used - 2: raise ValueError("SquashFS metadata pointer out of bounds")
+        stored = struct.unpack_from("<H", data, base + offset)[0]
+        size = stored & 0x7FFF
+        if not 1 <= size <= 8192 or offset + 2 + size > used:
+            raise ValueError("SquashFS metadata block out of bounds")
+        raw = bytes(data[base + offset + 2:base + offset + 2 + size])
+        return (raw if stored & 0x8000 else _lz4_metadata(raw, task)), offset + 2 + size
+
+    # Validate all packed inode metadata blocks and locate the root by its
+    # block-reference, instead of trusting a plausible embedded superblock.
+    cursor, root_data = inode_table, None
+    root_block, root_offset = root >> 16, root & 0xFFFF
+    while cursor < directory_table:
+        task.check()
+        start = cursor
+        decoded, cursor = metadata(cursor)
+        if cursor > directory_table: raise ValueError("SquashFS inode table overlaps directory table")
+        if start == inode_table + root_block:
+            if root_offset + 32 > len(decoded): raise ValueError("SquashFS root inode crosses its metadata block")
+            root_data = decoded[root_offset:]
+    if root_data is None: raise ValueError("SquashFS root inode does not name a metadata block")
+    kind, _, uid, gid, _, number = struct.unpack_from("<4H2I", root_data)
+    if kind not in (1, 8) or uid >= ids or gid >= ids or not 1 <= number <= inodes:
+        raise ValueError("SquashFS root is not a bounded directory inode")
+    if kind == 1:
+        start, _, size, offset, parent = struct.unpack_from("<IIHHI", root_data, 16)
+    else:
+        if len(root_data) < 40: raise ValueError("Truncated SquashFS long root inode")
+        _, size, start, parent, _, offset, _ = struct.unpack_from("<4I2HI", root_data, 16)
+    directory, _ = metadata(directory_table + start)
+    if size < 3 or offset >= len(directory) or not 1 <= parent <= inodes + 1:
+        raise ValueError("SquashFS root directory extent is invalid")
+
+    def indexed_table(offset, count, width):
+        if not count:
+            if offset != absent: raise ValueError("Unexpected SquashFS empty table")
+            return
+        entries = (count * width + 8191) // 8192
+        if not 96 <= offset <= used - entries * 8: raise ValueError("SquashFS table index out of bounds")
+        remaining, previous = count * width, 0
+        for index in range(entries):
+            pointer = struct.unpack_from("<Q", data, base + offset + index * 8)[0]
+            if pointer <= previous or pointer >= offset: raise ValueError("SquashFS metadata index order/extent is invalid")
+            decoded, end = metadata(pointer)
+            expected = min(remaining, 8192)
+            if len(decoded) != expected or end > offset: raise ValueError("SquashFS table metadata size is invalid")
+            remaining -= expected; previous = pointer
+    indexed_table(id_table, ids, 4)
+    indexed_table(fragment_table, fragments, 16)
+    if flags & 0x80:
+        indexed_table(export_table, inodes, 8)
+    elif export_table != absent:
+        raise ValueError("Unexpected SquashFS export table")
+    return {"size": used, "inodes": inodes, "compression": "lz4", "block_size": block,
+            "root_inode": root, "verification": "superblock, complete inode metadata, root directory and indexed table bounds; regular file data not decompressed"}
+
+
 def _extract_components(payload: Path, destination: Path, decoded_size: int, task: Task) -> list[dict]:
     # Components are selected by validated ROMFS inode paths, never by guessing
     # how much data follows an embedded kernel/FDT magic value.
@@ -313,6 +427,21 @@ def _extract_components(payload: Path, destination: Path, decoded_size: int, tas
                 total += length
                 selected.append({"output": name, "kind": kind, "romfs_path": path,
                                  "payload_offset": start, "size": length})
+        offset = 0
+        while (offset := data.find(b"hsqs", offset)) >= 0:
+            base = offset
+            offset += 4
+            try:
+                filesystem = _squashfs_extent(data, base, task)
+            except ValueError:
+                continue
+            if "rootfs.squashfs" in names:
+                raise ValueError("Multiple valid Ricoh SquashFS images claim the rootfs role")
+            if total + filesystem["size"] > MAX_OUTPUT:
+                raise ValueError("Ricoh components exceed the total 2 GiB output limit")
+            names.add("rootfs.squashfs"); total += filesystem["size"]
+            selected.append({"output": "rootfs.squashfs", "kind": "rootfs",
+                             "payload_offset": base, **filesystem})
         for component in selected:
             digest = hashlib.sha256()
             start, length = component["payload_offset"], component["size"]
@@ -352,7 +481,7 @@ def extract(source: Path, destination: Path, task: Task) -> dict:
             "Complete input little-endian 32-bit word sum is zero.",
             "All frame/block/back-reference extents validated; output limited to 2 GiB.",
             "Complete decoded payload little-endian 32-bit word sum is zero.",
-            "Optional boot components use ROMFS size/header/inode checksums, paths and bounded file extents.",
+            "Optional boot components use ROMFS size/header/inode checksums and paths, or SquashFS 4/LZ4 root/indexed-table metadata; file extents are bounded.",
         ],
         "notes": [
             f"Decoded {frames:,} frames into {output.size:,} bytes; frame terminator ends at input offset {consumed:#x}.",

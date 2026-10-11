@@ -111,7 +111,7 @@ def create_support(device, qemu=None):
     if data['components_extracted']:
         lines += ['', '## Extracted components / 解包组件', '',
                   f"Method / 方法: {data['extraction_method']}", '',
-                  'Component extraction completed. Kernel, userspace and original UI boot are still unverified. / 组件解包完成；内核、用户空间和原厂 UI 启动尚未验证。', '',
+                  'Component extraction completed. This extraction record alone does not verify kernel, userspace or original UI boot. / 组件解包完成；此解包记录本身不能验证内核、用户空间或原厂 UI 启动。', '',
                   'Files and sizes checked; SHA-256 values record extraction time and are not rehashed by this diagnosis. / 已检查文件存在与大小；SHA-256 记录解包时结果，本次诊断未重新计算。', '',
                   '| File / 文件 | Format / 格式 | Architecture / 架构 | Bytes / 字节 |',
                   '| --- | --- | --- | --- |']

@@ -44,10 +44,12 @@ authorship or validation of the DevKit's QEMU implementation.
   retain their license and attribution; the bounded stream and archive handling
   are implemented in this project.
 - **WonderLantern**: [nikon-fw-key-tool](https://github.com/WonderLantern/nikon-fw-key-tool)
-  (GPL-3.0) and [z7-qemu](https://github.com/WonderLantern/z7-qemu)
+  (GPL-3.0), [z7-qemu](https://github.com/WonderLantern/z7-qemu) and
+  [z30-qemu](https://github.com/WonderLantern/z30-qemu) and
+  [z6-qemu](https://github.com/WonderLantern/z6-qemu/tree/419a1f2a91a1f2d3a0209027c29606475f7fe26f)
   (GPL-2.0-or-later). The independently implemented package reader uses tables
   supplied separately by the user. The key tool and custom QEMU are not bundled.
-  The Z7 lab is assisted startup; its research is not credited as complete camera
+  These menu labs use assisted startup; their research is not credited as complete camera
   hardware emulation or an unmodified power-on path.
 - **yeahnope** / [gr_unpack](https://github.com/yeahnope/gr_unpack) and
   **hhornbacher** / [gr3x-fw-hack](https://github.com/hhornbacher/gr3x-fw-hack): Ricoh
@@ -69,6 +71,24 @@ authorship or validation of the DevKit's QEMU implementation.
 Fixed research revisions, model-specific results and limitations are recorded in
 [docs/CAMERA_FIRMWARE.md](docs/CAMERA_FIRMWARE.md) and `devkit/camera_catalog.json`.
 感谢以上作者的公开研究；致谢不表示上游作者验证了本项目的实现。
+
+### Independent board bring-up / 独立板级适配
+
+The GPL-2.0-or-later board overlays in `scripts/boards/sony`, `ricoh` and
+`insta360` are independently implemented here and built against pinned QEMU
+10.2.4 source. Builders and corresponding overlay source accompany the portable
+app; the custom emulator binaries are built locally and are not bundled.
+The Sony register/address and boot handoff analysis was checked against
+[Sony's official ILCE-7M4 Ver.2.00 GPL source](https://oss.sony.net/Products/Linux/DI/ILCE-7M4_Ver200.html).
+Downloaded vendor GPL source remains a separate research input; these board
+models do not distribute proprietary camera drivers, encryption keys or firmware.
+
+**marin-m / vmlinux-to-elf**, GPL-3.0, revision
+`19683fb95b29cd31362d49e6f48ab8368f96cbdf`, was used separately for local kernel
+symbol analysis. Its code and recovered proprietary kernel images are not
+bundled. **Unicorn 2.1.4**, GPL-2.0, is an optional local Canon algorithm
+verification dependency (`pip install .[canon-lab]`), not a camera emulator or a
+required dependency of the portable workbench.
 
 ## Downloaded separately, not bundled in the portable app
 

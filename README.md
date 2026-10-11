@@ -28,7 +28,8 @@ The camera UI runtime download is approximately **615 MB**. Allow **8 GB free di
 - Review JSON boot profiles for ARM64 `virt`, ARM `virt`, x86-64 `pc`, or RISC-V 64 `virt`; run compatible direct kernels or disk images with temporary disk writes and networking disabled.
 - Use the CLI to inspect, import, list boards, run and export support information.
 - Extract checked Sony, Nikon, Ricoh, Canon and Insta360 components offline; see the model/version matrix below.
-- Start the verified Nikon Z7 C3.80 assisted menu lab with a separately built custom QEMU.
+- Start verified Nikon Z7 C3.80, Z30 C1.20 and Z6 C3.80 assisted menu labs with separately built custom QEMU.
+- Run bounded original Linux/rootfs checks for Sony A7 IV / A7R V, Ricoh GR and Insta360 X3 from the workbench or CLI.
 - Original firmware UI, streamed directly from a minimal Wayland compositor in QEMU.
 - Start/stop controls, correctly scaled mouse touch input and PNG screenshots.
 - English / Simplified Chinese; system / light / dark themes; Iris / Blue / Leaf accents.
@@ -49,17 +50,21 @@ The camera UI runtime download is approximately **615 MB**. Allow **8 GB free di
 | Additional profiles | X1D, X1D II, X2D and 907X 50C; see the preview matrix below |
 | Generic kernels / disk images | Boot profiles are available; each image must match the selected QEMU board |
 | Unknown / proprietary updates | Inspect and create a support workspace; no automatic boot claim |
-| Nikon Z7 C3.80 | Original menu and navigation verified using assisted startup; separate custom QEMU/WSL lab |
-| Sony A7 IV 2.00 / A7R V 4.00 | Actual update decryption and extraction verified; original UI not booted |
-| Ricoh GR III 2.10 / IIIx 1.60 / IV 1.11 | Checked decoding and kernel/DTB extraction; original UI not booted |
-| Insta360 X3 v1.1.4.1_build1 | Six components extracted; generic QEMU trial produced no kernel console |
-| Canon EOS 50D 1.0.9 | Updater extracted; encrypted main payload and missing full ROM dumps block UI boot |
+| Nikon Z7 C3.80 / Z30 C1.20 | Original menus, submenu entry and return verified using assisted startup; custom QEMU/WSL labs |
+| Nikon Z6 C3.80 | Original Playback menu and DOWN/UP selection round trip verified using assisted startup; LCD scanout, natural boot and imaging unverified |
+| Sony A7 IV 2.00 | Original Linux and ext2 rootfs shell boot; camera initialization and UI remain incomplete |
+| Sony A7R V 4.00 | Original Linux 4.9.337-scel and ext2 rootfs shell boot; camera initialization and UI remain incomplete |
+| Ricoh GR III 2.10 / IIIx 1.60 / IV 1.11 | Original Linux/rootfs shells boot; camctld runs in restrict mode on all three; RTOS IPC and original UI remain incomplete |
+| Insta360 X3 v1.1.4.1_build1 | Original Linux/SquashFS root shell boots; original init stalls in RTOS RPMsg; UI unverified |
+| Canon EOS 50D 1.0.9 | Original DryOS updater boots; full ROMs/ROM1 seed are needed for main-firmware/UI bring-up |
 | Camera UI rendering | QEMU TCG + Qt Quick software backend |
 | Camera guest hardware acceleration | Not implemented for this ARM64 guest on x86-64 Windows |
 | Capture, ISP, AF, lens, USB camera, real storage | Not emulated |
 | Physical camera installation / firmware flashing | Not provided |
 
-The Hasselblad adapter runs the **original camera user interface in a development guest**, with Android ARM32, Android ARM64 or Linux ARMhf libraries selected for the firmware and simulated camera services. It does not boot the camera's original kernel or reproduce the complete camera hardware. UI responsiveness varies with the host CPU. Camera values are mocked and some actions are intentionally unsupported. The Nikon Z7 lab is a separate custom QEMU route, with firmware function calls and guest RAM changes during assisted startup; natural power-on and full imaging hardware remain unverified.
+The Hasselblad adapter runs the **original camera user interface in a development guest**, with Android ARM32, Android ARM64 or Linux ARMhf libraries selected for the firmware and simulated camera services. It does not boot the camera's original kernel or reproduce the complete camera hardware. UI responsiveness varies with the host CPU. Camera values are mocked and some actions are intentionally unsupported. Nikon labs call original firmware functions and change guest RAM during assisted startup; natural power-on and full imaging hardware remain unverified.
+
+Additional Linux labs use independently built QEMU boards, development device trees and explicit bootloader setup. After importing and extracting a matching firmware, configure its local build as described in [camera firmware research](docs/CAMERA_FIRMWARE.md). **Start camera Linux lab** runs a 30-second check; **Cancel** stops its owned guest. This provides serial boot evidence, with camera UI status recorded separately.
 
 A firmware signature or CPU architecture is only an inspection result. Booting the original system also requires an appropriate board, boot chain and drivers. Generic `virt`/`pc` profiles do not reproduce proprietary camera SoCs. Unrecognized firmware receives a draft support workspace so those requirements can be investigated and recorded. Verified camera UI compatibility remains in [the verification matrix](docs/VERIFICATION.md).
 

@@ -1,0 +1,967 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-11",
+  "scope": "Offline local emulation only; original firmware files unchanged; no camera connection or flashing",
+  "prior_record": "camera-verification-20261011.json",
+  "interpretation": "Original menu/UI, Linux shell, service readiness and full camera boot are separate milestones. Assisted startup is not natural power-on.",
+  "runs": [
+    {
+      "model": "Nikon Z30",
+      "firmware": "C1.20",
+      "entry_point": "public-api",
+      "source_sha256": "1a5449ef505f1f347ed4e066a6a3f588ea542240680e83f4ebcae3b16da3434a",
+      "local_run_id": "0f2f61af8aef4fdeb5bb68a5731f8ce3",
+      "evidence_sha256": "448281d2ba3be31b38a894c983d716f51914b9e210a14b818f367d812d308b38",
+      "milestones": {
+        "assisted_startup": true,
+        "guest_state_modified": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": true,
+        "menu_runtime_verified": true,
+        "single_instance_menu_roundtrip_verified": true,
+        "live_view_verified": false,
+        "photography_verified": false,
+        "owned_guest_processes_reaped": true,
+        "worker_stopped": true,
+        "elapsed_seconds": 12.54329226699997,
+        "main_sha256": "8a99ced2d8220729ba067587b0624bf30c81757abc5d728768134b1c7fd457fa",
+        "frames": [
+          {
+            "name": "01-my-menu",
+            "sha256": "efc9558932d0e195a047e8a3875ebf0388fac5a11907599d31fcf34a7bf9d08f",
+            "bytes": 1036815,
+            "colors": 279
+          },
+          {
+            "name": "02-enter-add-items",
+            "sha256": "a360eab0233cfdf5bbb216269ae8df87499999f5e54055386a7a294f9e24408b",
+            "bytes": 1036815,
+            "colors": 260
+          },
+          {
+            "name": "03-back-my-menu",
+            "sha256": "efc9558932d0e195a047e8a3875ebf0388fac5a11907599d31fcf34a7bf9d08f",
+            "bytes": 1036815,
+            "colors": 279
+          }
+        ],
+        "qemu_sha256": "090758b4c88b51c7bedd3b81b3790989463957a3482494873637831123d0f597",
+        "source_revision": "0ba0c3547ccbec09e7c861eaca35db8e82795f15"
+      }
+    },
+    {
+      "model": "Nikon Z6",
+      "firmware": "C3.80",
+      "entry_point": "public-api",
+      "source_sha256": "ff978ffdf77c58c0b861a06e16d432d5886969f3cdd05d62f6c8e82e8a4cea54",
+      "local_run_id": "9afa36d54aa54db99159427887c154a4",
+      "evidence_sha256": "565efea23affb24fda6f2dd8ad7aba27fb051f7e73623288c8a5c76d06d9c398",
+      "milestones": {
+        "assisted_startup": true,
+        "guest_state_modified": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": true,
+        "menu_runtime_verified": true,
+        "single_instance_menu_roundtrip_verified": true,
+        "live_view_verified": false,
+        "photography_verified": false,
+        "owned_guest_processes_reaped": true,
+        "worker_stopped": true,
+        "elapsed_seconds": 6.337635434999999,
+        "main_sha256": "1e6348d58750e67372d0a8e363932c57ee9c04d0eb8f62803bcd19812df0d25c",
+        "frames": [
+          {
+            "name": "01-menu",
+            "sha256": "2526ed046d70e72fdd55e0575a9d06219e1e0f1803a9e6b78e5c0d6515660df0",
+            "fingerprint_sha256": "b7fe783476104432d380f3b26b5248bc03db6a7e7fc9e66007dc2b9ea5b87764",
+            "width": 720,
+            "height": 480,
+            "bytes": 1036815,
+            "colors": 345
+          },
+          {
+            "name": "02-next-item",
+            "sha256": "ed2e0483fea3af141f37f792454c18751539da9da15c63ba799a51378a1908f6",
+            "fingerprint_sha256": "d5f17407ba15b94f073b33e688e52cf79636c07fed4d629b1fec4e6de5805469",
+            "width": 720,
+            "height": 480,
+            "bytes": 1036815,
+            "colors": 272
+          },
+          {
+            "name": "03-return-item",
+            "sha256": "2526ed046d70e72fdd55e0575a9d06219e1e0f1803a9e6b78e5c0d6515660df0",
+            "fingerprint_sha256": "b7fe783476104432d380f3b26b5248bc03db6a7e7fc9e66007dc2b9ea5b87764",
+            "width": 720,
+            "height": 480,
+            "bytes": 1036815,
+            "colors": 345
+          }
+        ],
+        "frame_fingerprint_mask": {
+          "x": 646,
+          "y": 448,
+          "width": 32,
+          "height": 4,
+          "reason": "Observed blinking disabled slide-show marker; displayed pixels remain original"
+        },
+        "qemu_sha256": "f137211ad5f44aebb5e0678d18f44bfeac8e672f6f0be7a7c64ba0f6b74bf782",
+        "lcd_scanout_verified": false,
+        "source_revision": "419a1f2a91a1f2d3a0209027c29606475f7fe26f"
+      }
+    },
+    {
+      "model": "Ricoh GR III",
+      "firmware": "2.10",
+      "entry_point": "public-api",
+      "source_sha256": "d6a3c9c288d784080e7b283222ecdd8752adfeed6faa36dab44f73115354bfd4",
+      "local_run_id": "bd9b96e01cc4487b9d90352808e10ed0",
+      "evidence_sha256": "b2f7087b04f3e1211a83071b0b9aaa7ec96cbe67921ee74ef8ab43ac1e956ba6",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "userspace_booted": true,
+        "shell_oracle_complete": true,
+        "original_init_started": false,
+        "camera_service_alive": false,
+        "camera_service_ready_file": false,
+        "restrict_mode": false,
+        "process_reaped": true,
+        "transport_reaped": true,
+        "seconds": 12,
+        "interventions": [
+          "Development DTB: one Cortex-A7 CPU at index 0, 256 MiB RAM, fixed UART clock, architected timer.",
+          "Development DTB: non-empty vendor interrupt blacklist reserves unused SPI 0.",
+          "Minimal independent bootloader setup writes GICC_CTLR=1 before entering the original kernel.",
+          "RTOS control RAM 0x4fed0000..0x4fefffff and metadata RAM 0x4ff00000..0x4fffffff reserved; zeroed 8 MiB payload transport mapped at 0x50000000. Original DTB shared_commem pointer locations retained; no RTOS allocations or IPC replies synthesized.",
+          "RTOS cores, display, sensor, storage controller, USB UDC and camera IPC are not emulated.",
+          "Shell/services probe selects original /bin/sh as PID 1; mounts proc/sys/devtmpfs and volatile tmpfs only."
+        ],
+        "blockers": [
+          "Camera RTOS/UI, camera IPC, display, storage controller and sensor peripherals are not emulated."
+        ],
+        "mode": "shell"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 8788,
+          "sha256": "5a7fdbb6a145e90ea866ca4ac04d5924c7a04c0bb9229b97def1354c0d2f11a5"
+        }
+      },
+      "build": {
+        "qemu_version": "10.2.4",
+        "machine": "ricoh-milbeaut-lab",
+        "binary_sha256": "fb21654e8a68035f2fa7d7a4807a1ccede337dd796e8c5f5e52b07d0f873bc87",
+        "dtb_sha256": "b4d20ce3efe9d078fa2098030288b7b748ca72911b5c5ec584a56ceddae9dcd3",
+        "sources": {
+          "ricoh-milbeaut-lab.c": "c2051f73a84fb22bcad612d7ee44d9f64a133f82d153cb5f237d5cf44553485e",
+          "ricoh-milbeaut-lab.dts": "e9735d76ffc0537c7109c97078effc0fe00d5c163c2a4409a63f41c0cfce76e7",
+          "build.py": "846ba6f527b48ae4a50a7b7aa7a7a963c40159aa739f90b7f446698e676c70dd"
+        },
+        "scope": "UART/GIC/architectural timer, zeroed transport RAM and bootloader GIC state; development DTB; no RTOS, IPC replies or display"
+      },
+      "inputs": [
+        {
+          "size": 2993048,
+          "sha256": "9996a8968beecf199f3d9cdbd8a51e4f44204cf1b733a4f6bb800a8736e4ea1b"
+        },
+        {
+          "size": 13898903,
+          "sha256": "f8c2efc7c1ddcc917ded5f3b751f6fa54020534545ec57fdb625d586b410c657"
+        }
+      ]
+    },
+    {
+      "model": "Ricoh GR III",
+      "firmware": "2.10",
+      "entry_point": "public-api",
+      "source_sha256": "d6a3c9c288d784080e7b283222ecdd8752adfeed6faa36dab44f73115354bfd4",
+      "local_run_id": "64337e9813864960a328ad89810b156d",
+      "evidence_sha256": "c5c2923c1bfab03867ac04a35d8cdf0c7f7569456be439f8e4d9538bfce2771f",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "userspace_booted": true,
+        "shell_oracle_complete": true,
+        "original_init_started": false,
+        "camera_service_alive": true,
+        "camera_service_ready_file": true,
+        "restrict_mode": true,
+        "process_reaped": true,
+        "transport_reaped": true,
+        "seconds": 10,
+        "interventions": [
+          "Development DTB: one Cortex-A7 CPU at index 0, 256 MiB RAM, fixed UART clock, architected timer.",
+          "Development DTB: non-empty vendor interrupt blacklist reserves unused SPI 0.",
+          "Minimal independent bootloader setup writes GICC_CTLR=1 before entering the original kernel.",
+          "RTOS control RAM 0x4fed0000..0x4fefffff and metadata RAM 0x4ff00000..0x4fffffff reserved; zeroed 8 MiB payload transport mapped at 0x50000000. Original DTB shared_commem pointer locations retained; no RTOS allocations or IPC replies synthesized.",
+          "RTOS cores, display, sensor, storage controller, USB UDC and camera IPC are not emulated.",
+          "Shell/services probe selects original /bin/sh as PID 1; mounts proc/sys/devtmpfs and volatile tmpfs only."
+        ],
+        "blockers": [
+          "Camera RTOS/UI, camera IPC, display, storage controller and sensor peripherals are not emulated."
+        ],
+        "mode": "services"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 13136,
+          "sha256": "ca6f4cca5aa80406cb9c14aad0eeb8159e3e23a6ddc95c1c7e7bcfeeed506b72"
+        }
+      },
+      "build": {
+        "qemu_version": "10.2.4",
+        "machine": "ricoh-milbeaut-lab",
+        "binary_sha256": "fb21654e8a68035f2fa7d7a4807a1ccede337dd796e8c5f5e52b07d0f873bc87",
+        "dtb_sha256": "b4d20ce3efe9d078fa2098030288b7b748ca72911b5c5ec584a56ceddae9dcd3",
+        "sources": {
+          "ricoh-milbeaut-lab.c": "c2051f73a84fb22bcad612d7ee44d9f64a133f82d153cb5f237d5cf44553485e",
+          "ricoh-milbeaut-lab.dts": "e9735d76ffc0537c7109c97078effc0fe00d5c163c2a4409a63f41c0cfce76e7",
+          "build.py": "846ba6f527b48ae4a50a7b7aa7a7a963c40159aa739f90b7f446698e676c70dd"
+        },
+        "scope": "UART/GIC/architectural timer, zeroed transport RAM and bootloader GIC state; development DTB; no RTOS, IPC replies or display"
+      },
+      "inputs": [
+        {
+          "size": 2993048,
+          "sha256": "9996a8968beecf199f3d9cdbd8a51e4f44204cf1b733a4f6bb800a8736e4ea1b"
+        },
+        {
+          "size": 13898903,
+          "sha256": "f8c2efc7c1ddcc917ded5f3b751f6fa54020534545ec57fdb625d586b410c657"
+        }
+      ]
+    },
+    {
+      "model": "Ricoh GR IIIx",
+      "firmware": "1.60",
+      "entry_point": "public-api",
+      "source_sha256": "708e79f3b7b96a7e1581b4acf4c412233050a1832718ef7f06c8397db1b431c7",
+      "local_run_id": "25d1a9e4482d4aac84ea797a0507c32d",
+      "evidence_sha256": "57805e3e909640ac439c399fb868211d7d2611c13361e5d6b60da10a3ce80fb8",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "userspace_booted": true,
+        "shell_oracle_complete": true,
+        "original_init_started": false,
+        "camera_service_alive": false,
+        "camera_service_ready_file": false,
+        "restrict_mode": false,
+        "process_reaped": true,
+        "transport_reaped": true,
+        "seconds": 12,
+        "interventions": [
+          "Development DTB: one Cortex-A7 CPU at index 0, 256 MiB RAM, fixed UART clock, architected timer.",
+          "Development DTB: non-empty vendor interrupt blacklist reserves unused SPI 0.",
+          "Minimal independent bootloader setup writes GICC_CTLR=1 before entering the original kernel.",
+          "RTOS control RAM 0x4fed0000..0x4fefffff and metadata RAM 0x4ff00000..0x4fffffff reserved; zeroed 8 MiB payload transport mapped at 0x50000000. Original DTB shared_commem pointer locations retained; no RTOS allocations or IPC replies synthesized.",
+          "RTOS cores, display, sensor, storage controller, USB UDC and camera IPC are not emulated.",
+          "Shell/services probe selects original /bin/sh as PID 1; mounts proc/sys/devtmpfs and volatile tmpfs only."
+        ],
+        "blockers": [
+          "Camera RTOS/UI, camera IPC, display, storage controller and sensor peripherals are not emulated."
+        ],
+        "mode": "shell"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 8738,
+          "sha256": "dfbcc44284946919d808b53f2ded8f910fffdcfecdc4fd8ed4ac2fed380ce255"
+        }
+      },
+      "build": {
+        "qemu_version": "10.2.4",
+        "machine": "ricoh-milbeaut-lab",
+        "binary_sha256": "fb21654e8a68035f2fa7d7a4807a1ccede337dd796e8c5f5e52b07d0f873bc87",
+        "dtb_sha256": "b4d20ce3efe9d078fa2098030288b7b748ca72911b5c5ec584a56ceddae9dcd3",
+        "sources": {
+          "ricoh-milbeaut-lab.c": "c2051f73a84fb22bcad612d7ee44d9f64a133f82d153cb5f237d5cf44553485e",
+          "ricoh-milbeaut-lab.dts": "e9735d76ffc0537c7109c97078effc0fe00d5c163c2a4409a63f41c0cfce76e7",
+          "build.py": "846ba6f527b48ae4a50a7b7aa7a7a963c40159aa739f90b7f446698e676c70dd"
+        },
+        "scope": "UART/GIC/architectural timer, zeroed transport RAM and bootloader GIC state; development DTB; no RTOS, IPC replies or display"
+      },
+      "inputs": [
+        {
+          "size": 2993048,
+          "sha256": "9996a8968beecf199f3d9cdbd8a51e4f44204cf1b733a4f6bb800a8736e4ea1b"
+        },
+        {
+          "size": 13898903,
+          "sha256": "f8c2efc7c1ddcc917ded5f3b751f6fa54020534545ec57fdb625d586b410c657"
+        }
+      ]
+    },
+    {
+      "model": "Ricoh GR IIIx",
+      "firmware": "1.60",
+      "entry_point": "public-api",
+      "source_sha256": "708e79f3b7b96a7e1581b4acf4c412233050a1832718ef7f06c8397db1b431c7",
+      "local_run_id": "7570c980f4fe49cabad571ce038a18c1",
+      "evidence_sha256": "7242c3604ac4900f3b527294c62437dcb9c60f33d8b9cbe9fa275f29700b6a30",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "userspace_booted": true,
+        "shell_oracle_complete": true,
+        "original_init_started": false,
+        "camera_service_alive": true,
+        "camera_service_ready_file": true,
+        "restrict_mode": true,
+        "process_reaped": true,
+        "transport_reaped": true,
+        "seconds": 15,
+        "interventions": [
+          "Development DTB: one Cortex-A7 CPU at index 0, 256 MiB RAM, fixed UART clock, architected timer.",
+          "Development DTB: non-empty vendor interrupt blacklist reserves unused SPI 0.",
+          "Minimal independent bootloader setup writes GICC_CTLR=1 before entering the original kernel.",
+          "RTOS control RAM 0x4fed0000..0x4fefffff and metadata RAM 0x4ff00000..0x4fffffff reserved; zeroed 8 MiB payload transport mapped at 0x50000000. Original DTB shared_commem pointer locations retained; no RTOS allocations or IPC replies synthesized.",
+          "RTOS cores, display, sensor, storage controller, USB UDC and camera IPC are not emulated.",
+          "Shell/services probe selects original /bin/sh as PID 1; mounts proc/sys/devtmpfs and volatile tmpfs only."
+        ],
+        "blockers": [
+          "Camera RTOS/UI, camera IPC, display, storage controller and sensor peripherals are not emulated."
+        ],
+        "mode": "services"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 13530,
+          "sha256": "865bf2bf00b7cc65aceb17d208ca79592bf26c30160af23caee1c79c439f652a"
+        }
+      },
+      "build": {
+        "qemu_version": "10.2.4",
+        "machine": "ricoh-milbeaut-lab",
+        "binary_sha256": "fb21654e8a68035f2fa7d7a4807a1ccede337dd796e8c5f5e52b07d0f873bc87",
+        "dtb_sha256": "b4d20ce3efe9d078fa2098030288b7b748ca72911b5c5ec584a56ceddae9dcd3",
+        "sources": {
+          "ricoh-milbeaut-lab.c": "c2051f73a84fb22bcad612d7ee44d9f64a133f82d153cb5f237d5cf44553485e",
+          "ricoh-milbeaut-lab.dts": "e9735d76ffc0537c7109c97078effc0fe00d5c163c2a4409a63f41c0cfce76e7",
+          "build.py": "846ba6f527b48ae4a50a7b7aa7a7a963c40159aa739f90b7f446698e676c70dd"
+        },
+        "scope": "UART/GIC/architectural timer, zeroed transport RAM and bootloader GIC state; development DTB; no RTOS, IPC replies or display"
+      },
+      "inputs": [
+        {
+          "size": 2993048,
+          "sha256": "9996a8968beecf199f3d9cdbd8a51e4f44204cf1b733a4f6bb800a8736e4ea1b"
+        },
+        {
+          "size": 13898903,
+          "sha256": "f8c2efc7c1ddcc917ded5f3b751f6fa54020534545ec57fdb625d586b410c657"
+        }
+      ]
+    },
+    {
+      "model": "Ricoh GR IV",
+      "firmware": "1.11",
+      "entry_point": "public-api",
+      "source_sha256": "a2f664dfca034059eb0fd6e18ab08684c326b4a034d85c164dad7e1ec9b5655f",
+      "local_run_id": "da9adb629866438cbf7d67b02e02a2fe",
+      "evidence_sha256": "860bd6e9466f2d23e11ea19d00a1f4ccf9ecf50f76e7d6a99669bbc9a9ecbadb",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "userspace_booted": true,
+        "shell_oracle_complete": true,
+        "original_init_started": false,
+        "camera_service_alive": false,
+        "camera_service_ready_file": false,
+        "restrict_mode": false,
+        "process_reaped": true,
+        "transport_reaped": true,
+        "seconds": 12,
+        "interventions": [
+          "Development DTB: one Cortex-A7 CPU at index 0, 256 MiB RAM, fixed UART clock, architected timer.",
+          "Development DTB: non-empty vendor interrupt blacklist reserves unused SPI 0.",
+          "Minimal independent bootloader setup writes GICC_CTLR=1 before entering the original kernel.",
+          "RTOS control RAM 0x4fed0000..0x4fefffff and metadata RAM 0x4ff00000..0x4fffffff reserved; zeroed 8 MiB payload transport mapped at 0x50000000. Original DTB shared_commem pointer locations retained; no RTOS allocations or IPC replies synthesized.",
+          "RTOS cores, display, sensor, storage controller, USB UDC and camera IPC are not emulated.",
+          "Shell/services probe selects original /bin/sh as PID 1; mounts proc/sys/devtmpfs and volatile tmpfs only."
+        ],
+        "blockers": [
+          "Camera RTOS/UI, camera IPC, display, storage controller and sensor peripherals are not emulated."
+        ],
+        "mode": "shell"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 13560,
+          "sha256": "bcc21f5a28f2fa874029a2e3fa77accf14cbdf46507dac686c032cb07319e8ae"
+        }
+      },
+      "build": {
+        "qemu_version": "10.2.4",
+        "machine": "ricoh-milbeaut-lab",
+        "binary_sha256": "fb21654e8a68035f2fa7d7a4807a1ccede337dd796e8c5f5e52b07d0f873bc87",
+        "dtb_sha256": "b4d20ce3efe9d078fa2098030288b7b748ca72911b5c5ec584a56ceddae9dcd3",
+        "sources": {
+          "ricoh-milbeaut-lab.c": "c2051f73a84fb22bcad612d7ee44d9f64a133f82d153cb5f237d5cf44553485e",
+          "ricoh-milbeaut-lab.dts": "e9735d76ffc0537c7109c97078effc0fe00d5c163c2a4409a63f41c0cfce76e7",
+          "build.py": "846ba6f527b48ae4a50a7b7aa7a7a963c40159aa739f90b7f446698e676c70dd"
+        },
+        "scope": "UART/GIC/architectural timer, zeroed transport RAM and bootloader GIC state; development DTB; no RTOS, IPC replies or display"
+      },
+      "inputs": [
+        {
+          "size": 5709552,
+          "sha256": "9e6bdf2174b6beec0252ce4c8d58ccdb5a13631401f48e10b4e4d2553d2c9eca"
+        },
+        {
+          "size": 21847529,
+          "sha256": "fafc70b9048fe8f1eb8502e15f909ff65a7ce5d28367a1bb45f5e20f1f19ea16"
+        }
+      ]
+    },
+    {
+      "model": "Ricoh GR IV",
+      "firmware": "1.11",
+      "entry_point": "public-api",
+      "source_sha256": "a2f664dfca034059eb0fd6e18ab08684c326b4a034d85c164dad7e1ec9b5655f",
+      "local_run_id": "e542183128464ff8a43cf162260dc7f4",
+      "evidence_sha256": "d33881dd227802c7161825793737d73770730809eca1b8c796b5457be154f921",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "userspace_booted": true,
+        "shell_oracle_complete": true,
+        "original_init_started": false,
+        "camera_service_alive": true,
+        "camera_service_ready_file": true,
+        "restrict_mode": true,
+        "process_reaped": true,
+        "transport_reaped": true,
+        "seconds": 15,
+        "interventions": [
+          "Development DTB: one Cortex-A7 CPU at index 0, 256 MiB RAM, fixed UART clock, architected timer.",
+          "Development DTB: non-empty vendor interrupt blacklist reserves unused SPI 0.",
+          "Minimal independent bootloader setup writes GICC_CTLR=1 before entering the original kernel.",
+          "RTOS control RAM 0x4fed0000..0x4fefffff and metadata RAM 0x4ff00000..0x4fffffff reserved; zeroed 8 MiB payload transport mapped at 0x50000000. Original DTB shared_commem pointer locations retained; no RTOS allocations or IPC replies synthesized.",
+          "RTOS cores, display, sensor, storage controller, USB UDC and camera IPC are not emulated.",
+          "Shell/services probe selects original /bin/sh as PID 1; mounts proc/sys/devtmpfs and volatile tmpfs only."
+        ],
+        "blockers": [
+          "Camera RTOS/UI, camera IPC, display, storage controller and sensor peripherals are not emulated."
+        ],
+        "mode": "services"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 17709,
+          "sha256": "c1988831a5888216055b12c70a806af816f426592189deb54bc4e58c857946f3"
+        }
+      },
+      "build": {
+        "qemu_version": "10.2.4",
+        "machine": "ricoh-milbeaut-lab",
+        "binary_sha256": "fb21654e8a68035f2fa7d7a4807a1ccede337dd796e8c5f5e52b07d0f873bc87",
+        "dtb_sha256": "b4d20ce3efe9d078fa2098030288b7b748ca72911b5c5ec584a56ceddae9dcd3",
+        "sources": {
+          "ricoh-milbeaut-lab.c": "c2051f73a84fb22bcad612d7ee44d9f64a133f82d153cb5f237d5cf44553485e",
+          "ricoh-milbeaut-lab.dts": "e9735d76ffc0537c7109c97078effc0fe00d5c163c2a4409a63f41c0cfce76e7",
+          "build.py": "846ba6f527b48ae4a50a7b7aa7a7a963c40159aa739f90b7f446698e676c70dd"
+        },
+        "scope": "UART/GIC/architectural timer, zeroed transport RAM and bootloader GIC state; development DTB; no RTOS, IPC replies or display"
+      },
+      "inputs": [
+        {
+          "size": 5709552,
+          "sha256": "9e6bdf2174b6beec0252ce4c8d58ccdb5a13631401f48e10b4e4d2553d2c9eca"
+        },
+        {
+          "size": 21847529,
+          "sha256": "fafc70b9048fe8f1eb8502e15f909ff65a7ce5d28367a1bb45f5e20f1f19ea16"
+        }
+      ]
+    },
+    {
+      "model": "Ricoh GR IV",
+      "firmware": "1.11",
+      "entry_point": "standalone-rtos-reset-probe",
+      "source_sha256": "a2f664dfca034059eb0fd6e18ab08684c326b4a034d85c164dad7e1ec9b5655f",
+      "local_run_id": "gr4-rtos-public-probe-04",
+      "evidence_sha256": "f6aaa63ce3407abf7f55d507a623f27c6ba89ce3732859627ebade2d2d79b9f0",
+      "milestones": {
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "process_reaped": true,
+        "seconds": 5,
+        "interventions": [
+          "Three secure Cortex-A7 cores start at the original vector address; the camera Linux core is absent.",
+          "512 MiB development RAM at 0x40000000; zeroed SRAM at 0x01000000. The original guest publishes its own rendezvous values.",
+          "GIC at 0x1d000000; actual virtual countdown timer 13 at 0x1e0000d0, 6.75 MHz, SPI 99.",
+          "ARM CNTControlBase at 0x1d010000 uses a real 40 MHz elapsed-time counter. Explicit development bootloader configuration starts CNTCR.EN=1, matching the always-on Generic Timer in Ricoh GPL sc2000.dtsi; real-camera bootloader configuration remains unverified.",
+          "USB3_JT_ADJ at 0x1b110298 retains guest-written configuration only; its unknown reset value remains an error on reads before the first write. Official GR IIIx GPL dwc3-sn.c identifies offset 0x18 in the USB3 glue register block.",
+          "No camera IPCU replies, display, storage, sensor, USB transfers or network peripherals are implemented.",
+          "Original ROM prefix loaded at 0x53000000; its original MMU table, initialized data and vector code are unchanged.",
+          "QMP reads CPU registers only. No device-register reads or writes are injected.",
+          "Explicit bootloader flag 0x0100fff8=0xbeefcafe selects the GIC branch already present in the original reset code; real-camera bootloader provenance remains unverified."
+        ],
+        "blockers": [
+          "Original PC 0x53acc2dc reads 0x28825000 before updating 32 configuration entries; this peripheral block has no confirmed reset values or register behavior in the reviewed official GPL source, so the access remains a real abort.",
+          "Original RTOS camera tasks still require unimplemented peripherals and bootloader inputs. Linux/camera-control IPC and original display are not connected."
+        ],
+        "original_reset_executed": true,
+        "irq_exceptions": 2,
+        "svc_exceptions": 583,
+        "data_abort_faults": [
+          [
+            "8",
+            "28825000"
+          ],
+          [
+            "80d",
+            "0"
+          ]
+        ],
+        "trace_sha256": "c16d845233dae636bc75a33e2f52f33f48eba5049e08a19916efabaf25e462c9",
+        "trace_size": 262782,
+        "rtos_sha256": "a9a9a51530c35819df47dee1cce9f4f560a17eeed1da258950167d282884fce1",
+        "source_payload_sha256": "c4e597c7c9ca1bc181b30e35139ed90a4fd876ddcca14f12be0e00b6702233ae",
+        "firmware_modified": false
+      },
+      "build": {
+        "qemu_version": "10.2.4",
+        "machine": "ricoh-rtos-lab",
+        "binary_sha256": "d2c1439ad6130eff04ddfc96ccb91baa6f75f3d0fed8c1bb4c26e1a9b28e3ced",
+        "sources": {
+          "ricoh-rtos-lab.c": "3ce7e22d5da568f37c789caaf70db8b246047c6212611fd35fc664238fc3bb51",
+          "build_rtos.py": "55f7ff8431d69db494973058a56d533af53ab60f685e836e8a0439f2084db76f"
+        },
+        "scope": "Three secure RTOS cores, guest-written SRAM, GIC, timer 13, 40 MHz ARM system counter and USB3_JT_ADJ configuration retention; no USB transfers, IPC replies or display"
+      }
+    },
+    {
+      "model": "Canon EOS 50D",
+      "firmware": "1.0.9",
+      "entry_point": "public-api",
+      "source_sha256": "68a223845bd23a4aa35509ca3454f68a6128ef68c0f7d3dcc31ffa470690d298",
+      "local_run_id": "public-updater-native-evidence",
+      "evidence_sha256": "0329fd56e3db35d1cec6f280f23368beba7c7fe97bc977afb142fff087b84f14",
+      "milestones": {
+        "stock_ui_verified": false,
+        "stock_boot_verified": false,
+        "updater_runtime_observed": true,
+        "observed_missing_rom": true,
+        "elapsed_seconds": 10.013,
+        "seconds_limit": 10.0,
+        "qemu_source_commit": "4b667a1d3c08ab7a55835d15ddbd884fa754946d",
+        "updater_sha256": "fa7640db657dee18959259c4a285fefc9050918332cb844c67bb266cf4bab711"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 9161,
+          "sha256": "2550a43999c687e0e3ea6b326d28d3935c7fefa9ed5dd141963e92fa4279ca2f"
+        },
+        "qemu.log": {
+          "bytes": 7928,
+          "sha256": "a16365805e9e1e201a85324f1510a8360c9f9fe61fe88d7e3fe2a8a87fb47f93"
+        },
+        "guest-assembly.log": {
+          "bytes": 1330543,
+          "sha256": "5e5bb06765fab97884ccb7b62619dc308d383e7946dcedf96eb21f4392b80ebd"
+        }
+      }
+    },
+    {
+      "model": "Sony A7R V",
+      "firmware": "4.00",
+      "entry_point": "public-api",
+      "source_sha256": "51e1176a255a9a4b4782dfbcfa6c5f332b71173bdfe9ed2bcf4fca6bcbc6c2e2",
+      "local_run_id": "cc5f67300b204303a96a5021eaa83aba",
+      "evidence_sha256": "6c9522df1351e1b0c17de233917d9d35a8ca385a0af41c0e20c66de139c70891",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "rootfs_mounted": true,
+        "userspace_booted": true,
+        "serial_command_verified": true,
+        "native_identity_verified": true,
+        "original_init_requested": false,
+        "original_init_progress_verified": false,
+        "kernel_oops_observed": false,
+        "guest_exception_observed": false,
+        "kernel_panic_observed": false,
+        "source_sha256_verified_after": true,
+        "process_reaped": true,
+        "bounded_seconds": 10,
+        "interventions": [
+          "Linux development DTB and single Cortex-A35 core",
+          "CXD90057 UART/GIC and board register models with unsupported peripheral stubs",
+          "Development DTB reserves a 2 MiB noncacheable DMA instruction pool",
+          "Bootloader kemco parameters, DTB and original ext2 initrd placed by raw loaders",
+          "Blacklisted __boottime_sony_usb_init: USB board DTS is not yet implemented",
+          "Development DTB chosen initrd-end adjusted for the exact A7R V initrd size",
+          "init=/bin/sh bypasses camera service startup"
+        ],
+        "qemu_sha256": "83a60c5347e0c077a7ef2c08caa96fdbd08a455c94a44c0650448422a1dd0d3d",
+        "dtb_sha256": "6c77ed82a2b8c31ee90418c11004c3a1645532c656af79ca19d9026ebd70d858",
+        "overlay_sha256": {
+          "build.py": "39903dc3e490987c5829dbf8e511d09e6a845f0c6d2b175de8c0525047197d89",
+          "cxd90057-mailbox.c.inc": "b417988eb4e08106b46b200c1a311f83abe5303034857d367d89cea55b1a6df8",
+          "cxd90057-lab.dts": "f5eb9338ec2de9c7998e57846278f1509f512b0dfe5dec4aaf86af0fa7edba92",
+          "run.py": "676d2a5044a714af048a1b3ade4e35c48813276b81692a4c0fe0bd19e6ea0194",
+          "../insta360/run.py": "8036e564de0b3a322b7b3fa2db6cea1408ed656dda1339aac7b6fc3222afb609"
+        },
+        "development_dtb_sha256_verified_after": true,
+        "dtb_snapshot_frozen": true,
+        "original_development_dtb_sha256": "1310f3a0944be33ca8e64791b2c4f66439d4a0e789dd7a019ce9c8d407b86069",
+        "development_dtb_changes": [
+          {
+            "path": "/chosen/linux,initrd-end",
+            "before": "0x4184cc000",
+            "after": "0x4184fa000"
+          }
+        ],
+        "firmware_sha256": {
+          "kernel": "bdb129ad6806e3e33f1a1b9c094c0c97c4940bdea7aa9c09cef18f02e4012e66",
+          "rootfs": "8a1ac5c8494fe6b4b8b46d46f88d11272fe42091bc4ce28393dc9eae6a0e649d"
+        },
+        "startup_mode": "shell"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 11091,
+          "sha256": "a01dd4fca5a9235a6f337bd0ee796051e71e52f27c9db00d8d686a632d82ecce"
+        }
+      }
+    },
+    {
+      "model": "Sony A7R V",
+      "firmware": "4.00",
+      "entry_point": "public-api",
+      "source_sha256": "51e1176a255a9a4b4782dfbcfa6c5f332b71173bdfe9ed2bcf4fca6bcbc6c2e2",
+      "local_run_id": "bb5db34b38b9491b895a3a500d5e47dc",
+      "evidence_sha256": "6f780d51e6a0a79655991cebe3c1beaa3260d20455d1fe5cef1138ebc2c125f1",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "rootfs_mounted": true,
+        "userspace_booted": false,
+        "serial_command_verified": false,
+        "native_identity_verified": false,
+        "original_init_requested": true,
+        "original_init_progress_verified": true,
+        "kernel_oops_observed": true,
+        "guest_exception_observed": true,
+        "kernel_panic_observed": false,
+        "source_sha256_verified_after": true,
+        "process_reaped": true,
+        "bounded_seconds": 5,
+        "interventions": [
+          "Linux development DTB and single Cortex-A35 core",
+          "CXD90057 UART/GIC and board register models with unsupported peripheral stubs",
+          "Development DTB reserves a 2 MiB noncacheable DMA instruction pool",
+          "Bootloader kemco parameters, DTB and original ext2 initrd placed by raw loaders",
+          "Blacklisted __boottime_sony_usb_init: USB board DTS is not yet implemented",
+          "Development DTB chosen initrd-end adjusted for the exact A7R V initrd size"
+        ],
+        "qemu_sha256": "83a60c5347e0c077a7ef2c08caa96fdbd08a455c94a44c0650448422a1dd0d3d",
+        "dtb_sha256": "6c77ed82a2b8c31ee90418c11004c3a1645532c656af79ca19d9026ebd70d858",
+        "overlay_sha256": {
+          "build.py": "39903dc3e490987c5829dbf8e511d09e6a845f0c6d2b175de8c0525047197d89",
+          "cxd90057-mailbox.c.inc": "b417988eb4e08106b46b200c1a311f83abe5303034857d367d89cea55b1a6df8",
+          "cxd90057-lab.dts": "f5eb9338ec2de9c7998e57846278f1509f512b0dfe5dec4aaf86af0fa7edba92",
+          "run.py": "676d2a5044a714af048a1b3ade4e35c48813276b81692a4c0fe0bd19e6ea0194",
+          "../insta360/run.py": "8036e564de0b3a322b7b3fa2db6cea1408ed656dda1339aac7b6fc3222afb609"
+        },
+        "development_dtb_sha256_verified_after": true,
+        "dtb_snapshot_frozen": true,
+        "original_development_dtb_sha256": "1310f3a0944be33ca8e64791b2c4f66439d4a0e789dd7a019ce9c8d407b86069",
+        "development_dtb_changes": [
+          {
+            "path": "/chosen/linux,initrd-end",
+            "before": "0x4184cc000",
+            "after": "0x4184fa000"
+          }
+        ],
+        "firmware_sha256": {
+          "kernel": "bdb129ad6806e3e33f1a1b9c094c0c97c4940bdea7aa9c09cef18f02e4012e66",
+          "rootfs": "8a1ac5c8494fe6b4b8b46d46f88d11272fe42091bc4ce28393dc9eae6a0e649d"
+        },
+        "startup_mode": "init"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 21131,
+          "sha256": "a9cf08ccc715cf8e66272a6f82ed5a0ada7029fb47d41a3e5f411483f5c9da24"
+        }
+      }
+    },
+    {
+      "model": "Sony A7 IV",
+      "firmware": "2.00",
+      "entry_point": "public-api",
+      "source_sha256": "394ac0daaeb9ce3f6ca0273a18c6af26505770e3b470f70d1d9f062e257bbe88",
+      "local_run_id": "7acfffb74c464992bbef4e884981391b",
+      "evidence_sha256": "3b3702073451eb4ac4bb1d78ef263288bd243a5bb65a56ed103ae7163778f523",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "rootfs_mounted": true,
+        "userspace_booted": true,
+        "serial_command_verified": true,
+        "native_identity_verified": true,
+        "original_init_requested": false,
+        "original_init_progress_verified": false,
+        "kernel_oops_observed": false,
+        "guest_exception_observed": false,
+        "kernel_panic_observed": false,
+        "source_sha256_verified_after": true,
+        "process_reaped": true,
+        "bounded_seconds": 5,
+        "interventions": [
+          "Linux development DTB and single Cortex-A35 core",
+          "CXD90057 UART/GIC and board register models with unsupported peripheral stubs",
+          "Development DTB reserves a 2 MiB noncacheable DMA instruction pool",
+          "Bootloader kemco parameters, DTB and original ext2 initrd placed by raw loaders",
+          "Blacklisted __boottime_sony_usb_init: USB board DTS is not yet implemented",
+          "init=/bin/sh bypasses camera service startup"
+        ],
+        "qemu_sha256": "83a60c5347e0c077a7ef2c08caa96fdbd08a455c94a44c0650448422a1dd0d3d",
+        "dtb_sha256": "1310f3a0944be33ca8e64791b2c4f66439d4a0e789dd7a019ce9c8d407b86069",
+        "overlay_sha256": {
+          "build.py": "39903dc3e490987c5829dbf8e511d09e6a845f0c6d2b175de8c0525047197d89",
+          "cxd90057-mailbox.c.inc": "b417988eb4e08106b46b200c1a311f83abe5303034857d367d89cea55b1a6df8",
+          "cxd90057-lab.dts": "f5eb9338ec2de9c7998e57846278f1509f512b0dfe5dec4aaf86af0fa7edba92",
+          "run.py": "676d2a5044a714af048a1b3ade4e35c48813276b81692a4c0fe0bd19e6ea0194",
+          "../insta360/run.py": "8036e564de0b3a322b7b3fa2db6cea1408ed656dda1339aac7b6fc3222afb609"
+        },
+        "development_dtb_sha256_verified_after": true,
+        "dtb_snapshot_frozen": true,
+        "original_development_dtb_sha256": "1310f3a0944be33ca8e64791b2c4f66439d4a0e789dd7a019ce9c8d407b86069",
+        "development_dtb_changes": [],
+        "firmware_sha256": {
+          "kernel": "5aa8ccf608b7e697b7ddb3fc78b00ebcb666236596e390c7d4517bcea72f474e",
+          "rootfs": "5bd6f0313198b7ddc3001faf07111ddf380f8e6fcfa3e76a033368ad311ae171"
+        },
+        "startup_mode": "shell"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 11180,
+          "sha256": "60ea5f1fb10cf772106657da33e37b9a1bdb3a3a1a00c7ca06cbb2bf58eab539"
+        }
+      }
+    },
+    {
+      "model": "Sony A7 IV",
+      "firmware": "2.00",
+      "entry_point": "public-api",
+      "source_sha256": "394ac0daaeb9ce3f6ca0273a18c6af26505770e3b470f70d1d9f062e257bbe88",
+      "local_run_id": "06e6032dbbde416d8ff6b3558f1a680f",
+      "evidence_sha256": "644cfcb1635a86dc6db711ff47d6e2598d7541ed9e244b0fc3be2f4f22d444a8",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "rootfs_mounted": true,
+        "userspace_booted": false,
+        "serial_command_verified": false,
+        "native_identity_verified": false,
+        "original_init_requested": true,
+        "original_init_progress_verified": true,
+        "kernel_oops_observed": true,
+        "guest_exception_observed": true,
+        "kernel_panic_observed": false,
+        "source_sha256_verified_after": true,
+        "process_reaped": true,
+        "bounded_seconds": 5,
+        "interventions": [
+          "Linux development DTB and single Cortex-A35 core",
+          "CXD90057 UART/GIC and board register models with unsupported peripheral stubs",
+          "Development DTB reserves a 2 MiB noncacheable DMA instruction pool",
+          "Bootloader kemco parameters, DTB and original ext2 initrd placed by raw loaders",
+          "Blacklisted __boottime_sony_usb_init: USB board DTS is not yet implemented"
+        ],
+        "qemu_sha256": "83a60c5347e0c077a7ef2c08caa96fdbd08a455c94a44c0650448422a1dd0d3d",
+        "dtb_sha256": "1310f3a0944be33ca8e64791b2c4f66439d4a0e789dd7a019ce9c8d407b86069",
+        "overlay_sha256": {
+          "build.py": "587244a256af86919c116e2a66f6beecc09449fa38b8349f001d649382a1e0bc",
+          "cxd90057-mailbox.c.inc": "b417988eb4e08106b46b200c1a311f83abe5303034857d367d89cea55b1a6df8",
+          "cxd90057-lab.dts": "f5eb9338ec2de9c7998e57846278f1509f512b0dfe5dec4aaf86af0fa7edba92",
+          "run.py": "affb0f06e9ef6ca2f90208861a937735090e47a27b3a77c7678e1ef99a9ffab9",
+          "../insta360/run.py": "1250abfa71f4c3fa7a10cccac80954c48bbf4dee0382fce00c457cf9f09c4261"
+        },
+        "firmware_sha256": {
+          "kernel": "5aa8ccf608b7e697b7ddb3fc78b00ebcb666236596e390c7d4517bcea72f474e",
+          "rootfs": "5bd6f0313198b7ddc3001faf07111ddf380f8e6fcfa3e76a033368ad311ae171"
+        },
+        "startup_mode": "init"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 21258,
+          "sha256": "d6b4e7875ab26d16a93851433291cb62da0eed9d68ef02db5ad035c463a17cbd"
+        }
+      }
+    },
+    {
+      "model": "Insta360 X3",
+      "firmware": "v1.1.4.1_build1",
+      "entry_point": "public-api",
+      "source_sha256": "c745287e1243fb20861a110374e09ef59ec97c288c7da51659ffae19db9302f7",
+      "local_run_id": "d2909324f4f84b2a842faae678fd74e5",
+      "evidence_sha256": "b913a35ad48283db9c8c32f0f40044a2f1ad7e7706d9fd2e0b96292efc47c5a2",
+      "milestones": {
+        "assisted_startup": true,
+        "firmware_file_modified": false,
+        "natural_power_on_verified": false,
+        "original_ui_verified": false,
+        "kernel_booted": true,
+        "rootfs_mounted": true,
+        "userspace_booted": true,
+        "serial_command_verified": true,
+        "native_identity_verified": true,
+        "original_init_requested": false,
+        "original_init_progress_verified": false,
+        "kernel_oops_observed": false,
+        "guest_exception_observed": false,
+        "kernel_panic_observed": false,
+        "source_sha256_verified_after": true,
+        "process_reaped": true,
+        "bounded_seconds": 5,
+        "interventions": [
+          "Linux-only device tree and single CPU",
+          "GIC distributor enabled after reset (missing RTOS handoff)",
+          "Original SquashFS passed as readonly RAM disk",
+          "init=/bin/sh bypasses RTOS-dependent service startup"
+        ],
+        "qemu_sha256": "6c21175a1a5617cee993179694c5242175eafa21645557951e787d7f7c5fb81b",
+        "dtb_sha256": "82ed301c56896517074bc125360361fa78f2173d6834c2cf26123a5dfea91b4d",
+        "overlay_sha256": {
+          "build.py": "766f2fe02b940a95e1f8d1be7b9ad1452b92040f68117b081c3360def61dd753",
+          "run.py": "8036e564de0b3a322b7b3fa2db6cea1408ed656dda1339aac7b6fc3222afb609",
+          "insta360-h22-lab.c": "63ce9c9de19443b27b725735a6b759abb226292e3909cda920fff79638c3af5e",
+          "minimal-linux.dts": "a6580a4254c5f1d6866cabba9264b67fb880afe634eec1fe15ac64b07546dffd"
+        },
+        "development_dtb_sha256_verified_after": true,
+        "dtb_snapshot_frozen": true,
+        "original_development_dtb_sha256": "82ed301c56896517074bc125360361fa78f2173d6834c2cf26123a5dfea91b4d",
+        "development_dtb_changes": [],
+        "firmware_sha256": {
+          "kernel.bin": "f1dd76309a3d7e6d0f6cf9d4b4b9b3c2ca55384afbbd97ebb5995a70dd6f3295",
+          "rootfs.squashfs": "31aa64fd800d78288fe28c8ae80f6a7b4a7c5a523b1f2dd3417d7a4b1056a89b"
+        },
+        "startup_mode": "shell"
+      },
+      "logs": {
+        "serial.log": {
+          "bytes": 14178,
+          "sha256": "14164f81e79cc9ca4950f38860da027ff7517385175151268fd67807dc0ea2b7"
+        }
+      }
+    }
+  ],
+  "integration_tests": {
+    "command": "python -m pytest -q -rs",
+    "passed": 493,
+    "skipped": 2,
+    "skip_reasons": [
+      "User-owned Canon fixture not supplied",
+      "Ricoh POSIX supervisor tested separately under Linux/WSL"
+    ]
+  },
+  "additional_observations": [
+    {
+      "model": "Insta360 X3",
+      "entry_point": "earlier-private-original-init-prototype",
+      "local_run_id": "lab-original-init-v10",
+      "serial_sha256": "d15db40e47415a62bbcfad7f4c414f18a2d347ec90a2ebd2c9470f45302f3006",
+      "observed_fault": "Kernel NULL dereference at 0x2d0 in rpmsg_example_printk+0x2c/0x50",
+      "original_ui_verified": false
+    },
+    {
+      "model": "Sony A7 IV",
+      "entry_point": "offline-original-module-analysis",
+      "artifact": "original crypt-emmc.ko",
+      "artifact_sha256": "a62c89b0f84ac3cc822d2e0cfa1c66bfe6e591e2b30b6de88f0f94af6f1bc147",
+      "fault_instruction_text_offset": "0x54",
+      "instruction": "ldrb w0, [x0, x5]",
+      "observed_virtual_read_address": "0xffffffffffffb8eb",
+      "inferred_physical_read_address_from_static_dtb_mapping": "0xffffb8eb",
+      "conclusion": "Missing backing read source. Origin in ROM/OTP/bootloader remains unproven; no key contents are included."
+    }
+  ],
+  "packaging_gates": {
+    "installed_wheel": {
+      "ok": true,
+      "board_families": {
+        "canon": "share\\qemu-everything\\boards\\canon",
+        "insta360": "share\\qemu-everything\\boards\\insta360",
+        "nikon-z30": "share\\qemu-everything\\boards\\nikon-z30",
+        "nikon-z6": "share\\qemu-everything\\boards\\nikon-z6",
+        "ricoh": "share\\qemu-everything\\boards\\ricoh",
+        "sony": "share\\qemu-everything\\boards\\sony"
+      },
+      "wheel": "qemu_everything-0.3.0-py3-none-any.whl",
+      "wheel_sha256": "f75d12475ed62d964aa8f985ec93c361d74fdfb8f8122003822075f67aa8e201",
+      "license_notices_present": true,
+      "proprietary_firmware_bundled": false
+    },
+    "portable_executable": [
+      {
+        "model": "Nikon Z6 C3.80",
+        "ok": true,
+        "frozen": true,
+        "source_sha256_unchanged": true,
+        "local_run_id": "356902680e014ea090d52fdc3327e185",
+        "owned_guest_processes_reaped": true,
+        "evidence_sha256": "4d187f7557bd0ec75cc0a041c2417a24a8cdcac1027b009cf1becc3f10dbb832",
+        "exe_sha256": "054d84752319f675d5878f7ff927dbcdac00b46e6095641d89c00ba5de97f8c6",
+        "elapsed_seconds": 14.313,
+        "screenshots": {
+          "guest.png": "3415779417dba23f1020c94f916578cec79449dc021cad778f7d7ccdccf3d893",
+          "workbench.png": "87f96f2dcc8570444d560e6c83a52ee5335085fedba1ac611d801cfcde36763a"
+        }
+      },
+      {
+        "model": "Ricoh GR IV 1.11",
+        "ok": true,
+        "frozen": true,
+        "source_sha256_unchanged": true,
+        "local_run_id": "7d9886f239e045d39de9bd8eda064875",
+        "owned_guest_processes_reaped": true,
+        "evidence_sha256": "2eef6bc5005b260c7d78c0e2c756fe7bf6d20bca7061dbe744a3bb5a544293f5",
+        "exe_sha256": "054d84752319f675d5878f7ff927dbcdac00b46e6095641d89c00ba5de97f8c6",
+        "elapsed_seconds": 32.641,
+        "screenshots": {
+          "workbench.png": "513f11928a09cc7d6532b2c10f961cff5c25de725f9ef96d4ae57427f663149a"
+        }
+      }
+    ]
+  }
+}

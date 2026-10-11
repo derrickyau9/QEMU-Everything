@@ -1,0 +1,179 @@
+{
+  "schema": 1,
+  "date": "2026-10-11",
+  "model": "Nikon Z6",
+  "firmware_version": "C3.80",
+  "source": {
+    "download_page": "https://downloadcenter.nikonimglib.com/en/download/fw/557.html",
+    "filename": "Z_6_0380.bin",
+    "size": 34923366,
+    "sha256": "ff978ffdf77c58c0b861a06e16d432d5886969f3cdd05d62f6c8e82e8a4cea54"
+  },
+  "upstream": {
+    "repository": "https://github.com/WonderLantern/z6-qemu",
+    "revision": "419a1f2a91a1f2d3a0209027c29606475f7fe26f",
+    "license": "GPL-2.0-or-later"
+  },
+  "main": {
+    "offset_in_decrypted": 581844,
+    "bytes_with_original_crc16": 33502842,
+    "original_crc16": "f92d",
+    "sha256": "1e6348d58750e67372d0a8e363932c57ee9c04d0eb8f62803bcd19812df0d25c",
+    "decrypted_sha256": "843f662881bf1d3b0bf3750549b3ddfcedb7896d19e4db0d53e751c7d3334de3",
+    "module_bytes_without_crc16": 33502840,
+    "module_sha256": "2953fe932d00d160d9794d8dea0625aeaadf9e0cb82aebca37fe4a79e860ec35",
+    "crc_recovered_from_original_container": true
+  },
+  "qemu": {
+    "version": "10.2.4",
+    "original_archive_sha256": "821b545b92f165e57dddccac5077d76d4d436a226595b8813ad59306bbfd0746",
+    "locally_built_binary_sha256": "f137211ad5f44aebb5e0678d18f44bfeac8e672f6f0be7a7c64ba0f6b74bf782",
+    "machine": "nikon-z6-display",
+    "separate_build_from_z7_and_z30": true
+  },
+  "probe": {
+    "menu_runtime_verified": true,
+    "original_ui_verified": true,
+    "single_instance_menu_roundtrip_verified": true,
+    "assisted_startup": true,
+    "guest_state_modified": true,
+    "firmware_file_modified": false,
+    "natural_power_on_verified": false,
+    "lcd_scanout_verified": false,
+    "renderer": "upstream original-GPU GUI-surface probe",
+    "live_view_verified": false,
+    "photography_verified": false,
+    "elapsed_seconds": 6.337635434999999,
+    "guest_pid": 354,
+    "owned_guest_pids": [
+      354
+    ],
+    "guest_exit_codes": [
+      0
+    ],
+    "owned_guest_processes_reaped": true,
+    "worker_stopped": true,
+    "frames": [
+      {
+        "name": "01-menu",
+        "sha256": "2526ed046d70e72fdd55e0575a9d06219e1e0f1803a9e6b78e5c0d6515660df0",
+        "fingerprint_sha256": "b7fe783476104432d380f3b26b5248bc03db6a7e7fc9e66007dc2b9ea5b87764",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 345
+      },
+      {
+        "name": "02-next-item",
+        "sha256": "ed2e0483fea3af141f37f792454c18751539da9da15c63ba799a51378a1908f6",
+        "fingerprint_sha256": "d5f17407ba15b94f073b33e688e52cf79636c07fed4d629b1fec4e6de5805469",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 272
+      },
+      {
+        "name": "03-return-item",
+        "sha256": "2526ed046d70e72fdd55e0575a9d06219e1e0f1803a9e6b78e5c0d6515660df0",
+        "fingerprint_sha256": "b7fe783476104432d380f3b26b5248bc03db6a7e7fc9e66007dc2b9ea5b87764",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 345
+      }
+    ],
+    "frame_fingerprint_mask": {
+      "x": 646,
+      "y": 448,
+      "width": 32,
+      "height": 4,
+      "reason": "Observed blinking disabled slide-show marker; displayed pixels remain original"
+    }
+  },
+  "input_and_cancel": {
+    "observed": {
+      "down": {
+        "status": 202,
+        "frame": 2,
+        "png_sha256": "5e3d792c597cbb4b41fd819c0a31b8198dd7ca9e9549f68080e2072a244ffc65"
+      },
+      "up": {
+        "status": 202,
+        "frame": 3,
+        "png_sha256": "3415779417dba23f1020c94f916578cec79449dc021cad778f7d7ccdccf3d893"
+      }
+    },
+    "cancelled": true,
+    "owned_guest_processes_reaped": true,
+    "transport_exit_code": 0,
+    "guest_pid": 368,
+    "owned_guest_pids": [
+      368
+    ],
+    "worker_stopped": true,
+    "frames": [
+      {
+        "name": "01-menu",
+        "sha256": "2526ed046d70e72fdd55e0575a9d06219e1e0f1803a9e6b78e5c0d6515660df0",
+        "fingerprint_sha256": "b7fe783476104432d380f3b26b5248bc03db6a7e7fc9e66007dc2b9ea5b87764",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 345
+      },
+      {
+        "name": "action-0001-down",
+        "sha256": "ed2e0483fea3af141f37f792454c18751539da9da15c63ba799a51378a1908f6",
+        "fingerprint_sha256": "d5f17407ba15b94f073b33e688e52cf79636c07fed4d629b1fec4e6de5805469",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 272
+      },
+      {
+        "name": "action-0002-up",
+        "sha256": "2526ed046d70e72fdd55e0575a9d06219e1e0f1803a9e6b78e5c0d6515660df0",
+        "fingerprint_sha256": "b7fe783476104432d380f3b26b5248bc03db6a7e7fc9e66007dc2b9ea5b87764",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 345
+      }
+    ]
+  },
+  "rendering_correction": {
+    "reason": "Pinned upstream enables experimental LCD/YUV scanout even for menu-only startup; absent RAW/YUV producer hides the existing original GPU menu surface with black output.",
+    "action": "Omit Z6_LCD_SCANOUT_TEST in menu-only owned child environment; use upstream original-GPU surface probe.",
+    "firmware_bytes_patched": false,
+    "menus_synthesized": false
+  },
+  "private_evidence": {
+    "probe": "library/ff978ffdf77c58c0/nikon-z6/runs/9afa36d54aa54db99159427887c154a4/evidence.json",
+    "http_input_cancel": "library/ff978ffdf77c58c0/nikon-z6/runs/3bacf59b7fd040c5bc051fe19ab861fa/http-input-cancel-check.json"
+  },
+  "camera_access": false,
+  "firmware_or_keys_in_report": false,
+  "animation_observation": {
+    "original_baseline_pixels_sha256": "2526ed046d70e72fdd55e0575a9d06219e1e0f1803a9e6b78e5c0d6515660df0",
+    "observed_alternate_pixels_sha256": "327288dcc1aae5e9ce83c5c9aa3206a43ca9d76724e56d0de220fa844f9f083c",
+    "changed_pixels": 112,
+    "difference_bbox": [
+      646,
+      448,
+      678,
+      452
+    ],
+    "full_frames_saved_unmodified": true,
+    "mask_applies_only_to_verification_fingerprint": true
+  },
+  "tests": {
+    "command": "python -m pytest -q -rs",
+    "passed": 493,
+    "skipped": 2,
+    "skip_reasons": [
+      "User-owned Canon fixture not supplied",
+      "Ricoh POSIX supervisor is executed separately under Linux/WSL"
+    ],
+    "z6_unit_tests": 44
+  }
+}

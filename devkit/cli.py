@@ -18,6 +18,8 @@ def main(argv=None):
         command = commands.add_parser(name); command.add_argument('file', type=Path)
     commands.add_parser('boards')
     commands.add_parser('cameras', help='Camera extraction and emulation research / 相机解包与模拟研究矩阵')
+    command = commands.add_parser('canon-lab', help='EOS 50D ROM/decryption/updater lab / 佳能 ROM、解密与升级程序实验')
+    command.add_argument('arguments', nargs=argparse.REMAINDER)
     command = commands.add_parser('unpack', help='Offline camera extraction / 离线相机解包')
     command.add_argument('file', type=Path)
     command.add_argument('--output', type=Path, required=True)
@@ -25,8 +27,18 @@ def main(argv=None):
     command = commands.add_parser('unpack-device', help='Extract an imported camera entry / 解包已导入相机条目')
     command.add_argument('device', type=Path)
     command.add_argument('--key-file', type=Path)
-    command = commands.add_parser('nikon-lab', help='Nikon Z7 C3.80 assisted menu lab; Ctrl+C to stop / 尼康辅助菜单实验，Ctrl+C 停止')
+    command = commands.add_parser('nikon-lab', help='Nikon Z7/Z30/Z6 assisted menu lab; Ctrl+C to stop / 尼康辅助菜单实验，Ctrl+C 停止')
     command.add_argument('device', type=Path)
+    command = commands.add_parser('nikon-z30-check', help='Z30 original menu round-trip verification / Z30 原厂菜单往返验证')
+    command.add_argument('device', type=Path)
+    command.add_argument('--seconds', type=int, default=60)
+    command = commands.add_parser('nikon-z6-check', help='Z6 original menu round-trip verification / Z6 原厂菜单往返验证')
+    command.add_argument('device', type=Path)
+    command.add_argument('--seconds', type=int, default=60)
+    command = commands.add_parser('camera-lab', help='Bounded original camera Linux boot / 限时启动原厂相机 Linux')
+    command.add_argument('device', type=Path)
+    command.add_argument('--seconds', type=int, default=30)
+    command.add_argument('--mode', choices=('shell', 'init', 'services'), default='shell')
     command = commands.add_parser('probe-boot', help='Bounded generic-board kernel experiment / 限时内核启动试验')
     command.add_argument('device', type=Path)
     command.add_argument('--kernel', required=True, help='Relative kernel path in this device workspace')
@@ -57,6 +69,9 @@ def main(argv=None):
         elif args.action == 'cameras':
             from .camera_catalog import camera_catalog
             print(json.dumps(camera_catalog(), ensure_ascii=False, indent=2))
+        elif args.action == 'canon-lab':
+            from .canon_lab import main as canon_main
+            return canon_main(args.arguments) or 0
         elif args.action == 'unpack':
             from .camera_research import unpack_firmware
             local_key = args.key_file or home / 'camera-keys/nikon-tables.json'
@@ -74,8 +89,18 @@ def main(argv=None):
             print(probe_boot(args.device, args.kernel, args.board, runtime['qemu'], task,
                              seconds=args.seconds, dtb=args.dtb))
         elif args.action == 'nikon-lab':
-            from .nikon_lab import run_lab
+            from .nikon_menus import run_lab
             run_lab(args.device, home, task, on_ready=lambda url: print(url, flush=True))
+        elif args.action == 'nikon-z30-check':
+            from .nikon_z30_lab import run_menu_probe
+            print(json.dumps(run_menu_probe(args.device, home, task, seconds=args.seconds), ensure_ascii=False, indent=2))
+        elif args.action == 'nikon-z6-check':
+            from .nikon_z6_lab import run_menu_probe
+            print(json.dumps(run_menu_probe(args.device, home, task, seconds=args.seconds), ensure_ascii=False, indent=2))
+        elif args.action == 'camera-lab':
+            from .camera_lab import run_lab
+            result = run_lab(args.device, home, task, seconds=args.seconds, mode=args.mode)
+            print(json.dumps(result, ensure_ascii=False, indent=2) if isinstance(result, dict) else str(result))
         elif args.action == 'setup':
             from .runtime import setup, setup_qemu, discover
             if args.camera and not discover(home) and not args.accept_android_sdk_license:

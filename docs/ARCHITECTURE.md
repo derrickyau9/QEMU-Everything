@@ -31,8 +31,12 @@ flowchart LR
 The import path records a SHA-256 identity and inspection metadata for a local
 firmware file. Known CIM packages use the original verified camera extraction
 pipeline. Other files retain an inspection/support route; a recognizable file
-header does not prove QEMU boot compatibility. Sony DAT updates currently belong
-to this latter route.
+header does not prove QEMU boot compatibility. Supported Sony DAT fingerprints
+also have a separate bounded Linux lab, after checked component extraction.
+Nikon Z7/Z30/Z6 use model-specific assisted menu bridges; Ricoh and Insta360 X3
+have independent Linux boards. These paths check firmware and build hashes before
+launch and record kernel, shell, menu and full boot milestones separately. See
+[camera board support](CAMERA_FIRMWARE.md) for exact models and remaining faults.
 
 Generic startup is described by a local `boot.json`, with a selected QEMU board,
 memory and CPU settings, relative kernel/initrd/disk paths, disk format and kernel

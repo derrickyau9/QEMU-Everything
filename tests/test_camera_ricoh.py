@@ -205,3 +205,77 @@ def test_components_count_toward_total_output_limit(tmp_path, monkeypatch):
     with pytest.raises(ValueError, match="total 2 GiB"):
         ricoh.extract(source, destination, Task(lambda _: None))
     assert not (destination / "kernel.zImage").exists()
+
+
+def _squashfs():
+    """Original empty-root SquashFS fixture with raw metadata and one UID."""
+    absent = 0xFFFFFFFFFFFFFFFF
+    inode = struct.pack("<4H2I2I2HI", 1, 0o755, 0, 0, 0, 1, 0, 2, 3, 0, 1)
+    data = bytearray(96)
+    inode_start = len(data)
+    data += struct.pack("<H", 0x8000 | len(inode)) + inode
+    directory_start = len(data)
+    data += struct.pack("<H", 0x8003) + bytes(3)
+    id_metadata = len(data)
+    data += struct.pack("<HI", 0x8004, 0)
+    id_table = len(data)
+    data += struct.pack("<Q", id_metadata)
+    struct.pack_into("<5I6H8Q", data, 0, 0x73717368, 1, 0, 131072, 0,
+                     5, 17, 1, 1, 4, 0, 0, len(data), id_table, absent,
+                     inode_start, directory_start, absent, absent)
+    return data
+
+
+def test_squashfs_rootfs_uses_complete_superblock_extent(tmp_path):
+    image = _squashfs()
+    payload = b"hsqsFALSE_HEADER" + image
+    payload += bytes(-len(payload) % 4)
+    data, _ = _container(_literal(payload), payload)
+    source, destination = _paths(tmp_path, data)
+    report = ricoh.extract(source, destination, Task(lambda _: None))
+    assert (destination / "rootfs.squashfs").read_bytes() == image
+    root = report["components"][0]
+    assert root["kind"] == "rootfs"
+    assert root["payload_offset"] == 16
+    assert root["inodes"] == 1
+    assert "regular file data not decompressed" in root["verification"]
+
+
+@pytest.mark.parametrize("offset,value", [(40, 999999), (48, 999999),
+                                         (32, 999999), (64, 999999)])
+def test_squashfs_rejects_outside_extent_and_root_table_pointers(offset, value):
+    image = _squashfs()
+    struct.pack_into("<Q", image, offset, value)
+    with pytest.raises(ValueError, match="SquashFS"):
+        ricoh._squashfs_extent(image, 0, Task(lambda _: None))
+
+
+def test_squashfs_damaged_metadata_is_not_exported(tmp_path):
+    image = _squashfs()
+    struct.pack_into("<H", image, 96, 0xFFFF)
+    payload = image + bytes(-len(image) % 4)
+    data, _ = _container(_literal(payload), payload)
+    source, destination = _paths(tmp_path, data)
+    report = ricoh.extract(source, destination, Task(lambda _: None))
+    assert report["components"] == []
+    assert not (destination / "rootfs.squashfs").exists()
+
+
+def test_squashfs_metadata_lz4_overlap_and_bounds():
+    task = Task(lambda _: None)
+    assert ricoh._lz4_metadata(b"\x13A\x01\x00", task) == b"A" * 8
+    with pytest.raises(ValueError, match="reference"):
+        ricoh._lz4_metadata(b"\x03\x00\x00", task)
+    with pytest.raises(ValueError, match="literal"):
+        ricoh._lz4_metadata(b"\xf0\xff", task)
+
+
+def test_multiple_squashfs_candidates_cannot_overwrite_one_role(tmp_path):
+    image = _squashfs()
+    payload = image + image
+    payload += bytes(-len(payload) % 4)
+    data, _ = _container(_literal(payload), payload)
+    source, destination = _paths(tmp_path, data)
+    with pytest.raises(ValueError, match="Multiple valid Ricoh SquashFS"):
+        ricoh.extract(source, destination, Task(lambda _: None))
+    assert not (destination / "rootfs.squashfs").exists()

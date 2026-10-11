@@ -2,15 +2,34 @@
 
 ## QEMU Everything v0.3.0 — 2026-10-11
 
+The latest board gate passed **493 host tests, with 2 skipped**. Nikon Z30 C1.20
+and Z6 C3.80 display original menus with assisted startup and verified navigation.
+Sony A7 IV 2.00 / A7R V 4.00, Ricoh GR III 2.10 / IIIx 1.60 / IV 1.11 and
+Insta360 X3 v1.1.4.1_build1 boot their original Linux/rootfs into root shells;
+their camera UI remains unverified. Canon EOS 50D's original updater executes,
+but its shooting UI still requires ROM dumps. Exact runs, interventions and
+remaining faults are in [current board evidence](camera-board-verification-20261011.json).
+
+The final installed wheel finds all six board-resource families outside the
+source checkout. The final portable EXE separately launches the Z6 menu and
+GR IV root shell, preserves source hashes and reaps both guests on close. Its
+board documentation links and source/license bundle are checked independently.
+
+最新板级关卡 **493 项测试通过，2 项跳过**。Z30/Z6 已辅助启动原厂菜单并验证导航；
+上述索尼、理光及 X3 已启动原厂 Linux/rootfs 和 root shell，相机 UI 尚未验证。
+佳能 50D 已执行原厂升级器，拍摄 UI 仍需 ROM 转储；具体证据见上述记录。
+
+### Earlier generic-workbench baseline / 较早的通用工作台基线
+
 - 146 host tests pass under Windows / Python 3.11.8 / PySide6 6.9.3. New tests cover bounded image identification, malformed headers, CRCs, generic boot validation, architecture mismatch, qcow2 external dependencies, library preservation, support exports, runtime selection, and camera/generic GUI separation.
 - `scripts/verify_generic.py` imported a project-authored 512-byte x86 BIOS image, selected the PC disk profile and booted it in the installed QEMU. Serial output contained `QEMU_EVERYTHING_BOOT_OK`. The source and copied disk hashes remained unchanged. The Qt session separately received the marker, stopped its QEMU process and released its guest lock.
 - ARM64 `virt`, ARM32 `virt`, x86-64 `pc` and RISC-V 64 `virt` accepted their configured machine/CPU/display/input options in real QEMU initialization checks. This establishes argument compatibility, not a completed firmware boot for all four architectures.
-- A local Sony A7R V 4.00 DAT (754,525,608 bytes; SHA-256 `51e1176a255a9a4b4782dfbcfa6c5f332b71173bdfe9ed2bcf4fca6bcbc6c2e2`) was identified and imported without modifying its source. It remains inspection-only, with a blank board and an adaptation plan. No Sony kernel or UI boot was verified.
+- At this earlier baseline, a local Sony A7R V 4.00 DAT (754,525,608 bytes; SHA-256 `51e1176a255a9a4b4782dfbcfa6c5f332b71173bdfe9ed2bcf4fca6bcbc6c2e2`) was identified and imported without modifying its source. Kernel startup was subsequently verified by the board gate above; camera UI is still unverified.
 - The preserved Hasselblad X2D II 1.3.16.2 adapter displayed the original main menu under the new workbench. The guest frame and workbench screenshot were visually reviewed; the session shut down normally.
 - The Windows portable executable also completed its camera UI smoke check with `ok: true` and `frozen: true`; its original guest image was visually reviewed. The source workbench's Chinese platform-support page was checked for readable text and accessible configuration controls.
 
 中文摘要：通用导入、启动配置、Qt 会话与停止流程已验证；四种 QEMU 平台的参数可初始化。
-自写 x86 测试镜像实际启动成功，哈苏原厂主菜单复测正常。索尼升级包当前仅分析，
+自写 x86 测试镜像实际启动成功，哈苏原厂主菜单复测正常。当时索尼升级包仅分析，
 没有宣称所有固件或所有专有硬件可直接启动。测试不需要附带厂商固件。
 
 Host: Windows x64 on AMD x86-64. Python 3.12, PySide6 6.9.3, QEMU Windows build

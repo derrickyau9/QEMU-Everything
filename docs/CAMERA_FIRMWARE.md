@@ -13,12 +13,22 @@ binaries are separate local inputs; they are not shipped in this repository.
 | --- | --- | --- | --- |
 | Hasselblad X System | Existing CIM adapter / 原有 CIM 适配器 | See [verification matrix](VERIFICATION.md) / 见原有矩阵 | Original kernel, sensor/ISP/peripherals / 原厂内核、传感器与外设 |
 | Nikon Z7 C3.80 | All module and package CRCs pass / 模块、整包 CRC 通过 | **Original menu and DOWN navigation verified / 原厂菜单及向下导航已验证** | Assisted startup modifies guest RAM; natural power-on and full imaging hardware unverified / 辅助启动修改 guest RAM，自然开机及完整拍摄硬件未验证 |
-| Nikon Z30 C1.20, Z50 C2.60, Z6 C3.80, Z7II C1.70, Z8 C3.11 | All five other packages pass; six packages total, 24 modules / 另五份包通过，共六包、24 模块 | Not locally boot verified / 未验证启动 | Separate model-specific emulator and firmware fingerprint / 各自的模拟器与固件指纹 |
-| Sony A7 IV / ILCE-7M4 2.00 | CXD90057_k8 AES/FDAT checks pass; original kernel executes in QEMU / 解密及校验通过，QEMU 已执行原厂内核 | No kernel console or UI / 未进入内核控制台或 UI | Early store to `0xFE005010` enters an exception path; Sony board MMIO, IPC, storage and display / 早期写该地址后进入异常路径，缺板级 MMIO、IPC、存储与显示 |
-| Sony A7R V / ILCE-7RM5 4.00 | Actual package decrypted and extracted / 真实包已解密提取 | Not booted / 尚未启动 | Matching SoC and services / 对应 SoC 与服务 |
-| Ricoh GR III 2.10, IIIx 1.60, IV 1.11 | Container and decoded sums pass; structural ROMFS extraction / 输入、输出加法校验通过，按 ROMFS 结构提取 | Not booted / 尚未启动 | Milbeaut board, RTOS/Linux IPC, display / Milbeaut 板型、RTOS 与 Linux IPC、显示 |
-| Insta360 X3 v1.1.4.1_build1 | Six components, MD5/CRC checked / 六组件，MD5/CRC 通过 | Not booted; `arm64-virt` trial produced no serial output / 尚未启动，通用板型试验无串口输出 | Ambarella H22 board, RTOS cooperation and display / Ambarella H22 板型、RTOS 协作与显示 |
-| Canon EOS 50D 1.0.9 | FIR checksum and updater XOR decoding pass / FIR 校验与升级器 XOR 解码通过 | Not booted / 尚未启动 | Main payload remains encrypted; qemu-eos needs full ROM0/ROM1 / 主载荷仍加密，qemu-eos 需要完整 ROM0/ROM1 |
+| Nikon Z30 C1.20 | CRC-checked MAIN with original CRC tail restored / 校验 MAIN 并保留原 CRC 尾巴 | **Original menu, submenu and return verified / 原厂菜单、子菜单与返回已验证** | GDB assisted startup; natural power-on and imaging unverified / GDB 辅助启动，自然开机与成像未验证 |
+| Nikon Z6 C3.80 | CRC-checked MAIN with original CRC tail restored / 校验 MAIN 并保留原 CRC 尾巴 | **Original Playback menu and DOWN/UP selection verified / 原厂回放菜单与向下/向上选择已验证** | GDB assisted GPU-surface inspection; LCD scanout, natural boot and imaging unverified / GDB 辅助读取 GPU surface；LCD 扫描输出、自然开机与成像未验证 |
+| Nikon Z50 C2.60, Z7II C1.70, Z8 C3.11 | CRC-checked packages/modules / 包及模块 CRC 通过 | Not locally boot verified / 未验证启动 | Separate model-specific emulator and firmware fingerprint / 各自的模拟器与固件指纹 |
+| Sony A7 IV / ILCE-7M4 2.00 | AES/FDAT and FAT component checks pass / 解密、校验与 FAT 组件提取通过 | Linux/root shell verified, camera UI unverified / Linux 和 root shell 已验证，相机 UI 未验证 | Original init faults in cryptEmmc_setKeyCovertly; storage, IPC and display / 原厂 init 在该函数异常，缺存储、IPC 与显示 |
+| Sony A7R V / ILCE-7RM5 4.00 | AES/FDAT and FAT component checks pass / 解密、校验与 FAT 组件提取通过 | Linux/root shell verified, camera UI unverified / Linux 和 root shell 已验证，相机 UI 未验证 | Original init faults in cryptEmmc_setKeyCovertly; storage, IPC and display / 原厂 init 在该函数异常，缺存储、IPC 与显示 |
+| Ricoh GR III 2.10, IIIx 1.60, IV 1.11 | Checked ROMFS and IV SquashFS extraction / ROMFS 与 IV SquashFS 提取校验通过 | Linux/root shells verified, camera UI unverified / Linux 和 root shell 已验证，相机 UI 未验证 | camctld restrict mode; missing RTOS IPC/display / camctld 受限模式，缺 RTOS IPC 与显示 |
+| Insta360 X3 v1.1.4.1_build1 | Six components, MD5/CRC checked / 六组件，MD5/CRC 通过 | Linux/root shell verified, camera UI unverified / Linux 和 root shell 已验证，相机 UI 未验证 | Original init RPMsg fault; RTOS cooperation and display / 原厂 init 的 RPMsg 异常，缺 RTOS 协作与显示 |
+| Canon EOS 50D 1.0.9 | FIR/updater checks and original-code KDF verification / FIR、升级器及原代码 KDF 校验 | Original updater runs; shooting UI unverified / 原升级器已执行，拍摄 UI 未验证 | Full ROM0/ROM1 and ROM1 payload seed / 完整 ROM0/ROM1 与 ROM1 解密种子 |
+
+For Z50, Z7II and Z8, [static board comparison](nikon-remaining-board-analysis-20261011.json)
+records independently checked module CRCs and actual instruction/RAM differences.
+Z8 uses AArch64; the older menu adapters use AArch32 and model-specific APIs.
+Neither a similar name nor a decrypted package establishes compatible hardware.
+
+Z50、Z7II、Z8 的上述静态比较记录了独立复核的 CRC、实际指令与 RAM 地址差异；
+Z8 使用 AArch64，旧菜单适配器使用 AArch32 及对应机型 API，不能互相替代。
 
 CRC/additive checks detect corruption. They do **not** authenticate a vendor
 signature or authorize a modified update. A running QEMU process, exit code 0,
@@ -27,13 +37,18 @@ or a detected Linux magic is not evidence that the original system booted.
 CRC 与加法校验可检测损坏，不代表验证了厂商签名或允许修改后升级。
 QEMU 进程启动、退出码 0、发现 Linux magic 都不能作为原厂系统启动成功的证据。
 
-The final test suite passed **275 tests**. Source GUI and Windows portable GUI
-both displayed the Z7 menu; cancel/exit cleaned their owned guest and listener.
-Input fingerprints and verified milestones are saved in
-[the machine-readable verification record](camera-verification-20261011.json).
+The prior extraction/Z7 gate passed **275 tests**. New board runs verify actual
+serial command output, original guest menu frames and owned cleanup, separately
+from extraction. Source GUI launches Z30 menus; the final Windows portable EXE
+also launches Z6 menus and the GR IV Linux shell with owned-process cleanup.
+Input fingerprints and
+milestones are saved in the [prior verification record](camera-verification-20261011.json)
+and [current board verification](camera-board-verification-20261011.json).
 
-最终 **275 项测试通过**。源码 GUI 与 Windows 便携版均显示 Z7 菜单，取消或退出后
-清理自己的虚拟机与监听。样本指纹和验证结果见上述 JSON 记录。
+此前解包/Z7 关卡 **275 项测试通过**。新增板型验证实际串口命令输出、原厂 guest
+菜单画面与进程清理；源码 GUI 已启动 Z30 菜单，最终 Windows 便携 EXE 也已启动
+Z6 菜单与 GR IV Linux shell 并完成进程清理。样本指纹与最新测试结果分别见
+上述历史和当前板级 JSON 记录。
 
 ## Use the workbench / 工作台使用
 
@@ -41,12 +56,12 @@ Input fingerprints and verified milestones are saved in
 2. Drop it into the workbench, then choose **Platform support → Extract camera components**.
 3. Review `extracted/extraction.json`: method, checks, notes, component boundaries,
    file hashes and unverified boot milestones.
-4. Configure a compatible board, or use the separately configured **Nikon Z7 menu lab**.
+4. Configure a compatible board, **Nikon menu lab**, or **Camera Linux lab**.
 
 1. 从厂商官网下载升级包，先取出 ZIP 内的固件文件。
 2. 拖入工作台，打开 **平台适配 → 解包相机组件**。
 3. 查看 `extracted/extraction.json` 中的方法、校验、组件边界、哈希和启动状态。
-4. 配置匹配板型；符合下文条件的 Z7 可使用 **尼康 Z7 原厂菜单实验**。
+4. 配置匹配板型；精确匹配的固件可使用 **尼康原厂菜单实验** 或 **相机 Linux 实验**。
 
 ```powershell
 # Source checkout; installed qemu-everything has the same commands.
@@ -234,15 +249,17 @@ documented frame format. The exact local inputs were:
 After checking both complete word sums, the decoder writes `payload.bin`. It
 extracts `kernel.zImage` and `board.dtb` only from validated ROMFS inode paths and
 extents. GR III/IIIx also yield `ramdisk.cpio.gz` from `/initramfs`, with a checked
-gzip stream and CPIO header. That ROMFS path was absent in the tested GR IV image;
-this does not establish that the camera has no root filesystem. None of these
-Ricoh samples has locally verified kernel, userspace or UI boot. Pentax packages
-use other formats and are outside this reader's coverage.
+gzip stream and CPIO header. GR IV has a separate, structurally checked LZ4
+SquashFS rootfs (`rootfs.squashfs`), including validated superblock/table bounds.
+All three original Linux/rootfs shells now boot in the Milbeaut lab described
+below. The RTOS camera UI remains unverified. Pentax packages use other formats
+and are outside this reader's coverage.
 
 验证完整输入、解码输出的字加法校验后生成 `payload.bin`；仅沿已验证的 ROMFS
 inode 路径与范围提取内核、设备树。III/IIIx 的 `/initramfs` 还生成经 gzip 与 CPIO
-头校验的 `ramdisk.cpio.gz`。实测 IV 包没有该 ROMFS 路径，不能据此认定其没有根
-文件系统。这三份样本均未验证内核、用户空间或 UI 启动；宾得包属于其他格式。
+头校验的 `ramdisk.cpio.gz`。IV 另有 LZ4 SquashFS 根文件系统，已验证超级块、表和
+范围后提取为 `rootfs.squashfs`。三款原厂 Linux/根文件系统 shell 已在下述 Milbeaut
+实验启动；RTOS 相机 UI 仍未验证，宾得包属于其他格式。
 
 ## Evidence and next board work / 证据与板级开发
 
@@ -251,29 +268,90 @@ inode 路径与范围提取内核、设备树。III/IIIx 的 `/initramfs` 还生
   Actual AES/FDAT checksum validation passed. FAT directory parsing located an
   ARM64 Linux 4.9.186-scel+ Image. Its DTB places RAM at `0x400000000`, GIC at
   `0xf13a1000`/`0xf13a2000`, PL011 at `0xf1000000`; these differ from QEMU `virt`.
-  The first board implementation needs interrupt/timer/UART and storage, followed
-  by proprietary IPC and display. A new firmware version requires another check.
-  A bounded single-core Cortex-A35 / GICv2 trial also produced no UART. One short
-  instruction trace proved execution of the original Image, through `0x40080000`
-  to a Sony routine at `0x404e8730`. After its store to `0xFE005010`, execution
-  entered the `0x200` exception path. The routine writes secondary-core entry
-  addresses and executes DSB/SEV, suggesting a boot mailbox; without ESR evidence,
-  the exact exception classification remains an inference. `nosmp` is parsed later
-  and does not bypass this routine. No kernel instructions were patched.
+  The independent CXD90057 lab now boots the original Linux Image and ext2 initrd
+  to BusyBox. Native `uname`, `/proc/self/status` Uid 0, root mounts and a random
+  serial proof token were verified. Fixed RAM/handoff, GIC/PL011, hardware timers,
+  GPIO/SCU/DDR initialization models, a 2 MHz CPU counter and a noncached DMA pool
+  resolved the earlier faults. A development DTB and explicit USB initcall
+  blacklist are used; kernel/module instructions are unchanged. Original init
+  passes DMA initialization but faults in `cryptEmmc_setKeyCovertly`; secure
+  storage/bootloader handoff, eMMC, proprietary IPC and display are not implemented.
+  **A7R V 4.00** is separately verified with its original Linux 4.9.337-scel and
+  5,218,304-byte ext2 initrd. Its original hardware DTB matches A7 IV byte for
+  byte; only the copied development DTB's initrd end changes. Native root shell
+  works; original init reaches the same crypt-emmc exception. New versions
+  still require separate boot verification.
 - **Ricoh III / IIIx**: Linux 4.4.15 ARMv7, `CONFIG_ARCH_MILBEAUT`, SN_USIO UART;
   virtio and generic Versatile/Vexpress support are disabled. **IV** uses Linux
   5.15.190 ARMv7 with legacy LZ4. Parsing a valid DTB is not implementing that SoC.
   The camera RTOS main program and Linux service core also need separate treatment.
-  A 10-second original-DTB `arm-virt` test produced no serial output; it does not
-  prove that no guest instructions executed. Kernel and UI startup remain unverified.
+  Original kernels/rootfs for III 2.10, IIIx 1.60 and IV 1.11 now boot to root
+  shells. Minimal GICC setup and a development DTB are required. Restoring the
+  shared-memory metadata description resolves the IIIx library's NULL dereference.
+  All three original `camctld` programs run and produce a ready file but stay in `restrict` mode,
+  without an RTOS IPC peer. Neither file creation nor Linux boot proves camera UI.
+  An independent GR IV RTOS reset board now advances three original cores through
+  MMU setup, SRAM rendezvous, SVC tasks and timer IRQs. A finite five-second run
+  records 583 SVC and 2 IRQ exceptions. USB3 glue configuration and a 40 MHz
+  standard system counter resolve the next two faults. The latest actual CPU 2
+  abort is at unimplemented MMIO `0x28825000`; register reset values/semantics
+  remain unknown. The optional bootloader GIC flag is an explicit intervention;
+  Linux/RTOS IPC and original display are still missing. See the separate reset
+  probe in the Ricoh board README.
 - **Insta360 X3**: valid ARM64 Image, SquashFS and Ambarella H22 DTB were extracted.
-  An original-DTB `arm64-virt` probe exited with no UART bytes; kernel/userspace/UI
-  remain unverified. Implement the actual board rather than infer success from
-  exit code. Other encrypted Luna/MWFI packages are explicitly unsupported.
+  The independent H22 board now boots Linux 4.9.76 and the original SquashFS to a
+  root shell with native command/proof-token verification. It supplies UART and
+  GIC setup, a development DTB and explicitly incomplete peripheral register stubs.
+  Original init executes through `S99bootdone`, then faults in RPMsg without the
+  RTOS endpoint. Camera UI is unverified; encrypted Luna/MWFI remains unsupported.
 - **Canon**: the original updater can be decoded, but EOS 50D main-image decoding
-  and full ROM reconstruction are still missing. qemu-eos expects model-specific
+  requires its ROM1-derived seed; the KDF has been independently checked against
+  original updater guest code. The original DryOS updater now runs in pinned
+  qemu-eos, prints `Initialized` and reaches `BackLightOn`, then asserts because
+  synthetic ROMs lack model properties and fonts. qemu-eos expects model-specific
   4 MiB ROM0 and 8 MiB ROM1 dumps. Stock QEMU's `canon-a1100` is an A1100/barebox
   target, not an EOS firmware adapter.
+
+### Reproduce the fixed startup routes / 复现已修通的启动路径
+
+These are optional local WSL/Linux builds, independent of the Hasselblad runtime.
+Build instructions and explicit interventions:
+
+- [Sony A7 IV / A7R V board](../scripts/boards/sony/RUNNING.md)
+- [Ricoh Milbeaut board](../scripts/boards/ricoh/README.md)
+- [Insta360 H22 board](../scripts/boards/insta360/README.md)
+- [Canon EOS updater and ROM gates](../scripts/boards/canon/README.md)
+- [Nikon Z30 assisted menus](../scripts/boards/nikon-z30/README.md)
+- [Nikon Z6 assisted menus](../scripts/boards/nikon-z6/README.md)
+
+After configuring the model's JSON file in the DevKit data home, select its
+imported firmware. **Start camera Linux lab** performs a bounded shell check;
+**Cancel** stops its owned guest. The CLI provides additional initialization
+and Ricoh service probes:
+
+```powershell
+.\.venv\Scripts\python -m devkit.cli camera-lab C:\Lab\library\device --seconds 30
+.\.venv\Scripts\python -m devkit.cli camera-lab C:\Lab\library\device --mode init --seconds 30
+.\.venv\Scripts\python -m devkit.cli camera-lab C:\Lab\library\ricoh --mode services --seconds 30
+.\.venv\Scripts\python -m devkit.cli nikon-lab C:\Lab\library\z30
+.\.venv\Scripts\python -m devkit.cli nikon-z30-check C:\Lab\library\z30
+.\.venv\Scripts\python -m devkit.cli nikon-z6-check C:\Lab\library\z6
+```
+
+GUI and CLI eligibility use exact fingerprints and local build configuration.
+Actual launch rechecks inputs, source/build hashes and owned-process cleanup.
+Shell checks do not grant the camera UI milestone. Nikon Z7 and Z30 menus use
+original guest GPU frames and assisted firmware API calls; submenu entry and
+return were tested in the same guest. Their natural power-on is still unverified.
+Z6 C3.80 was separately checked for Playback menu Down/Up navigation in the same
+guest; original GPU frames are verified, while LCD scanout remains unverified.
+
+新增路径使用独立 WSL/Linux 构建，按链接配置数据目录内的机型 JSON 后，可直接从
+工作台启动。Linux 实验限时运行并保留原始串口日志，取消仅停止本任务的虚拟机。
+GUI/CLI 使用精确指纹，启动前复核文件、构建与清理。尼康 Z7/Z30 已验证同一 guest
+中的原厂菜单往返，仍属于原厂函数辅助启动；原厂 UI 与自然开机分别记录。
+Z6 C3.80 另行验证了同一 guest 内回放菜单的下移/上移，使用原厂 GPU 帧；
+LCD 扫描输出尚未验证。
 
 Local experiment logs and screenshots are kept outside version control. Portable
 bundles include no decrypted payloads, recovered tables or proprietary artwork.

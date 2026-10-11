@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+// Assisted Linux-only topology. Not the full X3 hardware device tree.
+/dts-v1/;
+/ {
+    compatible = "qemu,insta360-x3-linux-lab";
+    model = "Insta360 X3 Linux-only assisted lab";
+    #address-cells = <1>;
+    #size-cells = <1>;
+    interrupt-parent = <&gic>;
+    chosen { stdout-path = "/uart@e8005000"; };
+    aliases { serial0 = &uart; };
+    memory@200000 { device_type = "memory"; reg = <0x200000 0x8000000>; };
+    cpus {
+        #address-cells = <1>; #size-cells = <0>;
+        cpu@0 { device_type = "cpu"; compatible = "arm,cortex-a53"; reg = <0>; };
+    };
+    gic: interrupt-controller@f0041000 {
+        compatible = "arm,gic-400";
+        #interrupt-cells = <3>;
+        interrupt-controller;
+        reg = <0xf0041000 0x1000 0xf0042000 0x2000>;
+    };
+    timer {
+        compatible = "arm,armv8-timer";
+        interrupts = <1 13 0x104>, <1 14 0x104>, <1 11 0x104>, <1 10 0x104>;
+    };
+    uart_clock: uart-clock { compatible = "fixed-clock"; #clock-cells = <0>; clock-frequency = <24000000>; };
+    uart: uart@e8005000 {
+        compatible = "ambarella,uart";
+        reg = <0xe8005000 0x1000>;
+        interrupts = <0 61 4>;
+        clocks = <&uart_clock>;
+        // The lab UART has no physical pins; an explicit empty default state
+        // lets the original driver request pinctrl without fabricating a GPIO.
+        pinctrl-names = "default";
+        pinctrl-0 = <>;
+        status = "okay";
+    };
+};

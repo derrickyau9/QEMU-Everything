@@ -13,6 +13,10 @@ dist/
 *.raw
 *.log
 *.dtb
+*.bin
+*.dat
+*.fir
+*.rom
 firmware/
 runtime/
 payload-stage/

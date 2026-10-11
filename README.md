@@ -15,7 +15,7 @@ Formerly **Hasselblad X System QEMU DevKit**. The existing camera UI adapters re
 3. A recognized Hasselblad `.cim` uses the existing **original UI** adapter. Compatible generic kernels and disk images use a **boot profile**. Unknown or encrypted updates remain available for inspection and support development.
 4. Review the selected boot profile, prepare the required runtime, and start. Generic guests use QEMU's own display window and the workbench console. Camera UI sessions retain embedded touch input and screenshots.
 
-[General firmware guide](docs/GENERAL_FIRMWARE.md) · [Architecture](docs/ARCHITECTURE.md)
+[General firmware guide](docs/GENERAL_FIRMWARE.md) · [Multi-brand camera research](docs/CAMERA_FIRMWARE.md) · [Architecture](docs/ARCHITECTURE.md)
 
 For a supported Hasselblad UI, first use prompts for the Android SDK license before downloading the guest runtime. Click to tap, drag to swipe, and use **Stop** to close the owned QEMU process. Later launches use cached firmware and runtime offline.
 
@@ -27,6 +27,8 @@ The camera UI runtime download is approximately **615 MB**. Allow **8 GB free di
 - Create support workspaces for new firmware instead of silently treating unknown packages as compatible.
 - Review JSON boot profiles for ARM64 `virt`, ARM `virt`, x86-64 `pc`, or RISC-V 64 `virt`; run compatible direct kernels or disk images with temporary disk writes and networking disabled.
 - Use the CLI to inspect, import, list boards, run and export support information.
+- Extract checked Sony, Nikon, Ricoh, Canon and Insta360 components offline; see the model/version matrix below.
+- Start the verified Nikon Z7 C3.80 assisted menu lab with a separately built custom QEMU.
 - Original firmware UI, streamed directly from a minimal Wayland compositor in QEMU.
 - Start/stop controls, correctly scaled mouse touch input and PNG screenshots.
 - English / Simplified Chinese; system / light / dark themes; Iris / Blue / Leaf accents.
@@ -47,19 +49,27 @@ The camera UI runtime download is approximately **615 MB**. Allow **8 GB free di
 | Additional profiles | X1D, X1D II, X2D and 907X 50C; see the preview matrix below |
 | Generic kernels / disk images | Boot profiles are available; each image must match the selected QEMU board |
 | Unknown / proprietary updates | Inspect and create a support workspace; no automatic boot claim |
-| Sony update `.DAT` | Inspection only; no verified Sony hardware or original UI adapter |
+| Nikon Z7 C3.80 | Original menu and navigation verified using assisted startup; separate custom QEMU/WSL lab |
+| Sony A7 IV 2.00 / A7R V 4.00 | Actual update decryption and extraction verified; original UI not booted |
+| Ricoh GR III 2.10 / IIIx 1.60 / IV 1.11 | Checked decoding and kernel/DTB extraction; original UI not booted |
+| Insta360 X3 v1.1.4.1_build1 | Six components extracted; generic QEMU trial produced no kernel console |
+| Canon EOS 50D 1.0.9 | Updater extracted; encrypted main payload and missing full ROM dumps block UI boot |
 | Camera UI rendering | QEMU TCG + Qt Quick software backend |
 | Camera guest hardware acceleration | Not implemented for this ARM64 guest on x86-64 Windows |
 | Capture, ISP, AF, lens, USB camera, real storage | Not emulated |
 | Physical camera installation / firmware flashing | Not provided |
 
-This runs the **original camera user interface in a development guest**, with Android ARM32, Android ARM64 or Linux ARMhf libraries selected for the firmware and simulated camera services. It does not boot the camera's original kernel or reproduce the complete camera hardware. UI responsiveness varies with the host CPU. Camera values are mocked and some actions are intentionally unsupported.
+The Hasselblad adapter runs the **original camera user interface in a development guest**, with Android ARM32, Android ARM64 or Linux ARMhf libraries selected for the firmware and simulated camera services. It does not boot the camera's original kernel or reproduce the complete camera hardware. UI responsiveness varies with the host CPU. Camera values are mocked and some actions are intentionally unsupported. The Nikon Z7 lab is a separate custom QEMU route, with firmware function calls and guest RAM changes during assisted startup; natural power-on and full imaging hardware remain unverified.
 
 A firmware signature or CPU architecture is only an inspection result. Booting the original system also requires an appropriate board, boot chain and drivers. Generic `virt`/`pc` profiles do not reproduce proprietary camera SoCs. Unrecognized firmware receives a draft support workspace so those requirements can be investigated and recorded. Verified camera UI compatibility remains in [the verification matrix](docs/VERIFICATION.md).
 
 Depending on the firmware, a local development copy adapts embedded QML image visibility or the legacy root window for software rendering. The original executable is retained, executable instructions are not patched, and no modified firmware is written back to the `.cim` file. See [architecture](docs/ARCHITECTURE.md).
 
 ## Develop an app
+
+The next camera research target is **native X2D II 4K60p recording**. This is
+offline feasibility work, not an implemented capture feature. See the
+[firmware evidence and development plan](docs/X2DII_VIDEO_RESEARCH.md).
 
 1. Import and select firmware.
 2. Open **Development → Open development workspace**.

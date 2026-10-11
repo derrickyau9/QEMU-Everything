@@ -29,6 +29,7 @@ from .theme import apply_theme, current_colors
 
 class Job(QThread):
     message = Signal(str)
+    url_ready = Signal(str)
     result = Signal(object)
     failed = Signal(str)
     def __init__(self, operation):
@@ -37,6 +38,8 @@ class Job(QThread):
     def run(self):
         try:
             self.result.emit(self.operation(self.task))
+        except Cancelled:
+            self.message.emit('Cancelled / 已取消')
         except Exception as error:
             self.failed.emit(str(error))
 
@@ -273,7 +276,45 @@ class Window(QMainWindow):
         row = QHBoxLayout()
         self.report_button = self.button('Refresh diagnosis', '刷新诊断', self.refresh_support)
         self.export_button = self.button('Export support bundle', '导出适配资料', self.export_bundle)
-        row.addWidget(self.report_button); row.addWidget(self.export_button); row.addStretch(); layout.addLayout(row)
+        self.unpack_button = self.button('Extract camera components', '解包相机组件', self.unpack_camera)
+        row.addWidget(self.unpack_button); row.addWidget(self.report_button); row.addWidget(self.export_button)
+        self.nikon_lab_button = self.button('Nikon Z7 menu lab', '尼康 Z7 原厂菜单实验', self.launch_nikon_lab)
+        row.addWidget(self.nikon_lab_button)
+        row.addWidget(self.button('Camera research', '相机品牌研究', self.show_camera_research))
+        row.addStretch(); layout.addLayout(row)
+
+    def unpack_camera(self):
+        if not self.device or self.busy(): return
+        from .camera_research import unpack_device
+        device = self.device
+        identity = read_json(device / 'inspection.json').get('camera', {})
+        key_file = None
+        if identity.get('key_required'):
+            key_file = self.home / 'camera-keys/nikon-tables.json'
+            if not key_file.is_file():
+                name, _ = QFileDialog.getOpenFileName(self, self.tr('Select locally recovered Nikon XOR tables', '选择本地恢复的尼康 XOR 表'), '', 'JSON (*.json)')
+                if not name: return
+                key_file = Path(name)
+        def done(result):
+            self.refresh_support(); self.update_controls()
+            self.log(self.tr('Checked camera components saved in extracted/. Review them before configuring boot.', '相机组件已校验并保存至 extracted/，请查看组件后再配置启动。'))
+        self.run_job(lambda task: unpack_device(device, task, key_file=key_file), done)
+
+    def launch_nikon_lab(self, *_):
+        if not self.device or self.busy(): return
+        from .nikon_lab import run_lab
+        device = self.device
+        self.run_job(lambda task: run_lab(device, self.home, task, on_ready=self.job.url_ready.emit),
+                     lambda _: self.log(self.tr('Nikon menu lab stopped.', '尼康菜单实验已停止。')))
+
+    def show_camera_research(self):
+        from .camera_catalog import catalogue_markdown
+        dialog = QDialog(self); dialog.setWindowTitle(self.tr('Camera firmware research', '相机固件研究'))
+        dialog.resize(950, 650)
+        layout = QVBoxLayout(dialog)
+        view = QPlainTextEdit(); view.setReadOnly(True); view.setPlainText(catalogue_markdown(self.lang)); layout.addWidget(view)
+        close = QDialogButtonBox(QDialogButtonBox.Close); close.rejected.connect(dialog.reject); layout.addWidget(close)
+        dialog.exec()
 
     def refresh_support(self):
         if not self.device: return
@@ -407,6 +448,7 @@ class Window(QMainWindow):
     def run_job(self, operation, done):
         if self.busy(): return
         self.job = Job(operation); self.job.message.connect(self.log); self.job.failed.connect(self.error); self.job.result.connect(done)
+        self.job.url_ready.connect(lambda url: QDesktopServices.openUrl(QUrl(url)))
         self.job.finished.connect(self.update_controls); self.job.start(); self.update_controls()
     def cancel_job(self):
         if self.job: self.job.task.cancelled.set()
@@ -494,6 +536,9 @@ class Window(QMainWindow):
         from .packages import remove_package
         self.run_job(lambda task: remove_package(self.device, *key), lambda _: self.refresh_apps())
     def launch(self, checked=False, mode='live'):
+        from .nikon_lab import lab_available
+        if self.device and mode == 'live' and lab_available(self.device, self.home):
+            return self.launch_nikon_lab()
         if self.busy() or not self.device: return
         if not is_camera(read_json(self.device / 'device.json')):
             if not self.save_boot(): return
@@ -567,13 +612,16 @@ class Window(QMainWindow):
         busy = self.busy(); live = bool(self.session and self.session.isRunning()); ready = bool(live and self.session.ready)
         profile = read_json(self.device / 'device.json') if self.device else {}
         camera = bool(self.device and is_camera(profile))
+        from .nikon_lab import lab_available
+        nikon_lab = bool(self.device and lab_available(self.device, self.home))
         configured = False
         if self.device and not camera:
             try:
                 validate_profile(read_json(self.device / 'boot.json'), self.device); configured = True
             except (OSError, ValueError, TypeError, KeyError): pass
-        self.start.setText(self.tr('Start original UI', '启动原厂 UI') if camera else self.tr('Start QEMU', '启动 QEMU'))
-        self.start.setEnabled((camera or configured) and not busy); self.stop.setEnabled(live)
+        self.start.setText(self.tr('Start Nikon menu lab', '启动尼康菜单实验') if nikon_lab else self.tr('Start original UI', '启动原厂 UI') if camera else self.tr('Start QEMU', '启动 QEMU'))
+        self.start.setEnabled((camera or configured or nikon_lab) and not busy); self.stop.setEnabled(live)
+        self.nikon_lab_button.setEnabled(nikon_lab and not busy)
         self.library.setEnabled(not busy); self.drop.setEnabled(not busy); self.folder.setEnabled(bool(self.device))
         self.model_choice.setEnabled(not busy and self.model_choice.count()>1)
         self.model_choice.setVisible(camera)
@@ -592,17 +640,25 @@ class Window(QMainWindow):
         self.board_choice.setEnabled(bool(self.device) and not camera and not busy)
         for button in self.component_buttons: button.setEnabled(bool(self.device) and not camera and not busy)
         self.report_button.setEnabled(bool(self.device) and not busy); self.export_button.setEnabled(bool(self.device) and not busy)
+        identity = read_json(self.device / 'inspection.json').get('camera', {}) if self.device else {}
+        self.unpack_button.setEnabled(bool(identity and identity.get('extractable')) and not camera and not busy and not (self.device / 'extracted').exists())
         self.shot.setEnabled(self.screen.frame is not None)
         self.progress.setVisible(busy and not ready); self.cancel.setVisible(bool(self.job and self.job.isRunning()))
         phase = getattr(self, 'current_phase', 'stopped') if live else 'stopped'
         statuses = {'starting': ('Starting…', '启动中…'), 'running': ('Running', '运行中'), 'stopping': ('Stopping…', '停止中…'), 'stopped': ('Stopped', '已停止')}
         self.badge.setText(self.tr('QEMU running · boot unverified', 'QEMU 运行中 · 启动未验证') if live and not camera and phase == 'running' else self.tr(*statuses[phase])); self.badge.setProperty('phase', phase)
+        if nikon_lab and self.job and self.job.isRunning():
+            self.badge.setText(self.tr('Nikon assisted menu lab', '尼康辅助菜单实验中'))
         self.badge.style().unpolish(self.badge); self.badge.style().polish(self.badge)
         self.screen.caption = self.tr('Click Start original UI', '点击「启动原厂 UI」') if camera else self.tr('Use Platform support to review and save a boot configuration.', '在「平台适配」中查看报告并保存启动配置。')
+        if nikon_lab:
+            self.screen.caption = self.tr('The assisted Nikon menu lab opens in your browser. Cancel stops its guest.', '尼康菜单实验在浏览器打开，使用辅助启动；点击「取消」停止虚拟机。')
         if not self.device: self.screen.caption = self.tr('Import firmware to begin', '导入固件，开始开发')
         if live and not ready: self.screen.caption = self.tr('Starting guest…', '正在启动虚拟机…')
         if live and not camera: self.screen.caption = self.tr('Display and input are in the QEMU window. Serial output is in Console and logs.', '显示与输入在 QEMU 独立窗口中，串口输出在控制台中。')
         self.preview_hint.setText(self.tr('Click to tap · Drag to swipe · Camera data is simulated', '鼠标点击 = 触控 · 拖动 = 滑动 · 相机数据为模拟值') if camera else self.tr('Generic QEMU displays open in their own window.', '通用 QEMU 的画面在独立窗口显示。'))
+        if nikon_lab:
+            self.preview_hint.setText(self.tr('Menu display and buttons open in your browser.', '菜单画面与按键在浏览器中打开。'))
         self.screen.update()
         self.runtime_label.setText(self.tr('Camera runtime ready · QEMU + Android ARM64', '相机运行环境已就绪 · QEMU + Android ARM64') if self.runtime else self.tr('Camera runtime not installed.', '尚未安装相机运行环境。'))
         self.runtime_label.setText(self.runtime_label.text() + '\n' + self.tr('Generic QEMU ready', '通用 QEMU 已就绪') if self.qemu_runtime else self.runtime_label.text() + '\n' + self.tr('Generic QEMU not installed', '尚未安装通用 QEMU'))
@@ -613,8 +669,8 @@ class Window(QMainWindow):
                 self.details.setText(f"{status}\n{MODELS[model]['abi']} · {profile['version']}")
                 self.screen.message = MODELS[model]['label'].removeprefix('Hasselblad ')
             else:
-                status = self.tr('Configured · boot unverified', '配置有效 · 启动未验证') if configured else self.tr('Inspection · needs adaptation', '已分析 · 待适配')
-                self.details.setText(f"{status}\n{profile.get('architecture') or 'Unknown / 未知'} · {profile['version']}")
+                status = self.tr('Assisted menu verified', '辅助启动菜单已验证') if nikon_lab else self.tr('Configured · boot unverified', '配置有效 · 启动未验证') if configured else self.tr('Inspection · needs adaptation', '已分析 · 待适配')
+                self.details.setText(f"{status}\nNikon Z7 C3.80" if nikon_lab else f"{status}\n{profile.get('architecture') or 'Unknown / 未知'} · {profile['version']}")
                 self.screen.message = 'QEMU Everything'
         else: self.details.setText(self.tr('Your imported firmware will appear here.', '导入的固件会显示在这里。'))
     def log(self, message):
@@ -646,7 +702,37 @@ def main():
             window.close()
         window.error = fail
         def begin_check():
-            if not window.device or not window.runtime:
+            if not window.device:
+                return fail('Import firmware before this check')
+            from .nikon_lab import lab_available, PORT
+            if lab_available(window.device, window.home):
+                # Exercise the same GUI job and URL signal as a normal launch.
+                # Only this explicit test suppresses opening an external browser.
+                window.launch()
+                window.job.url_ready.disconnect()
+                def poll_menu(_url=None):
+                    from urllib.request import urlopen
+                    try:
+                        with urlopen(f'http://127.0.0.1:{PORT}/api/status', timeout=1) as response:
+                            state = json.load(response)
+                        with urlopen(f'http://127.0.0.1:{PORT}/api/frame', timeout=1) as response:
+                            pixels = response.read()
+                        frame = QImage.fromData(pixels)
+                        visible = not frame.isNull() and any(frame.pixelColor(x, y).red() > 40
+                            for y in range(20, frame.height(), 30) for x in range(20, frame.width(), 30))
+                        if state.get('phase') != 'running' or not visible:
+                            return QTimer.singleShot(500, poll_menu)
+                        (output / 'guest.png').write_bytes(pixels)
+                        window.grab().save(str(output / 'workbench.png'))
+                        write_json(output / 'result.json', {'ok': True, 'frozen': bool(getattr(sys, 'frozen', False)),
+                            'model': 'Nikon Z7 C3.80', 'assisted_startup': True,
+                            'natural_power_on_verified': False, 'state': state})
+                        window.close()
+                    except (OSError, ValueError):
+                        if not window.closing: QTimer.singleShot(500, poll_menu)
+                window.job.url_ready.connect(lambda url: QTimer.singleShot(2500, lambda: poll_menu(url)))
+                return
+            if not window.runtime:
                 return fail('Import firmware and prepare runtime before this check')
             window.launch()
             def phase(value):

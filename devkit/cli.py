@@ -17,6 +17,23 @@ def main(argv=None):
     for name in ('inspect', 'import'):
         command = commands.add_parser(name); command.add_argument('file', type=Path)
     commands.add_parser('boards')
+    commands.add_parser('cameras', help='Camera extraction and emulation research / 相机解包与模拟研究矩阵')
+    command = commands.add_parser('unpack', help='Offline camera extraction / 离线相机解包')
+    command.add_argument('file', type=Path)
+    command.add_argument('--output', type=Path, required=True)
+    command.add_argument('--key-file', type=Path, help='Local Nikon XOR-table JSON / 本地尼康 XOR 表 JSON')
+    command = commands.add_parser('unpack-device', help='Extract an imported camera entry / 解包已导入相机条目')
+    command.add_argument('device', type=Path)
+    command.add_argument('--key-file', type=Path)
+    command = commands.add_parser('nikon-lab', help='Nikon Z7 C3.80 assisted menu lab; Ctrl+C to stop / 尼康辅助菜单实验，Ctrl+C 停止')
+    command.add_argument('device', type=Path)
+    command = commands.add_parser('probe-boot', help='Bounded generic-board kernel experiment / 限时内核启动试验')
+    command.add_argument('device', type=Path)
+    command.add_argument('--kernel', required=True, help='Relative kernel path in this device workspace')
+    from .boot import BOARDS
+    command.add_argument('--board', required=True, choices=BOARDS)
+    command.add_argument('--dtb', default='', help='Optional relative DTB path; vendor DTBs may not match the selected board')
+    command.add_argument('--seconds', type=int, default=10)
     command = commands.add_parser('support'); command.add_argument('device', type=Path)
     command.add_argument('--export', type=Path)
     command = commands.add_parser('run'); command.add_argument('device', type=Path)
@@ -37,6 +54,28 @@ def main(argv=None):
         elif args.action == 'boards':
             from .boot import BOARDS
             print(json.dumps(BOARDS, ensure_ascii=False, indent=2))
+        elif args.action == 'cameras':
+            from .camera_catalog import camera_catalog
+            print(json.dumps(camera_catalog(), ensure_ascii=False, indent=2))
+        elif args.action == 'unpack':
+            from .camera_research import unpack_firmware
+            local_key = args.key_file or home / 'camera-keys/nikon-tables.json'
+            print(unpack_firmware(args.file, args.output, task, key_file=local_key if local_key.is_file() else None))
+        elif args.action == 'unpack-device':
+            from .camera_research import unpack_device
+            local_key = args.key_file or home / 'camera-keys/nikon-tables.json'
+            print(unpack_device(args.device, task, key_file=local_key if local_key.is_file() else None))
+        elif args.action == 'probe-boot':
+            from .camera_probe import probe_boot
+            from .runtime import discover_qemu
+            runtime = discover_qemu(home, BOARDS[args.board]['binary'])
+            if not runtime:
+                raise ValueError('QEMU not installed: run qemu-everything setup')
+            print(probe_boot(args.device, args.kernel, args.board, runtime['qemu'], task,
+                             seconds=args.seconds, dtb=args.dtb))
+        elif args.action == 'nikon-lab':
+            from .nikon_lab import run_lab
+            run_lab(args.device, home, task, on_ready=lambda url: print(url, flush=True))
         elif args.action == 'setup':
             from .runtime import setup, setup_qemu, discover
             if args.camera and not discover(home) and not args.accept_android_sdk_license:

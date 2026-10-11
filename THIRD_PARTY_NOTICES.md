@@ -17,6 +17,8 @@ This repository's license does not relicense any third-party component.
 | cffi | MIT; [source](https://foss.heptapod.net/pypy/cffi) |
 | Python | PSF license; [source](https://www.python.org/downloads/source/) |
 | PyInstaller bootloader | GPL with distribution exception; [source and license](https://pyinstaller.org/en/stable/license.html) |
+| Sony fwtool constants in `devkit/camera_formats/_sony_vendor/constants.py` | MIT; Copyright 2015 ma1co; [fwtool.py](https://github.com/ma1co/fwtool.py), [DavidBuchanan314 XR work](https://github.com/DavidBuchanan314/fwtool.py/tree/72fbdd15ddcc2d2a24ccb52cf8e84b8de98c738a); full text in `third-party-licenses/Sony-fwtool-MIT.txt` |
+| Canon updater XOR tables and algorithm adapted in `devkit/camera_formats/canon.py` | GPL-2.0-or-later; Copyright 2010 Arm.Indy; [Magic Lantern fir_tool2.py](https://github.com/reticulatedpines/magiclantern_simplified/blob/142472e95054d73640f50789ac0fd66325499d82/tools/indy/fir_tool2.py); full text in `third-party-licenses/Canon-GPL-2.0.txt` |
 
 The portable distribution uses separate Qt DLLs in `_internal/PySide6`. Users may
 replace compatible libraries and rebuild the application; no restriction is
@@ -36,6 +38,38 @@ authorship or validation of the DevKit's QEMU implementation.
 为固件离线分析、原厂 UI 与菜单扩展研究提供参考。上游项目使用 MIT 许可证，
 版权归 Radium Wang 所有；此致谢不表示上游作者开发或验证了本 DevKit 的 QEMU 实现。
 
+### Multi-brand camera research / 多品牌相机研究
+
+- **ma1co and DavidBuchanan314**: Sony UFU/FDAT and BIONZ XR research. MIT constants
+  retain their license and attribution; the bounded stream and archive handling
+  are implemented in this project.
+- **WonderLantern**: [nikon-fw-key-tool](https://github.com/WonderLantern/nikon-fw-key-tool)
+  (GPL-3.0) and [z7-qemu](https://github.com/WonderLantern/z7-qemu)
+  (GPL-2.0-or-later). The independently implemented package reader uses tables
+  supplied separately by the user. The key tool and custom QEMU are not bundled.
+  The Z7 lab is assisted startup; its research is not credited as complete camera
+  hardware emulation or an unmodified power-on path.
+- **yeahnope** / [gr_unpack](https://github.com/yeahnope/gr_unpack) and
+  **hhornbacher** / [gr3x-fw-hack](https://github.com/hhornbacher/gr3x-fw-hack): Ricoh
+  frame-container and Linux/IPC research. No unlicensed source was copied;
+  the bounded decoder and structural ROMFS extraction here are independent.
+- **Radium Wang** / [Ricoh GR IV firmware analysis and feature expansion](https://github.com/radium-wang/ricoh-gr4-firmware-analysis-and-feature-expansion):
+  GR IV research is credited alongside the retained Hasselblad credit. Current
+  new material uses the GR IV Project Noncommercial Source License 1.0; older
+  revisions through `a55a2c7` retain their Apache-2.0 grants. No restricted material
+  was copied into this project.
+- **Arm.Indy / Magic Lantern / reticulatedpines**: Canon FIR and EOS emulator
+  research. Adapted updater code retains GPL-2.0-or-later and attribution; the
+  project supplies corresponding source. The combined AGPL-3.0-or-later project
+  uses the compatible GPL-3.0 option for that component.
+- **nneonneo** / [Insta360 X3 Firmware Tools](https://github.com/nneonneo/Insta360-X3-Firmware-Tools):
+  X3 container research. No unlicensed source was copied; this project implements
+  its own checked component reader.
+
+Fixed research revisions, model-specific results and limitations are recorded in
+[docs/CAMERA_FIRMWARE.md](docs/CAMERA_FIRMWARE.md) and `devkit/camera_catalog.json`.
+感谢以上作者的公开研究；致谢不表示上游作者验证了本项目的实现。
+
 ## Downloaded separately, not bundled in the portable app
 
 - **QEMU**, GPL-2.0 and other included licenses, downloaded from [Stefan Weil](https://qemu.weilnetz.de/w64/). The extracted download includes its license and source information. [QEMU source](https://gitlab.com/qemu-project/qemu).
@@ -49,7 +83,8 @@ Pinned Debian Bullseye ARMhf packages are downloaded separately from `deb.debian
 
 ## User-supplied firmware
 
-Hasselblad/DJI firmware binaries, Qt assets embedded in them, proprietary libraries,
+Hasselblad/DJI, Nikon, Sony, Ricoh, Canon and Insta360 firmware binaries,
+Qt assets embedded in them, proprietary libraries,
 fonts and artwork are not included in the repository or release. Their respective
 licenses and ownership remain with their owners. Import processes only a local
 user-supplied package. Screenshots illustrating compatibility are not a firmware

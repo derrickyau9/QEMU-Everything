@@ -26,6 +26,7 @@ include = ["devkit*"]
 
 [tool.setuptools.package-data]
 devkit = ["assets/*", "helpers/*", "helpers/arm32/*", "helpers/linux-arm32/*", "guest/*.c", "guest/*.h", "guest/*.sh", "guest/*.conf", "*.json", "templates/*"]
+"devkit.camera_formats._sony_vendor" = ["LICENSE.txt"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

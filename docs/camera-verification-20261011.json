@@ -1,0 +1,136 @@
+{
+  "date": "2026-10-11",
+  "scope": "Offline local firmware analysis and emulation; no camera access or flashing",
+  "tests": {
+    "passed": 275,
+    "command": "python -m pytest -q"
+  },
+  "samples": [
+    {
+      "brand": "Nikon",
+      "result": "Module and complete-package CRC16 verified",
+      "filename": "Z7_2_0170.bin",
+      "bytes": 48494024,
+      "sha256": "fc0e94f57500a1f0e287c6b9a036c81a5ffceccb8432a377d645b3fa35a19b6a"
+    },
+    {
+      "brand": "Nikon",
+      "result": "Module and complete-package CRC16 verified",
+      "filename": "Z_30_0120.bin",
+      "bytes": 34496798,
+      "sha256": "1a5449ef505f1f347ed4e066a6a3f588ea542240680e83f4ebcae3b16da3434a"
+    },
+    {
+      "brand": "Nikon",
+      "result": "Module and complete-package CRC16 verified",
+      "filename": "Z_50_0260.bin",
+      "bytes": 31972272,
+      "sha256": "69745c9e8f3156e936918e62a4a1fad18e7078e9ea3b95d8b8e08144b1542e49"
+    },
+    {
+      "brand": "Nikon",
+      "result": "Module and complete-package CRC16 verified",
+      "filename": "Z_6_0380.bin",
+      "bytes": 34923366,
+      "sha256": "ff978ffdf77c58c0b861a06e16d432d5886969f3cdd05d62f6c8e82e8a4cea54"
+    },
+    {
+      "brand": "Nikon",
+      "result": "Module and complete-package CRC16 verified",
+      "filename": "Z_7_0380.bin",
+      "bytes": 34472614,
+      "sha256": "07cf19513ada5b770caec4cfc3531a6734c48aede28dcec037f0f8374ef441a2"
+    },
+    {
+      "brand": "Nikon",
+      "result": "Module and complete-package CRC16 verified",
+      "filename": "Z_8_0311.bin",
+      "bytes": 99051117,
+      "sha256": "d67413c2ede6b9ce8887175f20700bd9fbad2a973a4820968c45503d15d80d96"
+    },
+    {
+      "brand": "Ricoh",
+      "result": "Container and decoded LE32 sums verified; structural ROMFS components extracted",
+      "filename": "fwdc239b.bin",
+      "bytes": 30391780,
+      "sha256": "d6a3c9c288d784080e7b283222ecdd8752adfeed6faa36dab44f73115354bfd4"
+    },
+    {
+      "brand": "Ricoh",
+      "result": "Container and decoded LE32 sums verified; structural ROMFS components extracted",
+      "filename": "fwdc243b.bin",
+      "bytes": 30391788,
+      "sha256": "708e79f3b7b96a7e1581b4acf4c412233050a1832718ef7f06c8397db1b431c7"
+    },
+    {
+      "brand": "Ricoh",
+      "result": "Container and decoded LE32 sums verified; structural ROMFS components extracted",
+      "filename": "fwdc248b.bin",
+      "bytes": 38648776,
+      "sha256": "a2f664dfca034059eb0fd6e18ab08684c326b4a034d85c164dad7e1ec9b5655f"
+    },
+    {
+      "brand": "Sony",
+      "model": "ILCE-7M4 2.00",
+      "filename": "ILCE-7M4_2.00_BODYDATA.DAT",
+      "bytes": 896712088,
+      "sha256": "394ac0daaeb9ce3f6ca0273a18c6af26505770e3b470f70d1d9f062e257bbe88",
+      "result": "AES/FDAT checks and bounded extraction verified",
+      "artifacts": 102
+    },
+    {
+      "brand": "Sony",
+      "model": "ILCE-7RM5 4.00",
+      "sha256": "51e1176a255a9a4b4782dfbcfa6c5f332b71173bdfe9ed2bcf4fca6bcbc6c2e2",
+      "result": "AES/FDAT checks verified; 111 files extracted; original UI unverified"
+    },
+    {
+      "brand": "Insta360",
+      "model": "X3 v1.1.4.1_build1",
+      "bytes": 98117232,
+      "sha256": "c745287e1243fb20861a110374e09ef59ec97c288c7da51659ffae19db9302f7",
+      "result": "Six components verified; MD5 and CRC checks pass; original UI unverified"
+    },
+    {
+      "brand": "Canon",
+      "model": "EOS 50D 1.0.9",
+      "bytes": 9520908,
+      "sha256": "68a223845bd23a4aa35509ca3454f68a6128ef68c0f7d3dcc31ffa470690d298",
+      "result": "FIR checksum and updater decoding verified; main image remains encrypted; original UI unverified"
+    }
+  ],
+  "nikon_z7_ui": {
+    "version": "C3.80",
+    "source_revision": "97abf0b81cd3211f8374a38987a0beaf4549b90f",
+    "original_menu_rendered": true,
+    "native_key_acknowledged": true,
+    "same_qemu_session": true,
+    "frame_changed": true,
+    "cancelled_and_cleaned": true,
+    "port_still_listening": false,
+    "assisted_startup": true,
+    "guest_state_modified": true,
+    "natural_power_on_verified": false,
+    "firmware_file_modified": false,
+    "full_camera_hardware_verified": false,
+    "portable_gui_verified": true
+  },
+  "sony_a7m4_execution": {
+    "original_image_executed": true,
+    "kernel_sha256": "5aa8ccf608b7e697b7ddb3fc78b00ebcb666236596e390c7d4517bcea72f474e",
+    "first_observed_pc": "0x40080000",
+    "early_store_address": "0xFE005010",
+    "next_observed_exception_pc": "0x200",
+    "mailbox_interpretation": "Inferred from secondary-entry writes and DSB/SEV; exact exception needs ESR",
+    "kernel_console_observed": false,
+    "userspace_verified": false,
+    "original_ui_verified": false
+  },
+  "generic_probe_limits": {
+    "ricoh_gr3x_original_dtb_serial_bytes": 0,
+    "insta360_x3_original_dtb_serial_bytes": 0,
+    "timeout_seconds": 10,
+    "original_ui_verified": false
+  },
+  "distribution": "No manufacturer firmware, recovered tables or custom emulator binaries bundled"
+}

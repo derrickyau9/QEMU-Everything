@@ -3,9 +3,19 @@ from pathlib import Path
 import shutil
 import tempfile
 import zipfile
-from .core import read_json, write_json
+from .core import checked_child, read_json, write_json
 from .library import is_camera
 from .boot import validate_profile
+
+def _support_path(device, relative):
+    device = Path(device).resolve()
+    path = device
+    for part in Path(relative).parts:
+        path /= part
+        if path.is_symlink() or getattr(path, 'is_junction', lambda: False)():
+            raise ValueError('Support paths must not contain links / 适配资料路径不能包含链接')
+    return checked_child(device, relative)
+
 
 def diagnose(device, qemu=None):
     device = Path(device)
@@ -13,6 +23,20 @@ def diagnose(device, qemu=None):
     if not profile:
         raise ValueError('Select an imported firmware library directory')
     inspection = read_json(device / 'inspection.json')
+    extraction = read_json(checked_child(device, 'extracted/extraction.json'))
+    extraction_recorded = bool(isinstance(extraction, dict) and extraction.get('source_sha256') == profile['sha256'])
+    extraction_matches = extraction_recorded
+    artifacts = extraction.get('artifacts', []) if extraction_recorded else []
+    if not isinstance(artifacts, list) or not artifacts:
+        extraction_matches = False
+    else:
+        for artifact in artifacts:
+            try:
+                path = _support_path(device, 'extracted/' + artifact['path'])
+                if not path.is_file() or path.stat().st_size != artifact['size']:
+                    extraction_matches = False; break
+            except (KeyError, TypeError, ValueError, OSError):
+                extraction_matches = False; break
     blockers = list(inspection.get('blockers', []))
     boot = read_json(device / 'boot.json')
     configured = False
@@ -48,6 +72,12 @@ def diagnose(device, qemu=None):
         'architecture': inspection.get('architecture') or profile.get('abi'),
         'configuration_valid': configured, 'guest_boot_verified': False,
         'camera_ui_previously_verified': bool(is_camera(profile) and profile.get('validated')),
+        'camera_format': inspection.get('camera'),
+        'components_extracted': extraction_matches,
+        'extraction_success_recorded': extraction_recorded,
+        'artifact_hashes_rechecked': False,
+        'extraction_method': extraction.get('method') if extraction_matches else None,
+        'extracted_artifacts': artifacts if extraction_matches else [],
         'qemu_directory': str(qemu) if qemu else None,
         'blockers': list(dict.fromkeys(blockers)), 'log_findings': issues,
         'next_steps': [
@@ -60,7 +90,9 @@ def diagnose(device, qemu=None):
 
 def create_support(device, qemu=None):
     device = Path(device)
-    root = device / 'support'; root.mkdir(exist_ok=True)
+    root = _support_path(device, 'support'); root.mkdir(exist_ok=True)
+    for name in ('diagnostics.json', 'diagnostics.json.tmp', 'report.md', 'adapter-plan.json', 'adapter-plan.json.tmp'):
+        _support_path(device, 'support/' + name)
     data = diagnose(device, qemu)
     write_json(root / 'diagnostics.json', data)
     inspection = read_json(device / 'inspection.json')
@@ -70,6 +102,21 @@ def create_support(device, qemu=None):
              'Import and a running QEMU process do not prove this firmware boots. / 导入成功和 QEMU 进程运行不代表固件启动成功。', '',
              '## Evidence / 识别依据', '']
     lines += ['- ' + str(value) for value in inspection.get('findings', [])]
+    if data['camera_format']:
+        camera = data['camera_format']
+        lines += ['', '## Camera format / 相机格式', '',
+                  f"{camera['brand']} · {camera.get('model') or 'model unconfirmed / 机型待确认'}", '',
+                  'Offline extraction available / 可离线解包: ' + str(bool(camera.get('extractable'))),
+                  'Container identification is separate from CPU/SoC and UI verification. / 容器识别与 CPU/SoC、UI 验证分别记录。']
+    if data['components_extracted']:
+        lines += ['', '## Extracted components / 解包组件', '',
+                  f"Method / 方法: {data['extraction_method']}", '',
+                  'Component extraction completed. Kernel, userspace and original UI boot are still unverified. / 组件解包完成；内核、用户空间和原厂 UI 启动尚未验证。', '',
+                  'Files and sizes checked; SHA-256 values record extraction time and are not rehashed by this diagnosis. / 已检查文件存在与大小；SHA-256 记录解包时结果，本次诊断未重新计算。', '',
+                  '| File / 文件 | Format / 格式 | Architecture / 架构 | Bytes / 字节 |',
+                  '| --- | --- | --- | --- |']
+        for artifact in data['extracted_artifacts']:
+            lines.append(f"| extracted/{artifact['path']} | {artifact['format']} | {artifact['architecture'] or 'unknown'} | {artifact['size']} |")
     lines += ['', '## Blockers / 启动缺口', ''] + ['- ' + value for value in data['blockers']]
     lines += ['', '## Log findings / 日志线索', ''] + ['- ' + value for value in data['log_findings']]
     lines += ['', '## Next steps / 适配步骤', ''] + ['- ' + value for value in data['next_steps']]
@@ -98,11 +145,12 @@ def export_support(device, destination, qemu=None):
     create_support(device, qemu)
     entries = ('device.json', 'inspection.json', 'boot.json', 'support/report.md',
                'support/diagnostics.json', 'support/adapter-plan.json', 'generic-command.json',
+              'extracted/extraction.json',
                'console.log', 'qemu-stderr.log', 'generic-console.log')
     with tempfile.TemporaryFile() as temporary:
         with zipfile.ZipFile(temporary, 'w', zipfile.ZIP_DEFLATED) as archive:
             for name in entries:
-                path = device / name
+                path = checked_child(device, name)
                 if not path.is_file() or path.is_symlink():
                     continue
                 with path.open('rb') as stream:

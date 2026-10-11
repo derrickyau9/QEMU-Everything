@@ -437,6 +437,14 @@ def inspect_firmware(source: Path, task: Task | None = None) -> dict:
             _disk(file, header, report)
         if report['format'] in ('unknown', 'sony-fdat', 'elf'):
             _embedded(probe, report, task)
+        from .camera_formats import identify_camera
+        camera = identify_camera(source, task)
+        if camera:
+            report['camera'] = camera
+            if report['format'] == 'unknown':
+                report['format'], report['summary'] = camera['format'], camera['summary']
+            report['findings'].extend(camera.get('findings', []))
+            report['blockers'].extend(camera.get('blockers', []))
         if report['format'] in ('zip', 'gzip', 'xz', 'bzip2', 'tar'):
             report['blockers'].append('Expand with a bounded format-specific adapter, then identify kernel/rootfs and target board.')
         if report['format'] == 'unknown':
@@ -444,6 +452,9 @@ def inspect_firmware(source: Path, task: Task | None = None) -> dict:
         report['findings'].append(f'Identification prefix is limited to {min(size, SCAN_LIMIT):,} bytes; SHA-256 covers all {size:,} bytes.')
         task.check()
         final = os.fstat(file.fileno())
-        if final.st_size != size or final.st_mtime_ns != before.st_mtime_ns:
+        current = source.stat()
+        if (final.st_size != size or final.st_mtime_ns != before.st_mtime_ns
+                or (current.st_dev, current.st_ino, current.st_size, current.st_mtime_ns)
+                != (before.st_dev, before.st_ino, before.st_size, before.st_mtime_ns)):
             raise ValueError('Firmware file changed while being inspected; retry with an unchanged copy.')
         return report

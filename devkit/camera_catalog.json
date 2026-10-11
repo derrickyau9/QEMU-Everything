@@ -1,0 +1,86 @@
+{
+  "schema_version": 1,
+  "updated": "2026-10-11",
+  "families": [
+    {
+      "id": "hasselblad-ui",
+      "brand": "Hasselblad",
+      "family": "X System",
+      "status_en": "Existing original UI adapter; selected firmware versions verified. Original hardware/kernel boot is not emulated.",
+      "status_zh": "保留原厂 UI 适配器，指定固件版本已验证；尚未模拟原厂硬件及原厂内核启动。",
+      "official_url": "https://www.hasselblad.com/x-system/firmware/",
+      "verified_samples": ["See docs/VERIFICATION.md"],
+      "boot_gap_en": "Sensor, ISP, lens and camera peripherals are mocked or absent.",
+      "boot_gap_zh": "传感器、ISP、镜头等相机外设为模拟值或尚未实现。",
+      "upstreams": [{"url": "https://github.com/radium-wang/Hasselblad-X-System-CIM-Firmware-Research-Feature-Extensions", "revision": "Existing project credits", "license": "See retained Radium notice"}]
+    },
+    {
+      "id": "sony-ufu",
+      "brand": "Sony",
+      "family": "UFU / BIONZ XR (including ILCE-7M4)",
+      "status_en": "Offline AES decryption and extraction verified on actual A7 IV 2.00 and A7R V 4.00 packages. Original UI has not booted.",
+      "status_zh": "真实 A7 IV 2.00 和 A7R V 4.00 升级包已通过 AES 解密与提取；原厂 UI 尚未启动。",
+      "official_url": "https://www.sony.com/electronics/support/e-mount-body-ilce-7-series/ilce-7m4/software/00280505",
+      "verified_samples": ["ILCE-7M4 2.00", "ILCE-7RM5 4.00"],
+      "boot_gap_en": "A7 IV original kernel executes but reaches an exception path after an early store to 0xFE005010 (suspected secondary-core boot mailbox). Sony SoC memory map, storage, proprietary IPC and display are missing. No original UI boot verified.",
+      "boot_gap_zh": "A7 IV 原厂内核已执行，早期写 0xFE005010 后进入异常路径，疑似次核启动邮箱；缺索尼 SoC 内存映射、存储、IPC 和显示适配，原厂 UI 未启动。",
+      "upstreams": [{"url": "https://github.com/ma1co/fwtool.py/pull/52", "revision": "DavidBuchanan314/fwtool.py 72fbdd15ddcc2d2a24ccb52cf8e84b8de98c738a", "license": "MIT"}]
+    },
+    {
+      "id": "ricoh-gr",
+      "brand": "Ricoh",
+      "family": "GR III / IIIx / IV frame container",
+      "status_en": "Independent bounded decoder verified on GR III, IIIx and IV. Structural ROMFS parsing extracts kernels and device trees; UI boot remains unverified.",
+      "status_zh": "独立解码器已验证 GR III、IIIx、IV；按 ROMFS 结构提取内核和设备树，UI 尚未启动。",
+      "official_url": "https://www.ricoh-imaging.co.jp/english/support/digital/gr3x_s.html",
+      "verified_samples": ["GR III 2.10", "GR IIIx 1.60", "GR IV 1.11"],
+      "boot_gap_en": "Milbeaut board emulation for the extracted vendor kernel, RTOS/Linux IPC/shared memory, display and camera services. III/IIIx initramfs extracted; no /initramfs ROMFS file found in the tested IV package. No original system or UI boot verified locally.",
+      "boot_gap_zh": "已提取原厂内核，仍缺对应 Milbeaut 板级模拟、RTOS/Linux IPC/共享内存、显示和相机服务适配。III/IIIx 已提取 initramfs，实测 IV 包未找到 /initramfs ROMFS 文件；本地原厂系统及 UI 尚未验证启动。",
+      "upstreams": [
+        {"url": "https://github.com/yeahnope/gr_unpack", "revision": "25f0cd513876655f355e7587302a5dd7b9ee6620", "license": "No license; source not copied"},
+        {"url": "https://github.com/hhornbacher/gr3x-fw-hack", "revision": "dc84ad50a0e5afc86d7273eb75e86ff889b83b19", "license": "No license; source not copied"},
+        {"url": "https://github.com/radium-wang/ricoh-gr4-firmware-analysis-and-feature-expansion", "revision": "e0e0b69a71d8d7727d2b5c97c9e809a3d8f45c85", "license": "Noncommercial Source License 1.0 for new material; source not copied"}
+      ]
+    },
+    {
+      "id": "nikon-update",
+      "brand": "Nikon",
+      "family": "XOR-table update packages / selected Z models",
+      "status_en": "Six Z-series update packages decrypted and checked. Z7 C3.80 original menu and navigation verified in a separately built custom QEMU, using assisted startup.",
+      "status_zh": "六份 Z 系列升级包已解密并校验；Z7 C3.80 在单独编译的定制 QEMU 中通过辅助启动显示原厂菜单，导航已验证。",
+      "official_url": "https://downloadcenter.nikonimglib.com/",
+      "verified_samples": ["Z30 C1.20", "Z50 C2.60", "Z6 C3.80", "Z7 C3.80 (assisted menu UI)", "Z7II C1.70", "Z8 C3.11"],
+      "boot_gap_en": "Keys and custom QEMU are separate local inputs. Z7 startup changes guest RAM; natural power-on and complete camera hardware are not verified. Other Z models are not locally boot verified.",
+      "boot_gap_zh": "密钥和定制 QEMU 单独配置；Z7 辅助启动会修改 guest RAM，未验证自然开机与完整相机硬件；其他 Z 机型未验证启动。",
+      "upstreams": [
+        {"url": "https://github.com/WonderLantern/nikon-fw-key-tool", "revision": "33426e892afd329a3b366b73776bcf53b9ac4ee8", "license": "GPL-3.0"},
+        {"url": "https://github.com/WonderLantern/z7-qemu", "revision": "97abf0b81cd3211f8374a38987a0beaf4549b90f", "license": "GPL-2.0-or-later; separately installed"},
+        {"url": "https://github.com/WonderLantern/z30-qemu", "revision": "0ba0c3547ccbec09e7c861eaca35db8e82795f15", "license": "GPL-2.0-or-later; not locally boot verified"}
+      ]
+    },
+    {
+      "id": "canon-fir",
+      "brand": "Canon",
+      "family": "Legacy EOS FIR / qemu-eos",
+      "status_en": "Validated legacy FIR inspection and updater extraction; main image decryption and full ROM reconstruction are separate tasks.",
+      "status_zh": "校验旧款 FIR 容器并提取升级程序；主固件解密和完整 ROM 重建需分别研究。",
+      "official_url": "https://www.usa.canon.com/support",
+      "verified_samples": ["EOS 50D 1.0.9 (updater only)"],
+      "boot_gap_en": "Custom qemu-eos binary and model-specific ROM0/ROM1 dumps are needed. Stock QEMU virt/canon-a1100 does not establish EOS firmware support.",
+      "boot_gap_zh": "需要定制 qemu-eos 和机型对应 ROM0/ROM1；标准 QEMU virt/canon-a1100 不能证明支持 EOS 固件。",
+      "upstreams": [{"url": "https://github.com/reticulatedpines/qemu-eos", "revision": "4b667a1d3c08ab7a55835d15ddbd884fa754946d (qemu-eos-v4.2.1)", "license": "GPL-2.0"}]
+    },
+    {
+      "id": "insta360-x3",
+      "brand": "Insta360",
+      "family": "X3 component container",
+      "status_en": "Plaintext container extraction with MD5 and CRC checks. This is not a general decryptor for other Insta360 cameras.",
+      "status_zh": "明文组件容器拆分，验证 MD5 和 CRC；该方法不等于支持其他 Insta360 机型的解密。",
+      "official_url": "https://www.insta360.com/download/insta360-x3",
+      "verified_samples": ["X3 v1.1.4.1_build1 (user-supplied)"],
+      "boot_gap_en": "Ambarella board support, RTOS cooperation, storage and display. Encrypted Luna MWFI packages remain unsupported.",
+      "boot_gap_zh": "缺 Ambarella 板级适配、RTOS 协作、存储和显示；加密的 Luna MWFI 包尚未支持解密。",
+      "upstreams": [{"url": "https://github.com/nneonneo/Insta360-X3-Firmware-Tools", "revision": "3e95fa30f8ad10f374c98b06a950f05eeb294aaf", "license": "No license; source not copied"}]
+    }
+  ]
+}

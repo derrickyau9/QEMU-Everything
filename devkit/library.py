@@ -74,6 +74,7 @@ def import_firmware(source, library, task=None):
             'version': report['format'], 'sha256': digest, 'filename': source.name,
             'architecture': report.get('architecture'), 'validated': False,
             'support_status': report['status'],
+            'camera': report.get('camera'),
         })
         from .support import create_support
         create_support(stage)

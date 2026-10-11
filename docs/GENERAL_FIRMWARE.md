@@ -16,13 +16,19 @@ QEMU Everything 分别记录文件分析结果、配置的启动方法及实际�
 | Bootable disk image | QEMU disk boot / 磁盘启动 | Board, firmware and disk controller compatibility / 平台、引导固件及磁盘控制器兼容性 |
 | Proprietary or encrypted update | Inspection and support workspace / 分析及支持工作区 | Container extraction, boot chain, hardware model and drivers / 解包、启动链、硬件模型及驱动 |
 
-Sony `.DAT` packages currently use the inspection route. The project does not
+Recognized Sony `.DAT` packages can now be decrypted and extracted offline;
+actual A7 IV 2.00 and A7R V 4.00 samples pass the container checks. The project does not
 include a verified Sony camera board or original Sony UI adapter. The Hasselblad
 adapter runs extracted original UI programs in a development guest; it does not
 boot the camera's original kernel.
 
-索尼 `.DAT` 当前走分析路线，项目尚无已验证的索尼相机硬件或原厂 UI 适配器。
+已识别的索尼 `.DAT` 可离线解密与提取，真实 A7 IV 2.00 和 A7R V 4.00 样本已通过校验；
+项目尚无已验证的索尼相机硬件或原厂 UI 适配器。
 哈苏路线是在开发虚拟机中运行提取的原厂 UI 程序，没有启动相机原厂内核。
+
+For checked camera components and the separately installed Nikon Z7 assisted UI
+lab, see [Camera firmware research](CAMERA_FIRMWARE.md).
+相机组件解包与单独配置的尼康 Z7 辅助启动实验见[多品牌固件记录](CAMERA_FIRMWARE.md)。
 
 ## Import and investigate / 导入与分析
 

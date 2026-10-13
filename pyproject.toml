@@ -15,6 +15,10 @@ dependencies = ["PySide6==6.9.3", "cryptography==46.0.3", "pyelftools==0.33", "d
 dev = ["pytest==8.4.2", "pyinstaller==6.16.0"]
 canon-lab = ["unicorn==2.1.4"]
 
+[project.urls]
+Repository = "https://github.com/derrickyau9/QEMU-Everything"
+Issues = "https://github.com/derrickyau9/QEMU-Everything/issues"
+
 [project.gui-scripts]
 qemu-everything-gui = "devkit.application:main"
 x-system-devkit = "devkit.application:main"
@@ -31,12 +35,18 @@ devkit = ["assets/*", "helpers/*", "helpers/arm32/*", "helpers/linux-arm32/*", "
 "devkit.camera_formats._sony_vendor" = ["LICENSE.txt"]
 
 [tool.setuptools.data-files]
-"share/qemu-everything/boards/canon" = ["scripts/boards/canon/*.md", "scripts/boards/canon/*.sh"]
-"share/qemu-everything/boards/insta360" = ["scripts/boards/insta360/*.py", "scripts/boards/insta360/*.c", "scripts/boards/insta360/*.dts", "scripts/boards/insta360/*.md", "scripts/boards/insta360/COPYING"]
+"share/qemu-everything/boards/canon" = ["scripts/boards/canon/*.md", "scripts/boards/canon/*.sh", "scripts/boards/canon/*.py", "scripts/boards/canon/*.json"]
+"share/qemu-everything/boards/gopro" = ["scripts/boards/gopro/*.md", "scripts/boards/gopro/*.py", "scripts/boards/gopro/*.c", "scripts/boards/gopro/*.h", "scripts/boards/gopro/*.S", "scripts/boards/gopro/*.ld", "scripts/boards/gopro/*.json", "scripts/boards/gopro/*.sh", "scripts/boards/gopro/COPYING"]
+"share/qemu-everything/boards/insta360" = ["scripts/boards/insta360/*.py", "scripts/boards/insta360/*.c", "scripts/boards/insta360/*.dts", "scripts/boards/insta360/*.md", "scripts/boards/insta360/*.S", "scripts/boards/insta360/*.ld", "scripts/boards/insta360/COPYING"]
 "share/qemu-everything/boards/nikon-z30" = ["scripts/boards/nikon-z30/*.py", "scripts/boards/nikon-z30/*.md", "scripts/boards/nikon-z30/*.sh"]
 "share/qemu-everything/boards/nikon-z6" = ["scripts/boards/nikon-z6/*.py", "scripts/boards/nikon-z6/*.md", "scripts/boards/nikon-z6/*.sh"]
 "share/qemu-everything/boards/ricoh" = ["scripts/boards/ricoh/*.py", "scripts/boards/ricoh/*.c", "scripts/boards/ricoh/*.dts", "scripts/boards/ricoh/*.md"]
-"share/qemu-everything/boards/sony" = ["scripts/boards/sony/*.py", "scripts/boards/sony/*.inc", "scripts/boards/sony/*.dts", "scripts/boards/sony/*.md"]
+"share/qemu-everything/boards/ricoh/evidence" = ["scripts/boards/ricoh/evidence/*.json"]
+"share/qemu-everything/boards/sony" = ["scripts/boards/sony/*.py", "scripts/boards/sony/*.inc", "scripts/boards/sony/*.dts", "scripts/boards/sony/*.md", "scripts/boards/sony/*.c", "scripts/boards/sony/*.h", "scripts/boards/sony/*.json"]
+
+"share/qemu-everything/boards/nikon-z50" = ["scripts/boards/nikon-z50/*.py", "scripts/boards/nikon-z50/*.md", "scripts/boards/nikon-z50/*.sh", "scripts/boards/nikon-z50/*.json", "scripts/boards/nikon-z50/COPYING"]
+"share/qemu-everything/boards/nikon-z50/source/qemu" = ["scripts/boards/nikon-z50/source/qemu/*.c", "scripts/boards/nikon-z50/source/qemu/*.h", "scripts/boards/nikon-z50/source/qemu/*.py"]
+"share/qemu-everything/boards/nikon-z50/source/tools" = ["scripts/boards/nikon-z50/source/tools/*.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

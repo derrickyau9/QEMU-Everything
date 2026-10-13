@@ -27,7 +27,7 @@ def main(argv=None):
     command = commands.add_parser('unpack-device', help='Extract an imported camera entry / 解包已导入相机条目')
     command.add_argument('device', type=Path)
     command.add_argument('--key-file', type=Path)
-    command = commands.add_parser('nikon-lab', help='Nikon Z7/Z30/Z6 assisted menu lab; Ctrl+C to stop / 尼康辅助菜单实验，Ctrl+C 停止')
+    command = commands.add_parser('nikon-lab', help='Nikon Z7/Z30/Z6/Z50 assisted menu lab; Ctrl+C to stop / 尼康辅助菜单实验，Ctrl+C 停止')
     command.add_argument('device', type=Path)
     command = commands.add_parser('nikon-z30-check', help='Z30 original menu round-trip verification / Z30 原厂菜单往返验证')
     command.add_argument('device', type=Path)
@@ -35,6 +35,40 @@ def main(argv=None):
     command = commands.add_parser('nikon-z6-check', help='Z6 original menu round-trip verification / Z6 原厂菜单往返验证')
     command.add_argument('device', type=Path)
     command.add_argument('--seconds', type=int, default=60)
+    command = commands.add_parser('nikon-z50-check', help='Z50 original menu round-trip verification / Z50 原厂菜单往返验证')
+    command.add_argument('device', type=Path)
+    command.add_argument('--seconds', type=int, default=60)
+    command = commands.add_parser('insta360-ui', help='X3 original emWin UI component lab / X3 原厂 emWin 界面组件实验')
+    command.add_argument('device', type=Path)
+    command = commands.add_parser('insta360-ui-check', help='Bounded X3 original UI and touch check / 限时 X3 原厂界面与触摸验证')
+    command.add_argument('device', type=Path)
+    command.add_argument('--seconds', type=int, default=20)
+    command = commands.add_parser('canon-ui', help='EOS 70D 1.1.2 original ROM menu; Ctrl+C to stop / 佳能原厂 ROM 菜单，Ctrl+C 停止')
+    command.add_argument('device', type=Path)
+    command = commands.add_parser('canon-ui-import', help='Import a complete EOS 70D 1.1.2 ROM set / 导入完整佳能 ROM 组合')
+    command.add_argument('--rom0', type=Path, required=True)
+    command.add_argument('--rom1', type=Path, required=True)
+    command.add_argument('--sfdata', type=Path, required=True)
+    command.add_argument('--output', type=Path, required=True, help='New library entry directory / 新固件库条目目录')
+    command = commands.add_parser('canon-ui-check', help='Bounded EOS 70D original menu check / 限时佳能原厂菜单验证')
+    command.add_argument('device', type=Path)
+    command.add_argument('--seconds', type=int, default=40)
+    command = commands.add_parser('gopro-ui', help='HERO8 2.51 original Tara UI component; Ctrl+C to stop / GoPro 原厂 UI 组件，Ctrl+C 停止')
+    command.add_argument('device', type=Path)
+    command = commands.add_parser('gopro-ui-import', help='Import official HERO8 2.51 UPDATE.zip or DATA.bin / 导入 GoPro 官方升级包')
+    command.add_argument('file', type=Path)
+    command.add_argument('--output', type=Path, required=True)
+    command = commands.add_parser('gopro-ui-check', help='Bounded original GoPro menu and Back check / 限时 GoPro 原厂菜单与返回验证')
+    command.add_argument('device', type=Path)
+    command.add_argument('--seconds', type=int, default=60)
+    command = commands.add_parser('ricoh-ui', help='GR IV 1.11 original TopMenu UI component; Ctrl+C to stop / 理光原厂菜单组件，Ctrl+C 停止')
+    command.add_argument('device', type=Path)
+    command = commands.add_parser('ricoh-ui-check', help='Bounded GR IV original menu, Confirm and Back check / 限时理光原厂菜单、确认与返回验证')
+    command.add_argument('device', type=Path)
+    command.add_argument('--seconds', type=int, default=120)
+    command = commands.add_parser('ricoh-ui-import', help='Import and extract official GR IV 1.11 firmware / 导入并解包理光 GR IV 1.11 官方固件')
+    command.add_argument('file', type=Path)
+    command.add_argument('--output', type=Path, required=True)
     command = commands.add_parser('camera-lab', help='Bounded original camera Linux boot / 限时启动原厂相机 Linux')
     command.add_argument('device', type=Path)
     command.add_argument('--seconds', type=int, default=30)
@@ -97,6 +131,42 @@ def main(argv=None):
         elif args.action == 'nikon-z6-check':
             from .nikon_z6_lab import run_menu_probe
             print(json.dumps(run_menu_probe(args.device, home, task, seconds=args.seconds), ensure_ascii=False, indent=2))
+        elif args.action == 'nikon-z50-check':
+            from .nikon_z50_lab import run_menu_probe
+            print(json.dumps(run_menu_probe(args.device, home, task, seconds=args.seconds), ensure_ascii=False, indent=2))
+        elif args.action == 'insta360-ui':
+            from .insta360_ui import run_lab
+            run_lab(args.device, home, task, on_ready=lambda url: print(url, flush=True))
+        elif args.action == 'insta360-ui-check':
+            from .insta360_ui import run_menu_probe
+            print(json.dumps(run_menu_probe(args.device, home, task, seconds=args.seconds), ensure_ascii=False, indent=2))
+        elif args.action == 'canon-ui':
+            from .canon_ui import run_lab
+            run_lab(args.device, home, task, on_ready=lambda url: print(url, flush=True))
+        elif args.action == 'canon-ui-import':
+            from .canon_ui import import_roms
+            print(import_roms(args.rom0, args.rom1, args.sfdata, args.output, task))
+        elif args.action == 'canon-ui-check':
+            from .canon_ui import run_menu_probe
+            print(json.dumps(run_menu_probe(args.device, home, task, seconds=args.seconds), ensure_ascii=False, indent=2))
+        elif args.action == 'gopro-ui':
+            from .gopro_ui import run_lab
+            run_lab(args.device, home, task, on_ready=lambda url: print(url, flush=True))
+        elif args.action == 'gopro-ui-import':
+            from .gopro_firmware import import_update
+            print(import_update(args.file, args.output, task))
+        elif args.action == 'gopro-ui-check':
+            from .gopro_ui import run_menu_probe
+            print(json.dumps(run_menu_probe(args.device, home, task, seconds=args.seconds), ensure_ascii=False, indent=2))
+        elif args.action == 'ricoh-ui':
+            from .ricoh_ui import run_lab
+            run_lab(args.device, home, task, on_ready=lambda url: print(url, flush=True))
+        elif args.action == 'ricoh-ui-check':
+            from .ricoh_ui import run_menu_probe
+            print(json.dumps(run_menu_probe(args.device, home, task, seconds=args.seconds), ensure_ascii=False, indent=2))
+        elif args.action == 'ricoh-ui-import':
+            from .ricoh_ui import import_update
+            print(import_update(args.file, args.output, task))
         elif args.action == 'camera-lab':
             from .camera_lab import run_lab
             result = run_lab(args.device, home, task, seconds=args.seconds, mode=args.mode)

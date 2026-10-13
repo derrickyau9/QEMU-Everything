@@ -47,9 +47,20 @@ def build(work, archive, jobs):
     if digest(archive) != ARCHIVE_SHA256:
         raise ValueError('Use the reviewed original QEMU 10.2.4 source archive')
     source = work / f'qemu-{QEMU_VERSION}'
-    if not source.exists():
+    extraction_marker = source / '.h22-extraction-complete'
+    if not extraction_marker.exists():
+        def source_filter(member, destination):
+            # Re-check an older extraction which may already contain QEMU's
+            # unused absolute X11 convenience link. Unlink only the link entry
+            # in this build tree; never follow or modify its external target.
+            target = Path(destination) / member.name
+            if member.issym() and target.is_symlink() and target.parent.resolve().is_relative_to(Path(destination).resolve()):
+                target.unlink()
+            try: return tarfile.data_filter(member, destination)
+            except (tarfile.AbsoluteLinkError, tarfile.LinkOutsideDestinationError): return None
         with tarfile.open(archive, 'r:xz') as packed:
-            packed.extractall(work, filter='data')
+            packed.extractall(work, filter=source_filter)
+        extraction_marker.write_text(ARCHIVE_SHA256)
     shutil.copyfile(overlay / 'insta360-h22-lab.c', source / 'hw/arm/insta360-h22-lab.c')
     meson = source / 'hw/arm/meson.build'
     registration = "arm_ss.add(when: 'CONFIG_INSTA360_H22_LAB', if_true: files('insta360-h22-lab.c'))"
@@ -69,9 +80,13 @@ def build(work, archive, jobs):
     if 'CONFIG_INSTA360_H22_LAB=y' not in defaults.read_text():
         defaults.write_text(defaults.read_text() + '\nCONFIG_INSTA360_H22_LAB=y\n')
     directory = work / 'build'; directory.mkdir(exist_ok=True)
+    environment = dict(os.environ)
+    for name in ('PYTHONPATH', 'PYTHONHOME', 'PYTHONSAFEPATH'):
+        environment.pop(name, None)
+    environment['PYTHONNOUSERSITE'] = '1'
     if not (directory / 'build.ninja').exists():
-        subprocess.run([str(source / 'configure'), *FLAGS], cwd=directory, check=True)
-    subprocess.run(['ninja', '-j', str(jobs), 'qemu-system-aarch64'], cwd=directory, check=True)
+        subprocess.run([str(source / 'configure'), *FLAGS], cwd=directory, env=environment, check=True)
+    subprocess.run(['ninja', '-j', str(jobs), 'qemu-system-aarch64'], cwd=directory, env=environment, check=True)
     dtb = directory / 'insta360-linux-lab.dtb'
     subprocess.run(['dtc', '-I', 'dts', '-O', 'dtb', '-o', str(dtb), str(overlay / 'minimal-linux.dts')], check=True)
     binary = directory / 'qemu-system-aarch64'

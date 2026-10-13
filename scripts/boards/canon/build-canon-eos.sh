@@ -3,7 +3,7 @@
 set -euo pipefail
 CANON_QEMU_PIN=4b667a1d3c08ab7a55835d15ddbd884fa754946d
 CANON_LAB_ROOT="${1:-${XDG_CACHE_HOME:-$HOME/.cache}/qemu-everything/canon-eos-build}"
-CANON_BUILD_JOBS="${CANON_BUILD_JOBS:-4}"
+CANON_BUILD_JOBS="${CANON_BUILD_JOBS:-2}"
 case "$CANON_BUILD_JOBS" in ''|*[!0-9]*) echo 'CANON_BUILD_JOBS must be an integer' >&2; exit 2;; esac
 if (( CANON_BUILD_JOBS < 1 || CANON_BUILD_JOBS > 16 )); then echo 'CANON_BUILD_JOBS must be 1..16' >&2; exit 2; fi
 for CANON_TOOL in git make gcc g++ pkg-config python3; do
@@ -28,4 +28,18 @@ cd "$CANON_LAB_ROOT/build"
 "$CANON_SOURCE/configure" --target-list=arm-softmmu --disable-docs --disable-gtk --disable-sdl --enable-vnc --disable-werror --enable-plugins --disable-capstone
 make -j"$CANON_BUILD_JOBS"
 ./arm-softmmu/qemu-system-arm -M help | awk '$1 == "50D" {found=1; print} END {exit !found}'
+./arm-softmmu/qemu-system-arm -M help | awk '$1 == "70D" {found=1; print} END {exit !found}'
+python3 -I - "$CANON_LAB_ROOT" "$CANON_QEMU_PIN" <<'PY'
+import hashlib, json, pathlib, sys
+root = pathlib.Path(sys.argv[1])
+binary = root / 'build/arm-softmmu/qemu-system-arm'
+digest = hashlib.sha256()
+with binary.open('rb') as stream:
+    for block in iter(lambda: stream.read(1024 * 1024), b''):
+        digest.update(block)
+(root / 'canon-ui-build.json').write_text(json.dumps({
+    'revision': sys.argv[2], 'qemu': str(binary), 'qemu_sha256': digest.hexdigest(),
+    'license': 'GPL-2.0-or-later', 'firmware_included': False,
+}, indent=2) + '\n')
+PY
 printf 'Built Canon QEMU: %s/build/arm-softmmu/qemu-system-arm\n' "$CANON_LAB_ROOT"

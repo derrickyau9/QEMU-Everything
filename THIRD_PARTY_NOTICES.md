@@ -64,6 +64,11 @@ authorship or validation of the DevKit's QEMU implementation.
   research. Adapted updater code retains GPL-2.0-or-later and attribution; the
   project supplies corresponding source. The combined AGPL-3.0-or-later project
   uses the compatible GPL-3.0 option for that component.
+- **peva3** / [magiclantern_70D](https://github.com/peva3/magiclantern_70D/tree/302806f5fb58a52ce458f65fb9612430ea0cf589):
+  Canon EOS 70D ROM-layout, hardware and emulator research informed the separate
+  1.1.2 original-menu verification. The prior 70D port by **nikfreak** and the
+  Magic Lantern/qemu-eos authors are also credited. Canon ROMs and serial-flash
+  data remain private research inputs and are not distributed by this project.
 - **nneonneo** / [Insta360 X3 Firmware Tools](https://github.com/nneonneo/Insta360-X3-Firmware-Tools):
   X3 container research. No unlicensed source was copied; this project implements
   its own checked component reader.
@@ -75,13 +80,16 @@ Fixed research revisions, model-specific results and limitations are recorded in
 ### Independent board bring-up / 独立板级适配
 
 The GPL-2.0-or-later board overlays in `scripts/boards/sony`, `ricoh` and
-`insta360` are independently implemented here and built against pinned QEMU
+`insta360`, and `gopro` are independently implemented here and built against pinned QEMU
 10.2.4 source. Builders and corresponding overlay source accompany the portable
 app; the custom emulator binaries are built locally and are not bundled.
 The Sony register/address and boot handoff analysis was checked against
 [Sony's official ILCE-7M4 Ver.2.00 GPL source](https://oss.sony.net/Products/Linux/DI/ILCE-7M4_Ver200.html).
 Downloaded vendor GPL source remains a separate research input; these board
 models do not distribute proprietary camera drivers, encryption keys or firmware.
+The independently reconstructed Sony resource codec `scripts/boards/sony/ldec.c`
+and `ldec.h` use AGPL-3.0-or-later; see their separate verified-format description
+in [README_LDEC.md](scripts/boards/sony/README_LDEC.md).
 
 **marin-m / vmlinux-to-elf**, GPL-3.0, revision
 `19683fb95b29cd31362d49e6f48ab8368f96cbdf`, was used separately for local kernel
@@ -103,7 +111,13 @@ Pinned Debian Bullseye ARMhf packages are downloaded separately from `deb.debian
 
 ## User-supplied firmware
 
-Hasselblad/DJI, Nikon, Sony, Ricoh, Canon and Insta360 firmware binaries,
+The independent Sigma fp 5.02 DFI reader was checked against execution of the
+original user-supplied IPL decoder. **ijigen / fpSup**, GPL-3.0, revision
+`4e957b41e276e14f89472457cb3e7547ba62acf1`, provided native memory and function
+references used to cross-check the extracted MAIN image; its source is not copied.
+[Upstream research](https://github.com/ijigen/fpSup).
+
+Hasselblad/DJI, Nikon, Sony, Ricoh, Canon, Insta360, GoPro and Sigma firmware binaries,
 Qt assets embedded in them, proprietary libraries,
 fonts and artwork are not included in the repository or release. Their respective
 licenses and ownership remain with their owners. Import processes only a local

@@ -1,0 +1,19 @@
+{
+  "revision": "0ba0c3547ccbec09e7c861eaca35db8e82795f15",
+  "scripts": {
+    "tools/display_session.py": "a6a16f4cf6378dd970fcd6155cac15431fa346d22afbcfd10761df40dd769fdc",
+    "tools/guest_call.py": "b7217f8c998819add965b96843d19520acd0efd29eed6a3de04837ed7b32249d",
+    "tools/rsp.py": "85da838d2e4ab349945b99c5f349e8a51208c97ba7065874b00951aba774e29e",
+    "tools/run.py": "b2a13a2e6f5c050b312a2ddc8df2189f0471ccd602c18f17ffe95919dfdeeeca"
+  },
+  "boards": {
+    "qemu/nikon-z50-display.c": "a425a9a72fb211e74b757d57118c211e952c4a6df2bea072dc1a6d2c9311131e",
+    "qemu/nikon-z50-gpu.h": "0395c5868e24807bc46f6977d973091cf2565cce4b337829d21468240f211c71",
+    "qemu/nikon-z50-isp-pixels.h": "3cf6625bd4bc4245b9ae9443494c49d42631f3cab97f553420680469d2c0b540",
+    "qemu/nikon-z50-isp.h": "8d6dd5964a0d94590e6a94e8c75f6763609ee12f3a0fa7bc07d8b2f6f5107301",
+    "qemu/nikon-z50.c": "9ffabe94d8443e3be32488d9cbc12f52afcad963208501a623cd7a53a0720288",
+    "qemu/prepare_source.py": "9b9fb9bcec2bbb34fbaf18adcabd28e50f874c41a62d03290a7537a3a927cf49",
+    "qemu/z50-display-map.h": "8b4e0285f5e968f77a0587622e276dd8ebb0f36ab028e1228e5a17dcb3c5c41f"
+  },
+  "builder_sha256": "8d736696ee4285bda0290f11ab2df0e1f7acb5393b162738f42f99e0f30fbd22"
+}

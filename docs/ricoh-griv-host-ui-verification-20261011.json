@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-10-12T05:10:42.741907+00:00",
+  "model": "Ricoh GR IV",
+  "version": "1.11",
+  "profile": "ricoh-griv-topmenu-ui-v1",
+  "source_and_frozen_gui": {
+    "source": {
+      "ok": true,
+      "frozen": false,
+      "run": "1362f95eb23b4595a84b830c409ade24",
+      "original_ui_verified": true,
+      "native_input_verified": true,
+      "single_instance_menu_roundtrip_verified": true,
+      "owned_guest_processes_reaped": true,
+      "guest_png_sha256": "16bb48f2feb89abf39faa13c21299356d2e4d8b9d85a91fd73ebb66ecc824d7e",
+      "evidence_sha256": "cda883ec9697313830dabdb8aa12b351bbf891940d5993112f9be26607cf3750",
+      "portable_exported_frames_verified": true
+    },
+    "frozen": {
+      "ok": true,
+      "frozen": true,
+      "run": "1c18f8d8ddfe4526a9e027f49691ad69",
+      "original_ui_verified": true,
+      "native_input_verified": true,
+      "single_instance_menu_roundtrip_verified": true,
+      "owned_guest_processes_reaped": true,
+      "guest_png_sha256": "16bb48f2feb89abf39faa13c21299356d2e4d8b9d85a91fd73ebb66ecc824d7e",
+      "evidence_sha256": "bfb6982a735b798d163b8d2f08911a73d82058c00c33f9a3ccccde427f8066e8",
+      "portable_exported_frames_verified": true
+    }
+  },
+  "host_tests": {
+    "passed": 145,
+    "skipped": 3,
+    "scope": "Ricoh importer, resources, board runner, camera routing and library support"
+  },
+  "fresh_official_firmware_import_verified": true,
+  "root_independent_visual_review": true,
+  "assisted_startup": true,
+  "natural_power_on_verified": false,
+  "full_rtos_boot_verified": false,
+  "physical_camera_used": false,
+  "frozen_exe_sha256": "d75a5a18cb079502242665c68fb38e3439a7b6cd28256e1a810c361420a57812",
+  "frozen_transport_exit_code": 0,
+  "cleanup_errors": [],
+  "repeat_launch_repair": {
+    "observed_failure": "DrvFS ENODATA while reading an actively appended QEMU log",
+    "failure_run": "1c1a00a70d9043e1a8afc2325b94bf5b",
+    "repair": "Run owned QEMU, logs and captures on Linux native temporary storage; export bounded files with SHA-256 verification only after owned guest exit/reap.",
+    "active_log_read_error_ignored": false,
+    "source_and_frozen_retest_passed": true
+  }
+}

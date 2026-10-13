@@ -4,7 +4,9 @@
 
 本项目原名 **Hasselblad X System QEMU DevKit**，保留原有相机 UI 适配器，新增通用固件库和可审阅的启动配置。QEMU Everything 表达项目的发展方向；每一份专有固件能否启动，仍需要按硬件平台验证。
 
-[English](README.md) · [下载 Windows 便携版](https://github.com/derrickyau9/Hasselblad-X-System-QEMU-DevKit/releases/latest) · [哈苏官方固件](https://www.hasselblad.com/zh-cn/x-system/firmware/)
+[English](README.md) · [发行版本](https://github.com/derrickyau9/QEMU-Everything/releases) · [哈苏官方固件](https://www.hasselblad.com/zh-cn/x-system/firmware/)
+
+这里是 QEMU Everything 的新仓库。在此发布便携版之前，请使用下方的源码启动方式。
 
 ![QEMU Everything 中保留的哈苏原厂 UI 适配器](docs/workbench.png)
 
@@ -28,7 +30,10 @@
 - ARM64 `virt`、ARM `virt`、x86-64 `pc`、RISC-V 64 `virt` 的 JSON 启动配置；启动匹配的内核或磁盘镜像，磁盘写入使用临时快照、关闭网络。
 - 命令行分析、导入、列出平台、启动、导出支持信息。
 - 离线校验与解包索尼、尼康、理光、佳能、Insta360 的指定机型固件。
-- 使用单独构建的定制 QEMU，启动已验证的尼康 Z7 C3.80、Z30 C1.20、Z6 C3.80 原厂菜单实验。
+- 使用单独构建的定制 QEMU，启动已验证的尼康 Z7 C3.80、Z30 C1.20、Z6 C3.80、Z50 C2.60 原厂菜单实验。
+- 启动 Insta360 X3 原厂 emWin 界面，已验证触摸切换 72MP → 18MP → 72MP。
+- 导入 GoPro HERO8 2.51 官方升级包，配置独立 UI 平台后运行原厂 Tara 拍摄页与 VIDEO 菜单。
+- 校验并离线解包适马 fp 5.02 的 DFI/LZSS 主程序；输出已与原厂解压函数执行结果逐字节核对，UI 启动仍在开发。
 - 从工作台或 CLI 限时验证索尼 A7 IV、理光 GR 和 Insta360 X3 的原厂 Linux/根文件系统启动。
 - QEMU 中原厂 UI 实时画面、鼠标触控、启动 / 停止、PNG 截图。
 - 中文 / English、跟随系统 / 浅色 / 深色、紫 / 蓝 / 绿主题。
@@ -51,17 +56,41 @@
 | 未知 / 专有升级包 | 可分析并建立支持工作区，尚未验证启动 |
 | 尼康 Z7 C3.80 / Z30 C1.20 | 原厂菜单、进入子菜单与返回已验证；辅助启动，独立定制 QEMU / WSL |
 | 尼康 Z6 C3.80 | 原厂回放菜单及向下/向上选择往返已验证；辅助启动；LCD 扫描输出、自然开机与成像未验证 |
-| 索尼 A7 IV 2.00 | 原厂 Linux 与 ext2 根文件系统 shell 已启动；相机初始化和 UI 尚未完成 |
-| 索尼 A7R V 4.00 | 原厂 Linux 4.9.337-scel 与 ext2 根文件系统 shell 已启动；相机初始化与 UI 尚未完成 |
-| 理光 GR III 2.10 / IIIx 1.60 / IV 1.11 | 原厂 Linux/根文件系统 shell 已启动；三款 camctld 均处于 restrict 模式；RTOS IPC 与原厂 UI 尚未完成 |
-| Insta360 X3 v1.1.4.1_build1 | 原厂 Linux/SquashFS root shell 已启动；原厂 init 在 RTOS RPMsg 卡住，UI 未验证 |
+| 尼康 Z50 C2.60 | 同一虚拟机内 MY MENU → Add items → MY MENU 已验证；辅助启动，自然开机与成像未验证 |
+| 索尼 A7 IV 2.00 | 原厂 Linux/rootfs shell 已启动；独立组件实验已验证[原厂诊断控件、图标、字体及指针响应](docs/sony-a7iv-diagnostic-ui-verification-20261011.json)；普通相机菜单与完整开机未验证 |
+| 索尼 A7R V 4.00 | 原厂 Linux 4.9.337-scel 与 ext2 根文件系统 shell 已启动；独立组件实验已验证[原厂诊断控件、图标、字体及指针响应](docs/sony-a7rv-diagnostic-ui-verification-20261011.json)；普通相机菜单与完整开机未验证 |
+| 理光 GR III 2.10 / IIIx 1.60 | 原厂 Linux/根文件系统 shell 已启动；camctld 处于 restrict 模式；RTOS IPC 与相机 UI 未验证 |
+| 理光 GR IV 1.11 | [原厂 TopMenu → Focus 设置 → 返回已验证](scripts/boards/ricoh/evidence/griv-1.11-menu-roundtrip.json)，支持原生上下键与完整像素恢复；辅助组件已接入工作台，完整冷启动与拍摄未验证 |
+| Insta360 X3 v1.1.4.1_build1 | 原厂 emWin 分辨率菜单与触摸往返已验证；Linux root shell 也可启动；完整 ThreadX/跨核启动与拍摄未验证 |
 | 佳能 EOS 50D 1.0.9 | 原厂 DryOS 升级器已启动；主固件/UI 仍需完整 ROM 与 ROM1 种子 |
+| 佳能 EOS 70D 1.1.2 | 原厂 ROM 从复位启动，显示 720 × 480 佳能菜单，原生上下键选择往返已验证；需要精确匹配的完整 ROM 与串行闪存数据，仅官方升级包不足以启动 |
+| GoPro HERO8 Black 2.51 | 同一虚拟机内原厂 Tara 拍摄页 → VIDEO 预设菜单 → 返回已验证；属于 UI 组件辅助启动，原厂冷启动与录制未验证 |
 | 相机 UI 渲染 | QEMU TCG CPU 模拟 + Qt Quick 软件渲染 |
 | 相机 guest 硬件加速 | 当前 ARM64 guest 在 x86-64 Windows 上未实现 |
 | 拍摄、ISP、对焦、镜头、真实存储 | 未模拟 |
 | 实机安装、刷机 | 不提供 |
 
 哈苏适配器的运行方式是：**在开发虚拟机中运行原厂相机 UI，按固件选择 Android ARM32、Android ARM64 或 Linux ARMhf 运行库，并提供模拟相机服务**。它没有启动相机原厂内核，也不等于完整相机硬件仿真；部分功能不会响应，数值可能为模拟值，流畅度取决于电脑 CPU。尼康菜单实验调用原厂函数并修改 guest RAM；自然开机与完整拍摄硬件未验证。
+
+配置对应的独立构建后，**原厂 UI 实验室 / Original UI lab** 会精确选择尼康、X3、佳能 70D、理光 GR IV 或 GoPro HERO8
+适配器。参见 [Z50 启动说明](scripts/boards/nikon-z50/README.md) 和
+[X3 启动说明](scripts/boards/insta360/UI_README.md)。X3 执行原厂控件、字体和事件
+处理，以 8 处共 68 字节的 RAM 平台适配代替调度、时钟、显示提交与消息投递；
+固件文件不变。原厂菜单成功运行不等于完整硬件开机、实时取景或视频录制。
+
+[佳能 EOS 70D 1.1.2 实验](scripts/boards/canon/README.md)从原厂 ROM 复位启动并显示
+原厂菜单，原生上下键选择、工作台启动与关闭清理已验证。需要另外提供三个精确匹配的
+ROM/串行闪存文件，官方升级包不足以启动。子页面、标签切换与拍摄尚未验证。
+
+索尼 A7 IV 与 A7R V 诊断组件属于独立研究实验：使用原厂控件、资源与字体及软件外设适配，
+诊断文字由开发者提供。它尚未接入 **原厂 UI 实验室** 按钮；普通相机菜单、
+完整开机均未验证。
+
+[理光 GR IV 组件实验](scripts/boards/ricoh/README.md)已接入 **原厂 UI 实验室** 按钮。
+配置独立构建后，导入精确匹配的官方 1.11 `fwdc248b.bin`，程序自动解包并验证原始数据。
+系统 QEMU 执行原厂 TopMenu、Focus 设置页、字体与图标，提供只读资源和软件显示接口；
+原生上下键、确认进入和返回均已验证。辅助接口调用原过渡完成函数；完整 RTOS 动画计时、
+冷启动、物理 LCD、拍摄与跨核 IPC 未验证。
 
 新增 Linux 实验使用独立定制 QEMU 板型、开发设备树和明确的引导设置。导入、解包匹配固件后，按[多品牌相机固件记录](docs/CAMERA_FIRMWARE.md)配置本地构建。点击 **启动相机 Linux 实验**运行 30 秒验证，**取消**停止该任务拥有的虚拟机；串口启动证据与相机 UI 状态分别记录。
 
@@ -110,8 +139,8 @@ ABI；它只在独立的本地 QEMU 会话运行，不会安装到实机。
 安装 Python **3.11+**，克隆仓库，双击 `Launch.cmd`。首次自动建立 `.venv` 并安装依赖。
 
 ```powershell
-git clone https://github.com/derrickyau9/Hasselblad-X-System-QEMU-DevKit.git
-cd Hasselblad-X-System-QEMU-DevKit
+git clone https://github.com/derrickyau9/QEMU-Everything.git
+cd QEMU-Everything
 .\Launch.cmd
 ```
 

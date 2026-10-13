@@ -15,12 +15,17 @@ binaries are separate local inputs; they are not shipped in this repository.
 | Nikon Z7 C3.80 | All module and package CRCs pass / 模块、整包 CRC 通过 | **Original menu and DOWN navigation verified / 原厂菜单及向下导航已验证** | Assisted startup modifies guest RAM; natural power-on and full imaging hardware unverified / 辅助启动修改 guest RAM，自然开机及完整拍摄硬件未验证 |
 | Nikon Z30 C1.20 | CRC-checked MAIN with original CRC tail restored / 校验 MAIN 并保留原 CRC 尾巴 | **Original menu, submenu and return verified / 原厂菜单、子菜单与返回已验证** | GDB assisted startup; natural power-on and imaging unverified / GDB 辅助启动，自然开机与成像未验证 |
 | Nikon Z6 C3.80 | CRC-checked MAIN with original CRC tail restored / 校验 MAIN 并保留原 CRC 尾巴 | **Original Playback menu and DOWN/UP selection verified / 原厂回放菜单与向下/向上选择已验证** | GDB assisted GPU-surface inspection; LCD scanout, natural boot and imaging unverified / GDB 辅助读取 GPU surface；LCD 扫描输出、自然开机与成像未验证 |
-| Nikon Z50 C2.60, Z7II C1.70, Z8 C3.11 | CRC-checked packages/modules / 包及模块 CRC 通过 | Not locally boot verified / 未验证启动 | Separate model-specific emulator and firmware fingerprint / 各自的模拟器与固件指纹 |
-| Sony A7 IV / ILCE-7M4 2.00 | AES/FDAT and FAT component checks pass / 解密、校验与 FAT 组件提取通过 | Linux/root shell verified, camera UI unverified / Linux 和 root shell 已验证，相机 UI 未验证 | Original init faults in cryptEmmc_setKeyCovertly; storage, IPC and display / 原厂 init 在该函数异常，缺存储、IPC 与显示 |
-| Sony A7R V / ILCE-7RM5 4.00 | AES/FDAT and FAT component checks pass / 解密、校验与 FAT 组件提取通过 | Linux/root shell verified, camera UI unverified / Linux 和 root shell 已验证，相机 UI 未验证 | Original init faults in cryptEmmc_setKeyCovertly; storage, IPC and display / 原厂 init 在该函数异常，缺存储、IPC 与显示 |
-| Ricoh GR III 2.10, IIIx 1.60, IV 1.11 | Checked ROMFS and IV SquashFS extraction / ROMFS 与 IV SquashFS 提取校验通过 | Linux/root shells verified, camera UI unverified / Linux 和 root shell 已验证，相机 UI 未验证 | camctld restrict mode; missing RTOS IPC/display / camctld 受限模式，缺 RTOS IPC 与显示 |
-| Insta360 X3 v1.1.4.1_build1 | Six components, MD5/CRC checked / 六组件，MD5/CRC 通过 | Linux/root shell verified, camera UI unverified / Linux 和 root shell 已验证，相机 UI 未验证 | Original init RPMsg fault; RTOS cooperation and display / 原厂 init 的 RPMsg 异常，缺 RTOS 协作与显示 |
+| Nikon Z50 C2.60 | CRC-checked MAIN with original tail / 校验 MAIN 与原 CRC 尾巴 | **MY MENU → Add items → MY MENU verified / 原厂菜单进入与返回已验证** | Assisted startup and model-specific board; natural power-on and imaging unverified / 辅助启动与专用板级适配，自然开机与成像未验证 |
+| Nikon Z7II C1.70, Z8 C3.11 | CRC-checked packages/modules / 包及模块 CRC 通过 | Not locally boot verified / 未验证启动 | Separate model-specific emulator and firmware fingerprint / 各自的模拟器与固件指纹 |
+| Sony A7 IV / ILCE-7M4 2.00 | AES/FDAT and FAT component checks pass / 解密、校验与 FAT 组件提取通过 | Linux/root shell and separate original diagnostic component verified / Linux、root shell 与独立原厂诊断组件已验证 | Normal camera menus and complete boot unverified; original init faults in cryptEmmc_setKeyCovertly / 普通相机菜单与完整开机未验证，原厂 init 在该函数异常 |
+| Sony A7R V / ILCE-7RM5 4.00 | AES/FDAT and FAT component checks pass / 解密、校验与 FAT 组件提取通过 | Linux/root shell and separate original diagnostic component verified / Linux、root shell 与独立原厂诊断组件已验证 | Normal camera menus and complete boot unverified; original init faults in cryptEmmc_setKeyCovertly / 普通相机菜单与完整开机未验证，原厂 init 在该函数异常 |
+| Ricoh GR III 2.10, IIIx 1.60 | Checked ROMFS extraction / ROMFS 提取校验通过 | Linux/root shells verified / Linux 和 root shell 已验证 | camctld restrict mode; camera UI and RTOS IPC unverified / camctld 受限模式，相机 UI 与跨核 IPC 未验证 |
+| Ricoh GR IV 1.11 | Checked ROMFS, SquashFS, RES and ICONBIN extraction / ROMFS、SquashFS、RES 与 ICONBIN 提取校验通过 | Linux/root shell and separate original TopMenu component with native Down/Up verified / Linux、root shell 与独立原厂菜单组件及原生上下键已验证 | Assisted RTOS software-display lab; full cold boot, LCD, capture and IPC unverified / 辅助 RTOS 软件显示实验，完整冷启动、LCD、拍摄与 IPC 未验证 |
+| Insta360 X3 v1.1.4.1_build1 | Six components, MD5/CRC checked / 六组件，MD5/CRC 通过 | **Original emWin menu and 72MP → 18MP → 72MP touch roundtrip / 原厂菜单与触摸往返已验证** | GUI platform adapter: eight RAM hooks, 68 bytes; full ThreadX boot, RTOS/Linux IPC and imaging unverified / 界面适配修改 8 处共 68 字节 RAM；完整开机、跨核 IPC 与成像未验证 |
 | Canon EOS 50D 1.0.9 | FIR/updater checks and original-code KDF verification / FIR、升级器及原代码 KDF 校验 | Original updater runs; shooting UI unverified / 原升级器已执行，拍摄 UI 未验证 | Full ROM0/ROM1 and ROM1 payload seed / 完整 ROM0/ROM1 与 ROM1 解密种子 |
+| Canon EOS 70D 1.1.2 | Exact complete ROM0, ROM1 and SFDATA set / 精确匹配的完整 ROM0、ROM1、SFDATA | Original reset boot and 720 × 480 menu; native Down/Up roundtrip / 原厂复位启动及菜单，原生上下键往返 | Requires complete ROMs; battery-information page and imaging remain unsupported / 需要完整 ROM；电池信息页与成像尚不支持 |
+| GoPro HERO8 Black 2.51 | Exact official UPDATE.zip or DATA.bin; original MILBEAUT RTOS volume / 精确匹配官方升级包及原厂 RTOS 卷 | Original Tara camera → VIDEO presets → native Back / 原厂拍摄页、VIDEO 预设菜单与原生返回已验证 | Assisted component; software display, timers, mutexes and finite heap. Full reset and recording unverified / 组件辅助启动，软件显示、时钟、互斥锁及有限堆；完整复位启动与录制未验证 |
+| Sigma fp 5.02 | Exact official DFI update; outer/packed SUM and MAIN SHA-256 / 精确匹配官方 DFI，外层、压缩段及主程序校验通过 | Original IPL decoder reproduces all 49,481,728 declared MAIN bytes / 原厂解压函数复现完整声明范围 | MAIN extraction implemented; RTOS and original UI not yet verified / 主程序解包已接入，RTOS 与原厂 UI 尚未验证 |
 
 For Z50, Z7II and Z8, [static board comparison](nikon-remaining-board-analysis-20261011.json)
 records independently checked module CRCs and actual instruction/RAM differences.
@@ -29,6 +34,22 @@ Neither a similar name nor a decrypted package establishes compatible hardware.
 
 Z50、Z7II、Z8 的上述静态比较记录了独立复核的 CRC、实际指令与 RAM 地址差异；
 Z8 使用 AArch64，旧菜单适配器使用 AArch32 及对应机型 API，不能互相替代。
+
+Z50 has since been ported independently using the credited Z30 QEMU research;
+see [its actual UI/input evidence](nikon-z50-lab-verification-20261011.json).
+X3's original GUI is a separate assisted component lab, with original frame and
+touch evidence in [the X3 record](insta360-x3-ui-verification-20261011.json).
+Both profiles are accessible from **Original UI lab** after their exact builds
+are configured. Z50 已完成独立移植；X3 已辅助启动原厂界面组件，两者的证据与
+介入项均单独记录，不代表完整硬件开机。
+
+Sony A7 IV 2.00 and A7R V 4.00 also render original diagnostic widgets, an original icon and
+native fonts, with two verified pointer responses per model. See [A7 IV component evidence](sony-a7iv-diagnostic-ui-verification-20261011.json) and [A7R V component evidence](sony-a7rv-diagnostic-ui-verification-20261011.json).
+This separate QEMU user-mode experiment uses software peripheral support and
+developer supplied diagnostic text; it is not an Original UI lab profile.
+Normal camera menus and complete boot remain unverified.
+索尼 A7 IV 与 A7R V 的独立诊断组件已验证原厂控件、图标、字体和指针输入出帧；
+诊断文字由开发者提供，尚未接入原厂 UI 按钮，普通相机菜单与完整开机未验证。
 
 CRC/additive checks detect corruption. They do **not** authenticate a vendor
 signature or authorize a modified update. A running QEMU process, exit code 0,
@@ -252,14 +273,25 @@ extents. GR III/IIIx also yield `ramdisk.cpio.gz` from `/initramfs`, with a chec
 gzip stream and CPIO header. GR IV has a separate, structurally checked LZ4
 SquashFS rootfs (`rootfs.squashfs`), including validated superblock/table bounds.
 All three original Linux/rootfs shells now boot in the Milbeaut lab described
-below. The RTOS camera UI remains unverified. Pentax packages use other formats
+below. GR IV additionally runs an assisted original RTOS TopMenu component with
+native Down/Up, Confirm into Focus settings and Back with exact pixel restoration.
+The exact official 1.11 BIN imports through the workbench and selects **Original
+UI lab** after its separate build is configured. Its software display,
+read-only resource storage and original transition-completion calls do not
+verify physical LCD, animation timers, full camera cold boot, capture or
+Linux/RTOS IPC. [Exact component evidence](../scripts/boards/ricoh/evidence/griv-1.11-menu-roundtrip.json).
+GR III/IIIx camera UI remains unverified. Pentax packages use other formats
 and are outside this reader's coverage.
 
 验证完整输入、解码输出的字加法校验后生成 `payload.bin`；仅沿已验证的 ROMFS
 inode 路径与范围提取内核、设备树。III/IIIx 的 `/initramfs` 还生成经 gzip 与 CPIO
 头校验的 `ramdisk.cpio.gz`。IV 另有 LZ4 SquashFS 根文件系统，已验证超级块、表和
 范围后提取为 `rootfs.squashfs`。三款原厂 Linux/根文件系统 shell 已在下述 Milbeaut
-实验启动；RTOS 相机 UI 仍未验证，宾得包属于其他格式。
+实验启动。GR IV 另已辅助启动原厂 RTOS TopMenu 组件，并验证原生上下键、确认进入
+Focus 设置和返回后的完整像素恢复；配置独立构建后，可通过工作台导入官方 1.11 BIN
+并点击原厂 UI 实验室启动，也提供 CLI/本机查看器。软件显示、只读资源
+存储和原列表完成函数不代表物理 LCD、动画计时、完整冷启动、拍摄或跨核 IPC 已实现。
+III/IIIx 相机 UI 仍未验证；宾得包属于其他格式。
 
 ## Evidence and next board work / 证据与板级开发
 
@@ -290,20 +322,30 @@ inode 路径与范围提取内核、设备树。III/IIIx 的 `/initramfs` 还生
   shared-memory metadata description resolves the IIIx library's NULL dereference.
   All three original `camctld` programs run and produce a ready file but stay in `restrict` mode,
   without an RTOS IPC peer. Neither file creation nor Linux boot proves camera UI.
-  An independent GR IV RTOS reset board now advances three original cores through
+  An earlier independent GR IV RTOS reset checkpoint advanced three original cores through
   MMU setup, SRAM rendezvous, SVC tasks and timer IRQs. A finite five-second run
   records 583 SVC and 2 IRQ exceptions. USB3 glue configuration and a 40 MHz
-  standard system counter resolve the next two faults. The latest actual CPU 2
-  abort is at unimplemented MMIO `0x28825000`; register reset values/semantics
+  standard system counter resolved the next two faults. That reset-only CPU 2
+  abort was at unimplemented MMIO `0x28825000`; register reset values/semantics
   remain unknown. The optional bootloader GIC flag is an explicit intervention;
-  Linux/RTOS IPC and original display are still missing. See the separate reset
-  probe in the Ricoh board README.
+  Linux/RTOS IPC and physical display remain unverified. A later, separate
+  assisted TopMenu component renders original fonts/icons and verifies native
+  Down/Up pixel restoration. A later public component run also verifies native
+  Confirm into Focus settings and Back, with no data abort in the recorded run.
+  It bypasses hardware startup waits, supplies a software surface and exact
+  read-only resources, and completes original list transitions explicitly.
+  Original default DateTime construction supplies the background log cache;
+  this does not emulate a real clock or establish complete camera cold boot.
+  See the Ricoh board README and
+  [component evidence](../scripts/boards/ricoh/evidence/griv-1.11-menu-roundtrip.json).
 - **Insta360 X3**: valid ARM64 Image, SquashFS and Ambarella H22 DTB were extracted.
   The independent H22 board now boots Linux 4.9.76 and the original SquashFS to a
   root shell with native command/proof-token verification. It supplies UART and
   GIC setup, a development DTB and explicitly incomplete peripheral register stubs.
   Original init executes through `S99bootdone`, then faults in RPMsg without the
-  RTOS endpoint. Camera UI is unverified; encrypted Luna/MWFI remains unsupported.
+  RTOS endpoint. This Linux/RTOS boot route has not displayed the camera UI;
+  the separate assisted original X3 GUI is verified below. Encrypted Luna/MWFI
+  remains unsupported.
 - **Canon**: the original updater can be decoded, but EOS 50D main-image decoding
   requires its ROM1-derived seed; the KDF has been independently checked against
   original updater guest code. The original DryOS updater now runs in pinned
@@ -323,6 +365,8 @@ Build instructions and explicit interventions:
 - [Canon EOS updater and ROM gates](../scripts/boards/canon/README.md)
 - [Nikon Z30 assisted menus](../scripts/boards/nikon-z30/README.md)
 - [Nikon Z6 assisted menus](../scripts/boards/nikon-z6/README.md)
+- [Nikon Z50 assisted menus](../scripts/boards/nikon-z50/README.md)
+- [Insta360 X3 original GUI](../scripts/boards/insta360/UI_README.md)
 
 After configuring the model's JSON file in the DevKit data home, select its
 imported firmware. **Start camera Linux lab** performs a bounded shell check;
@@ -370,9 +414,9 @@ bundles include no decrypted payloads, recovered tables or proprietary artwork.
 
 Legacy Nikon FR/TX + ITRON emulation is a separate architecture. Recent Nikon
 encrypted formats, modern Canon FIR, other Insta360 models and Pentax formats
-are not covered by the tested readers. Fujifilm, Panasonic, OM System and GoPro
+are not covered by the tested readers. Fujifilm, Panasonic and OM System
 remain future platform work with no local boot claim.
 
 老尼康 FR/TX + ITRON 是另一套架构。较新的尼康加密格式、现代佳能 FIR、其他
-Insta360 和宾得格式未被这些实测解析器覆盖。富士、松下、OM System、GoPro
+Insta360 和宾得格式未被这些实测解析器覆盖。富士、松下、OM System
 仍需独立开发与验证。

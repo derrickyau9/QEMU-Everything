@@ -427,3 +427,22 @@ def test_builder_rejects_hardlinked_manifest_before_execution(tmp_path, monkeypa
     monkeypatch.setattr(subprocess, 'run', lambda *a, **k: pytest.fail('A linked manifest must not launch the builder'))
     with pytest.raises(ValueError, match='Hardlinked'): exec(compile(script, 'authored-build-preflight', 'exec'), {})
     assert target.read_bytes() == b'keep linked manifest'
+
+
+def test_builder_isolates_python_without_breaking_qemu_sibling_imports(tmp_path, monkeypatch):
+    project=tmp_path/'profile';project.mkdir();work=tmp_path/'new-work'
+    script=(lab.RUNNER.parent/'build.sh').read_text(encoding='utf-8').split("<<'PY'\n",1)[1].rsplit('\nPY',1)[0]
+    monkeypatch.setattr(sys,'argv',['build',str(project),str(work)])
+    monkeypatch.setenv('PYTHONSAFEPATH','1');monkeypatch.setenv('PYTHONPATH','authored-poison');monkeypatch.setenv('PYTHONHOME','authored-poison')
+    monkeypatch.setattr(subprocess,'check_output',lambda args,**kwargs:lab.REVISION if 'rev-parse' in args else '')
+    observed=[]
+    def build(command,**kwargs):
+        observed.append((command,kwargs))
+        assert command[1:4]==['-I','-S','-B']
+        assert all(key not in kwargs['env'] for key in ('PYTHONSAFEPATH','PYTHONPATH','PYTHONHOME'))
+        assert kwargs['env']['PYTHONNOUSERSITE']=='1'
+        binary=work/'build/qemu-system-arm';binary.parent.mkdir(parents=True);binary.write_bytes(b'authored executable')
+        write_json(project/'.local/build-manifest.json',{'binary':str(binary),'binary_sha256':hashlib.sha256(binary.read_bytes()).hexdigest()})
+    monkeypatch.setattr(subprocess,'run',build)
+    exec(compile(script,'authored-isolated-builder','exec'),{})
+    assert len(observed)==1 and (project/'.build/build/qemu-system-arm').read_bytes()==b'authored executable'

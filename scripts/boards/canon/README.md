@@ -1,4 +1,68 @@
-# Canon EOS 50D offline lab
+# Canon EOS offline labs
+
+## EOS 70D 1.1.2 original ROM menu
+
+The exact tested 70D ROM set boots from the original reset vector in the pinned
+qemu-eos machine. Its original 720×480 settings menu, firmware-version label,
+and Down/Up selection roundtrip have been verified from guest pixels. No
+Magic Lantern binary, GDB startup hook or replacement menu is used. The
+emulator supplies its existing recorded MPU replies and virtual peripherals;
+the temporary BOOTDISK flag is set to zero. This is not a claim of complete
+camera hardware, photography or LiveView support.
+
+**Current limits:** only the tested settings-page Up/Down roundtrip is a
+verified input gate. Battery-information entry, tab switching and further
+submenus have not passed; some may leave the guest waiting. Cancel/restart
+the lab to restore its original private ROM copy. The physical camera is
+never connected, and changes to temporary ROMs/cards are discarded.
+
+A normal update FIR cannot substitute for the complete ROMs and serial-flash
+data. Supply your own files separately; no vendor firmware or ROM is included
+or downloaded by this adapter. The exact matching private entry is imported
+with:
+
+```sh
+python -m devkit.canon_ui import-roms --rom0 /path/ROM0.BIN \
+  --rom1 /path/ROM1.BIN --sf /path/SFDATA.BIN --output /path/new-private-entry
+```
+
+The reviewed file lengths are 8 MiB, 16 MiB and 16 MiB respectively. Import
+checks all three full SHA-256 values, preserves inputs and refuses overwrites,
+links and other ROM sets. A separately built qemu-eos is required (see below).
+Its build writes `canon-ui-build.json`; create `canon-ui-lab.json` in your
+workbench data directory with its `revision`, absolute Linux `qemu` path,
+`qemu_sha256`, and an explicit `distro` such as `Debian`.
+
+```sh
+python -m devkit.canon_ui check /path/private-entry --home /path/workbench-data --seconds 30
+python -m devkit.canon_ui run /path/private-entry --home /path/workbench-data
+```
+
+Windows uses the configured WSL distribution. The interactive viewer binds
+only `http://127.0.0.1:8793`; `/status` and `/frame.png` expose the same live
+guest. Each probe uses one QEMU instance and requires the original menu,
+changed Down frame and exact Up return pixels; an exit code or key log alone
+does not pass. Cancellation sends a bounded stop to the owned supervisor,
+which closes its viewer and reaps its own QEMU process. Other sessions are
+not stopped.
+
+The private research input's provenance is the author's documented physical
+70D 1.1.2 dump in
+[peva3/magiclantern_70D](https://github.com/peva3/magiclantern_70D/tree/302806f5fb58a52ce458f65fb9612430ea0cf589),
+commit `302806f5fb58a52ce458f65fb9612430ea0cf589`. That provenance is an author
+statement, not Canon authentication. Its proprietary ROM bytes are not
+covered by the emulator's GPL license and are not redistributed here.
+This success does not establish EOS 50D or other Canon-model UI support.
+The [hash-only verification record](70d-112-ui-verification.json) records the
+exact sources, guest frames, input sequence and boundaries of this result;
+it contains no Canon image, ROM, secret or screenshot bytes.
+
+70D 原厂 ROM 已在固定 qemu-eos 板型中从 reset 启动，实际显示原厂菜单，
+上下键选中条像素往返已验证。需要另外提供匹配的自有 ROM0、ROM1 和串行
+闪存数据；仅有官方 FIR 升级包不足。电池页、换页和更深子菜单尚未通过，
+拍摄、LiveView 及完整硬件均未验证。关闭实验后会删除临时 ROM 和虚拟卡。
+
+## EOS 50D 1.0.9 extraction/updater lab
 
 This adapter uses [qemu-eos](https://github.com/reticulatedpines/qemu-eos/tree/4b667a1d3c08ab7a55835d15ddbd884fa754946d), pinned to commit `4b667a1d3c08ab7a55835d15ddbd884fa754946d` (GPL-2.0-or-later). Stock QEMU does not implement its `50D` machine. The independent build below runs in Windows WSL Debian or Linux and does not replace another camera's QEMU.
 

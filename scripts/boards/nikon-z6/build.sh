@@ -34,8 +34,8 @@ if subprocess.check_output(['git','-C',str(project),'status','--porcelain','--un
     raise ValueError('Tracked upstream source changed; use the fixed original checkout')
 command = [sys.executable, '-I', '-S', '-B', str(project/'tools/build.py'), '--work-dir', str(work), '--jobs', '6']
 if len(sys.argv) == 4: command += ['--archive', str(Path(sys.argv[3]).absolute())]
-environment = {k:v for k,v in os.environ.items() if k not in ('PYTHONPATH','PYTHONHOME')}
-environment.update(PYTHONSAFEPATH='1', PYTHONNOUSERSITE='1')
+environment = {k:v for k,v in os.environ.items() if k not in ('PYTHONPATH','PYTHONHOME','PYTHONSAFEPATH')}
+environment.update(PYTHONNOUSERSITE='1')
 subprocess.run(command, check=True, env=environment)
 meta = json.loads(manifest.read_text())
 source = Path(meta['binary'])

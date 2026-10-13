@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-11",
+  "firmware": {
+    "model": "Sony A7 IV / ILCE-7M4",
+    "version": "2.00",
+    "sha256": "394ac0daaeb9ce3f6ca0273a18c6af26505770e3b470f70d1d9f062e257bbe88"
+  },
+  "mode": "QEMU AArch64 user-mode original diagnostic component",
+  "original_diagnostic_ui_verified": true,
+  "normal_camera_ui_verified": false,
+  "whole_firmware_boot_verified": false,
+  "A7R_V_diagnostic_UI_verified": true,
+  "A7R_V_verification_reference": "sony-a7rv-diagnostic-ui-verification-20261011.json",
+  "pixel_frames": [
+    {
+      "component": "sample-first-pixels",
+      "width": 640,
+      "height": 480,
+      "format": "RGBA4444 little-endian",
+      "raw_sha256": "015bc88f43e8ee9e2f342566c45193929c0c74834c443a53a473ad31d9f748eb",
+      "distinct_pixel_values": 57
+    },
+    {
+      "component": "jiritsu-font-success",
+      "width": 640,
+      "height": 480,
+      "format": "RGBA4444 little-endian",
+      "raw_sha256": "6e622f1eedffc941e5e97fa4bbe3a6c51dceaa3ae5212cf2b23c1c8fbf990f59",
+      "distinct_pixel_values": 31
+    }
+  ],
+  "input": {
+    "route": "HTTP pointer coordinates -> original MsecTime -> original UXEngine mouse posts; original AdjChk diagnostic marker command 0x20000005 -> original renderer -> framebuffer",
+    "verified": true,
+    "events": [
+      {
+        "x": 210,
+        "y": 160,
+        "pixels_changed": true,
+        "before_sha256": "cab2d16ad0f0679e8e0b4134f19c61c9a2dd79a67aa13fe3cc164ba212ba38a5",
+        "after_sha256": "a7850d7948060273805fd033938391e3e252baf4e5710568be849cddfc924bc5"
+      },
+      {
+        "x": 420,
+        "y": 320,
+        "pixels_changed": true,
+        "before_sha256": "a7850d7948060273805fd033938391e3e252baf4e5710568be849cddfc924bc5",
+        "after_sha256": "00982e074c6a1386c7b243e856b7dcf0036ac526d3143952cf9b1a66aa4bfd40"
+      }
+    ]
+  },
+  "interventions": [
+    "isolated QEMU user-mode Linux syscall execution, original kernel not running in this component mode",
+    "original libObj UXEngine2, original AdjChk presenter constructors, native widget layouts and native fonts",
+    "original firmware resource 0x02001b57 decompressed by verified software LDEC compatibility device",
+    "private shared physical memory/DMM allocator and real OSAL queue/timer compatibility",
+    "software GPE handles only verified fill, identity blit, source-alpha RGBA4444 and A8 glyph tint operations; hardware GPU rounding is not claimed bit-exact",
+    "original OSD swap captures actual framebuffer after pixel write; original callback ordering maintained",
+    "sample visibility parameters explicitly activated; no original ARM instruction patches",
+    "four developer supplied diagnostic text strings rendered by original font/widgets, not camera menu text",
+    "browser converts actual RGBA4444 framebuffer to PNG; it never draws camera widgets",
+    "host pointer is routed to original diagnostic event API; not claimed real camera touch hardware"
+  ],
+  "scope_limits": [
+    "Not the normal camera application, camera menus, sensor or capture pipeline",
+    "No physical camera or host camera devices available",
+    "A7 IV 2.00 diagnostic UI verified; A7R V 4.00 diagnostic verification recorded separately; normal camera menus unverified",
+    "Unknown peripheral operations fail closed; hardware readiness is not fabricated",
+    "No firmware bytes, images, proprietary resource blobs or Backup record values in this evidence file"
+  ]
+}

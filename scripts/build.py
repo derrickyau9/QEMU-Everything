@@ -13,8 +13,14 @@ name=args.name
 if not name.replace('-','').isalnum(): raise SystemExit('Invalid build name')
 board_data = []
 board_files = []
-for path in sorted((root / 'scripts/boards').rglob('*')):
-    if path.is_file() and '__pycache__' not in path.parts and (path.suffix in ('.py', '.sh', '.c', '.inc', '.dts', '.md') or path.name == 'COPYING'):
+# Use the same public Git inventory as the source bundle. In particular, do
+# not collect JSON/Markdown from ignored board-local build or research caches.
+sources=subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','-z'],cwd=root).decode().split('\0')
+for file in sorted(set(sources)):
+    if not file or not file.startswith('scripts/boards/'):
+        continue
+    path = root / file
+    if path.is_file() and '__pycache__' not in path.parts and (path.suffix in ('.py', '.sh', '.c', '.h', '.inc', '.dts', '.md', '.json', '.S', '.ld') or path.name == 'COPYING'):
         board_files.append(path)
         board_data.extend(['--add-data', f'{path.relative_to(root)};{path.parent.relative_to(root)}'])
 subprocess.run([sys.executable,'-m','PyInstaller','--noconfirm','--clean','--windowed','--onedir',
@@ -42,7 +48,6 @@ for path in board_files:
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(path, target)
 # Corresponding project source alongside the binary; no personal caches, firmware or SDK images.
-sources=subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','-z'],cwd=root).decode().split('\0')
 firmware_suffixes = {'.bin', '.dat', '.fir', '.rom', '.cim', '.img', '.qcow2', '.raw', '.dtb'}
 with zipfile.ZipFile(output/'DevKit-source.zip','w',zipfile.ZIP_DEFLATED) as z:
     for file in sources:

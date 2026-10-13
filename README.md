@@ -4,7 +4,9 @@
 
 Formerly **Hasselblad X System QEMU DevKit**. The existing camera UI adapters remain available. QEMU Everything adds a general firmware library and reviewed boot profiles; its name describes the project's direction, not a claim that every firmware already boots.
 
-[简体中文](README.zh-CN.md) · [Download Windows app](https://github.com/derrickyau9/Hasselblad-X-System-QEMU-DevKit/releases/latest)
+[简体中文](README.zh-CN.md) · [Releases](https://github.com/derrickyau9/QEMU-Everything/releases)
+
+This is the new QEMU Everything repository. Use the source launcher below until a portable build is published here.
 
 ![QEMU Everything with the preserved Hasselblad original UI adapter](docs/workbench.png)
 
@@ -28,7 +30,11 @@ The camera UI runtime download is approximately **615 MB**. Allow **8 GB free di
 - Review JSON boot profiles for ARM64 `virt`, ARM `virt`, x86-64 `pc`, or RISC-V 64 `virt`; run compatible direct kernels or disk images with temporary disk writes and networking disabled.
 - Use the CLI to inspect, import, list boards, run and export support information.
 - Extract checked Sony, Nikon, Ricoh, Canon and Insta360 components offline; see the model/version matrix below.
-- Start verified Nikon Z7 C3.80, Z30 C1.20 and Z6 C3.80 assisted menu labs with separately built custom QEMU.
+- Start verified Nikon Z7 C3.80, Z30 C1.20, Z6 C3.80 and Z50 C2.60 assisted menu labs with separately built custom QEMU.
+- Run the original Insta360 X3 emWin GUI with native touch and a verified 72MP → 18MP → 72MP menu roundtrip.
+- Import Ricoh GR IV 1.11 and open its original Focus Settings menu, including native Confirm and Back, with a separately built UI platform.
+- Import the official GoPro HERO8 2.51 update and run its original Tara camera and VIDEO menus with a separately built UI platform.
+- Extract Sigma fp 5.02 MAIN through the reviewed offline DFI reader; original UI bringup remains in development.
 - Run bounded original Linux/rootfs checks for Sony A7 IV / A7R V, Ricoh GR and Insta360 X3 from the workbench or CLI.
 - Original firmware UI, streamed directly from a minimal Wayland compositor in QEMU.
 - Start/stop controls, correctly scaled mouse touch input and PNG screenshots.
@@ -52,11 +58,15 @@ The camera UI runtime download is approximately **615 MB**. Allow **8 GB free di
 | Unknown / proprietary updates | Inspect and create a support workspace; no automatic boot claim |
 | Nikon Z7 C3.80 / Z30 C1.20 | Original menus, submenu entry and return verified using assisted startup; custom QEMU/WSL labs |
 | Nikon Z6 C3.80 | Original Playback menu and DOWN/UP selection round trip verified using assisted startup; LCD scanout, natural boot and imaging unverified |
-| Sony A7 IV 2.00 | Original Linux and ext2 rootfs shell boot; camera initialization and UI remain incomplete |
-| Sony A7R V 4.00 | Original Linux 4.9.337-scel and ext2 rootfs shell boot; camera initialization and UI remain incomplete |
-| Ricoh GR III 2.10 / IIIx 1.60 / IV 1.11 | Original Linux/rootfs shells boot; camctld runs in restrict mode on all three; RTOS IPC and original UI remain incomplete |
-| Insta360 X3 v1.1.4.1_build1 | Original Linux/SquashFS root shell boots; original init stalls in RTOS RPMsg; UI unverified |
+| Nikon Z50 C2.60 | Original MY MENU → Add items → MY MENU verified in one QEMU instance; assisted startup, natural boot and imaging unverified |
+| Sony A7 IV 2.00 | Original Linux/rootfs shell boot; [original diagnostic widgets, icon, font and pointer response verified](docs/sony-a7iv-diagnostic-ui-verification-20261011.json) in a separate component experiment; normal camera menus and complete boot unverified |
+| Sony A7R V 4.00 | Original Linux 4.9.337-scel and ext2 rootfs shell boot; [original diagnostic widgets, icon, font and pointer response verified](docs/sony-a7rv-diagnostic-ui-verification-20261011.json) in a separate component experiment; normal camera menus and complete boot unverified |
+| Ricoh GR III 2.10 / IIIx 1.60 | Original Linux/rootfs shells boot; camctld runs in restrict mode; RTOS IPC and camera UI remain unverified |
+| Ricoh GR IV 1.11 | [Original TopMenu → Focus settings → Back verified](scripts/boards/ricoh/evidence/griv-1.11-menu-roundtrip.json), with native Up/Down and exact frame restoration; assisted component available through the workbench; full camera cold boot and imaging unverified |
+| Insta360 X3 v1.1.4.1_build1 | Original emWin resolution menu and native touch roundtrip verified with a separate GUI platform adapter; Linux root shell also boots; full ThreadX/RTOS–Linux boot and imaging unverified |
 | Canon EOS 50D 1.0.9 | Original DryOS updater boots; full ROMs/ROM1 seed are needed for main-firmware/UI bring-up |
+| Canon EOS 70D 1.1.2 | Original ROM reset boot displays the 720 × 480 Canon menu; native Down/Up selection roundtrip verified. Requires the exact complete ROM and serial-flash set; an official update alone is insufficient |
+| GoPro HERO8 Black 2.51 | Original Tara camera → VIDEO presets → Back roundtrip verified in one QEMU instance; assisted UI component startup, original cold boot and recording unverified |
 | Camera UI rendering | QEMU TCG + Qt Quick software backend |
 | Camera guest hardware acceleration | Not implemented for this ARM64 guest on x86-64 Windows |
 | Capture, ISP, AF, lens, USB camera, real storage | Not emulated |
@@ -66,9 +76,36 @@ The Hasselblad adapter runs the **original camera user interface in a developmen
 
 Additional Linux labs use independently built QEMU boards, development device trees and explicit bootloader setup. After importing and extracting a matching firmware, configure its local build as described in [camera firmware research](docs/CAMERA_FIRMWARE.md). **Start camera Linux lab** runs a 30-second check; **Cancel** stops its owned guest. This provides serial boot evidence, with camera UI status recorded separately.
 
+The **Original UI lab** entry also selects the exact Nikon, X3, Canon 70D, Ricoh GR IV or GoPro HERO8 profile when its
+separate build is configured. See [Z50 setup](scripts/boards/nikon-z50/README.md)
+and [X3 setup](scripts/boards/insta360/UI_README.md). X3 executes original widgets,
+fonts and handlers with eight explicit platform hooks in guest RAM (68 bytes);
+it bypasses the ThreadX scheduler. Verified original menus do not establish
+complete camera boot, live view or recording.
+
+The [Canon EOS 70D 1.1.2 lab](scripts/boards/canon/README.md) boots the original
+ROM from reset and displays the original menu. Native Down/Up selection and
+workbench startup/cleanup are verified. It requires three exact ROM/serial-flash
+files supplied separately; an official update is insufficient. Subpages, tab
+navigation and imaging remain unverified.
+
+The Sony A7 IV and A7R V diagnostic components are separate research experiments. They run
+original widgets, resources and fonts with software peripheral support;
+diagnostic text is supplied by the developer. These experiments are not integrated into the
+**Original UI lab** button. Normal camera menus and complete boot remain unverified.
+
+The [Ricoh GR IV component lab](scripts/boards/ricoh/README.md) is available through
+the workbench's **Original UI lab** button after the separate build is configured.
+Import the exact official 1.11 `fwdc248b.bin`; the importer extracts and validates
+its original payload. System QEMU executes original TopMenu, Focus settings,
+fonts and icons with read-only resources and a software display. Native Up/Down,
+Confirm and Back are verified. The adapter calls the original transition-completion
+API; full RTOS animation timing, camera cold boot, physical LCD, capture and
+Linux/RTOS IPC remain unverified.
+
 A firmware signature or CPU architecture is only an inspection result. Booting the original system also requires an appropriate board, boot chain and drivers. Generic `virt`/`pc` profiles do not reproduce proprietary camera SoCs. Unrecognized firmware receives a draft support workspace so those requirements can be investigated and recorded. Verified camera UI compatibility remains in [the verification matrix](docs/VERIFICATION.md).
 
-Depending on the firmware, a local development copy adapts embedded QML image visibility or the legacy root window for software rendering. The original executable is retained, executable instructions are not patched, and no modified firmware is written back to the `.cim` file. See [architecture](docs/ARCHITECTURE.md).
+In the Hasselblad adapter, a local development copy adapts embedded QML image visibility or the legacy root window for software rendering. The original executable is retained, executable instructions are not patched, and no modified firmware is written back to the `.cim` file. See [architecture](docs/ARCHITECTURE.md).
 
 ## Develop an app
 
@@ -96,8 +133,8 @@ in a separate local QEMU session and does not install on a physical camera.
 Install Python **3.11+**, clone the repository, and double-click `Launch.cmd`. It creates a local virtual environment and installs dependencies on the first run.
 
 ```powershell
-git clone https://github.com/derrickyau9/Hasselblad-X-System-QEMU-DevKit.git
-cd Hasselblad-X-System-QEMU-DevKit
+git clone https://github.com/derrickyau9/QEMU-Everything.git
+cd QEMU-Everything
 .\Launch.cmd
 ```
 

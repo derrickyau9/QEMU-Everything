@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "recorded_on": "2026-10-11",
+  "profile": "canon-70d-112-rom-ui-v1",
+  "model": "Canon EOS 70D",
+  "firmware": "1.1.2",
+  "scope": "Original settings-menu execution from the original ROM reset vector, with a verified native Down/Up selection roundtrip in one QEMU instance.",
+  "emulator": {
+    "repository": "https://github.com/reticulatedpines/qemu-eos",
+    "revision": "4b667a1d3c08ab7a55835d15ddbd884fa754946d",
+    "license": "GPL-2.0-or-later",
+    "machine": "70D,firmware=boot=0",
+    "tested_binary_bytes": 204301808,
+    "tested_binary_sha256": "58b1cf3e03a15ea3246ff1c0ffec7df5aafc1ec61f5c48d36d69364634fe9ff0",
+    "tracked_source_changes": false
+  },
+  "input_provenance": {
+    "repository": "https://github.com/peva3/magiclantern_70D",
+    "revision": "302806f5fb58a52ce458f65fb9612430ea0cf589",
+    "statement": "The repository author describes these as a physical EOS 70D 1.1.2 dump. This is an author statement, not Canon authentication.",
+    "proprietary_bytes_included": false,
+    "firmware_downloaded_by_adapter": false,
+    "files": [
+      {"name": "ROM0.BIN", "bytes": 8388608, "sha256": "841f20ec42c4f20032d2c472fb44ff0f55f1353691233e6fd18757836d3647bc", "git_blob": "cd0c62e166dff489cc8e4682922e6a3722b14712"},
+      {"name": "ROM1.BIN", "bytes": 16777216, "sha256": "3fe42299deb577b269b6901f40597a1939ac5876f22c8c3a0b6ee47219fdd42e", "git_blob": "ddeefa968f6b3e6d0ac720745e09eff01dcb4bc1"},
+      {"name": "SFDATA.BIN", "bytes": 16777216, "sha256": "a72aa76c6d58bf9d288cf845d75814508e92387b203de63086f9dccff14ad1ab", "git_blob": "053bd0e16d8d18b6d1ca2b55bf4faf02a9b42b84"}
+    ]
+  },
+  "implementation": [
+    {"path": "devkit/canon_ui.py", "sha256": "6a28f6bd9a08a25423e557519afc2199c11cad10aa0c7b4a2e8ff40ea55a4916"},
+    {"path": "scripts/boards/canon/run_ui.py", "sha256": "32a1f9dd143696ef470a2e9c9493867b7427760099c0e1934fa23c4dfdbd1f75"},
+    {"path": "scripts/boards/canon/build-canon-eos.sh", "sha256": "6dff9e933cefe1cb83f1db1804e5f71718cb55f65dff41ed21a19415ae765a8d"},
+    {"path": "scripts/boards/canon/README.md", "sha256": "499d16a49a89efd78f6e420f0801cb4f6f152ff371df13a5669b5653b2ab6fe0"},
+    {"path": "tests/test_canon_ui.py", "sha256": "5e0b594509c507a19df39b6b45dffe1166d1ab2c10272147cc06ceb27ee12004"}
+  ],
+  "observed_run": {
+    "id": "4361cc99049242809a00d413a467b23f",
+    "api": "devkit.canon_ui.run_menu_probe",
+    "qemu_instances": 1,
+    "original_reset_boot_verified": true,
+    "original_ui_verified": true,
+    "native_navigation_verified": true,
+    "uart_marker": "startupInitializeComplete",
+    "inputs": [{"qcode": "m", "seconds": 10.043}, {"qcode": "down", "seconds": 15.038}, {"qcode": "up", "seconds": 20.027}],
+    "frames": [
+      {"name": "01-menu", "width": 720, "height": 480, "rgb_sha256": "e20d2a148fc5879e9be86b6709bc8a1ac4f34fff6f01d638f6a6c0f25ba51c6d", "ppm_sha256": "547276d0fdc60a85d5d57bbddabd46dbd38cd410df168e15ea2fc9e21fc7f573"},
+      {"name": "02-down", "width": 720, "height": 480, "rgb_sha256": "3629aef4215d164bddf110a43fe2ef68d28fec2f56a10b48446a6875882e49f4", "ppm_sha256": "497fbe2c749e7756d67fd99a8b28a863695a320058a3ad369b676a2d2b91e20d"},
+      {"name": "03-up", "width": 720, "height": 480, "rgb_sha256": "e20d2a148fc5879e9be86b6709bc8a1ac4f34fff6f01d638f6a6c0f25ba51c6d", "ppm_sha256": "547276d0fdc60a85d5d57bbddabd46dbd38cd410df168e15ea2fc9e21fc7f573"}
+    ],
+    "independent_visual_review": true,
+    "down_pixels_changed": true,
+    "up_pixels_exactly_returned": true,
+    "qemu_exit_code": 0,
+    "transport_exit_code": 0,
+    "process_reaped": true,
+    "source_hashes_unchanged": true,
+    "qemu_hash_unchanged": true,
+    "elapsed_seconds": 23.036
+  },
+  "workbench_smoke": [
+    {
+      "kind": "source GUI",
+      "session": "844c7298e8fa4d5d96ac2398f0c7cc0e",
+      "guest_run": "01f637a2c3fc44e389573db1c831fcd2",
+      "original_menu_verified": true,
+      "original_reset_boot_verified": true,
+      "rgb_sha256": "e20d2a148fc5879e9be86b6709bc8a1ac4f34fff6f01d638f6a6c0f25ba51c6d",
+      "source_hashes_unchanged": true,
+      "qemu_hash_unchanged": true,
+      "qemu_exit_code": 0,
+      "transport_exit_code": 0,
+      "owned_guest_processes_reaped": true,
+      "cleanup_errors": [],
+      "native_navigation_checked_in_this_smoke": false
+    },
+    {
+      "kind": "frozen Windows GUI",
+      "session": "c9e85df2f8c240419e6eced34fba1170",
+      "guest_run": "7bd89c9ceda84a04baa31580b824fad9",
+      "original_menu_verified": true,
+      "original_reset_boot_verified": true,
+      "assisted_startup": false,
+      "actual_command_used_bundled_runner": true,
+      "rgb_sha256": "e20d2a148fc5879e9be86b6709bc8a1ac4f34fff6f01d638f6a6c0f25ba51c6d",
+      "source_hashes_unchanged": true,
+      "qemu_hash_unchanged": true,
+      "qemu_exit_code": 0,
+      "transport_exit_code": 0,
+      "owned_guest_processes_reaped": true,
+      "cleanup_errors": [],
+      "native_navigation_checked_in_this_smoke": false
+    }
+  ],
+  "interventions": {
+    "custom_hardware_model": true,
+    "recorded_mpu_replies": true,
+    "temporary_bootdisk_data_flag_set_to_zero": true,
+    "empty_fat16_sd_cf_snapshot_media": true,
+    "networking_disabled": true,
+    "gdb_startup_hook": false,
+    "firmware_instructions_patched": false,
+    "magic_lantern_loaded": false,
+    "replacement_menu": false
+  },
+  "limits": {
+    "battery_information_page_verified": false,
+    "tab_switching_verified": false,
+    "deeper_submenus_verified": false,
+    "photography_verified": false,
+    "liveview_verified": false,
+    "full_camera_hardware_verified": false,
+    "other_canon_models_verified_by_this_result": false,
+    "note": "Some unverified entries may leave the guest waiting for unimplemented hardware. Cancel and restart to restore the temporary ROM/card state. An official FIR update cannot replace the exact complete ROM set."
+  },
+  "tests": {"canon_related_passed": 113, "canon_related_optional_skipped": 1},
+  "distribution": {"rom_bytes": false, "vendor_images": false, "screenshots": false, "host_absolute_paths": false}
+}

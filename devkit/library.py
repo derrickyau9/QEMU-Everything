@@ -49,6 +49,12 @@ def import_firmware(source, library, task=None):
         report['adapter'] = 'hasselblad-ui'
         write_json(device / 'inspection.json', report)
         return device
+    from .gopro_firmware import supported_source, import_update
+    if supported_source(digest):
+        return import_update(source, device, task, inspection=report)
+    from .ricoh_ui import supported_source as ricoh_supported, import_update as import_ricoh
+    if ricoh_supported(digest):
+        return import_ricoh(source, device, task, inspection=report)
     for adapter in adapters():
         if adapter.matches(report):
             task.report(f'Adapter / 适配器: {adapter.label}')

@@ -30,12 +30,12 @@
       "id": "ricoh-gr",
       "brand": "Ricoh",
       "family": "GR III / IIIx / IV frame container",
-      "status_en": "GR III 2.10, IIIx 1.60 and IV 1.11 original Linux/rootfs shells are verified in a custom Milbeaut lab. All three camctld programs run in restrict mode; camera UI boot remains unverified.",
-      "status_zh": "GR III 2.10、IIIx 1.60 和 IV 1.11 的原厂 Linux/根文件系统 shell 已在定制 Milbeaut 实验验证；三款 camctld 均处于 restrict 模式，原厂相机 UI 尚未启动。",
+      "status_en": "GR III 2.10, IIIx 1.60 and IV 1.11 original Linux/rootfs shells are verified. GR IV additionally runs original TopMenu and Focus settings with native Confirm/Back in an assisted QEMU UI lab integrated into the workbench.",
+      "status_zh": "GR III 2.10、IIIx 1.60 和 IV 1.11 的原厂 Linux/根文件系统 shell 已验证。GR IV 另已辅助运行原厂 TopMenu 与 Focus 设置页，原生确认/返回通过，并接入工作台 UI 实验室。",
       "official_url": "https://www.ricoh-imaging.co.jp/english/support/digital/gr3x_s.html",
       "verified_samples": ["GR III 2.10", "GR IIIx 1.60", "GR IV 1.11"],
-      "boot_gap_en": "Development DTB and GIC setup are required. GR IV's separate original RTOS trace reaches tasks/IRQs after USB3 glue and system-counter models, then faults at unimplemented MMIO 0x28825000. Linux/RTOS IPC, hardware allocations and display remain absent; a ready file alone does not prove camera readiness or UI.",
-      "boot_gap_zh": "实验使用开发 DTB 与 GIC 设置。GR IV 独立原 RTOS 已借助 USB3 配置及系统计数器模型进入任务/IRQ，随后在未实现 MMIO 0x28825000 异常。仍缺 Linux/RTOS IPC、硬件分配和显示；ready 文件不能证明相机就绪或 UI 正常。",
+      "boot_gap_en": "Original UI uses a separately built software-display platform, explicit startup adaptation and native transition completion. Full RTOS cold boot, animation timers, physical LCD, capture and Linux/RTOS IPC remain unverified. GR III/IIIx camera UI remains unverified.",
+      "boot_gap_zh": "原厂 UI 使用独立构建的软件显示平台、明确记录的启动适配与原生过渡完成函数。完整 RTOS 冷启动、动画计时、物理 LCD、拍摄和跨核 IPC 未验证；GR III/IIIx 原厂相机 UI 未验证。",
       "upstreams": [
         {"url": "https://github.com/yeahnope/gr_unpack", "revision": "25f0cd513876655f355e7587302a5dd7b9ee6620", "license": "No license; source not copied"},
         {"url": "https://github.com/hhornbacher/gr3x-fw-hack", "revision": "dc84ad50a0e5afc86d7273eb75e86ff889b83b19", "license": "No license; source not copied"},
@@ -82,6 +82,30 @@
       "boot_gap_en": "Development DTB, UART/register model and GIC reset setup are required. Original init reaches S99bootdone, then RPMsg faults without its RTOS partner. Original UI, imaging and storage controllers are absent. Luna MWFI remains unsupported.",
       "boot_gap_zh": "使用开发 DTB、UART/寄存器模型与 GIC 复位设置；原厂 init 到达 S99bootdone 后因缺 RTOS 对端而在 RPMsg 异常。原厂 UI、成像与存储控制器尚未实现，Luna MWFI 仍未支持。",
       "upstreams": [{"url": "https://github.com/nneonneo/Insta360-X3-Firmware-Tools", "revision": "3e95fa30f8ad10f374c98b06a950f05eeb294aaf", "license": "No license; source not copied"}]
+    },
+    {
+      "id": "sigma-fp-dfi",
+      "brand": "Sigma",
+      "family": "fp / DFI MAIN",
+      "status_en": "Exact fp 5.02 official update extracts a 49,481,728-byte ARM MAIN image. Outer and packed byte sums, load extents and full output SHA-256 are verified against original IPL decoder execution.",
+      "status_zh": "精确匹配 fp 5.02 官方升级包，提取 49,481,728 字节 ARM 主程序；外层及压缩段字节和、装载范围与输出哈希均已核验，并与执行原厂 IPL 解压函数的结果一致。",
+      "official_url": "https://www.sigma-global.com/en/support/download/FP__V502.bin",
+      "verified_samples": ["fp 5.02 (MAIN extraction only)"],
+      "boot_gap_en": "Original reset, RTOS peripherals and UI remain under development. Other revisions are inspection-only; extraction does not establish boot support.",
+      "boot_gap_zh": "原厂复位启动、RTOS 外设与 UI 仍在开发；其他版本仅分析，解包通过不代表启动成功。",
+      "upstreams": [{"url": "https://github.com/ijigen/fpSup", "revision": "4e957b41e276e14f89472457cb3e7547ba62acf1", "license": "GPL-3.0; native memory/function references, source not copied"}]
+    },
+    {
+      "id": "gopro-hero8-tara-ui-v1",
+      "brand": "GoPro",
+      "family": "HERO8 Black / MILBEAUT / Tara UI",
+      "status_en": "Exact official HERO8 2.51 UPDATE.zip or DATA.bin imports the original RTOS. Original Tara camera, VIDEO presets and native Back roundtrip are verified in one assisted QEMU instance.",
+      "status_zh": "精确匹配 HERO8 2.51 官方 UPDATE.zip 或 DATA.bin，导入原厂 RTOS；同一辅助启动 QEMU 实例内已验证原厂 Tara 拍摄页、VIDEO 预设菜单与原生返回。",
+      "official_url": "https://device-firmware.gp-static.com/50/77b086a3564dc3dfeca85a89d33acb49222f6c4a/HD8.01/camera_fw/02.51.00/UPDATE.zip",
+      "verified_samples": ["HERO8 Black HD8.01.02.51.00 (assisted original Tara UI)"],
+      "boot_gap_en": "Separate QEMU platform required. Original UI component entry bypasses proprietary RTOS tasks; 20 RAM veneers provide software display, heap, mutex and clock. Finite deferred-free heap. Full cold boot, sensor and recording are unverified.",
+      "boot_gap_zh": "需要独立 QEMU 平台；原厂 UI 组件入口绕过专有 RTOS 任务，20 处 RAM 适配提供软件显示、内存、互斥锁和时钟。堆空间有限，回收延迟到会话结束；完整冷启动、传感器和录制未验证。",
+      "upstreams": [{"url": "https://gitlab.com/qemu-project/qemu", "revision": "v10.2.4", "license": "GPL-2.0 and included licenses; independent local board overlay"}]
     }
   ]
 }

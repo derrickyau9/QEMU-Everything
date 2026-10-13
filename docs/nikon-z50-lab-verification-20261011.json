@@ -1,0 +1,146 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-11",
+  "model": "Nikon Z50",
+  "version": "C2.60",
+  "status": "verified original menu and same-guest native input using GDB-assisted startup",
+  "official_source_sha256": "69745c9e8f3156e936918e62a4a1fad18e7078e9ea3b95d8b8e08144b1542e49",
+  "main_sha256": "57e834fac8f921c18c99abe0b1469edbaca71cb1957794bb9f138bd223d30fc1",
+  "main_size": 31404090,
+  "restored_crc16": "93c5",
+  "upstream": {
+    "repository": "https://github.com/WonderLantern/z30-qemu",
+    "commit": "0ba0c3547ccbec09e7c861eaca35db8e82795f15",
+    "license": "GPL-2.0-or-later",
+    "role": "Z30/Z7 board and GPU source, independently ported here for Z50; upstream Z50 support is not claimed"
+  },
+  "adapter_revision": "z50-c260-1",
+  "qemu": {
+    "version": "10.2.4",
+    "archive_sha256": "821b545b92f165e57dddccac5077d76d4d436a226595b8813ad59306bbfd0746",
+    "binary_sha256": "86a02d70c346d2a901b1a0ec5028c4b8330c0b836a841bce967c16cb3e2f87e4",
+    "machine": "nikon-z50-display",
+    "build_jobs": 2,
+    "independent_build": true
+  },
+  "probe": {
+    "run_id": "305bf7f9206041819330bc62bd24c56e",
+    "evidence_sha256": "8204db05a668c861a3e64fa934896cc60a313ff3b181e0cd8833a5812e09c518",
+    "api_audit_sha256": "8c5e08e1ca6b4b4b09a3545da81dc1382c2656d0f585e78ddd2f4d91d09e15c1",
+    "original_ui_verified": true,
+    "single_instance_menu_roundtrip_verified": true,
+    "owned_guest_pids": [
+      8839
+    ],
+    "owned_guest_processes_reaped": true,
+    "worker_stopped": true,
+    "elapsed_seconds": 13.116261265000048,
+    "frames": [
+      {
+        "name": "01-my-menu",
+        "sha256": "efc9558932d0e195a047e8a3875ebf0388fac5a11907599d31fcf34a7bf9d08f",
+        "png_sha256": "2cd668fa33707895706c72b1acb522ff8c708f40baa84c6ca14a4d4433685517",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 279
+      },
+      {
+        "name": "02-add-items",
+        "sha256": "18d061f0dd6af80e1664d826f71fef88353549692d37a243360e84e1d87bc613",
+        "png_sha256": "3c1c2d14a54a11622c66127e2116d6e0f37462c750e744f7e92a589166e1163b",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 260
+      },
+      {
+        "name": "03-back-my-menu",
+        "sha256": "efc9558932d0e195a047e8a3875ebf0388fac5a11907599d31fcf34a7bf9d08f",
+        "png_sha256": "2cd668fa33707895706c72b1acb522ff8c708f40baa84c6ca14a4d4433685517",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 279
+      }
+    ]
+  },
+  "interactive": {
+    "run_id": "dcc2e2b163b94588b96ff883388389f5",
+    "evidence_sha256": "b99a70209ede0d1d880cce2aeaecbd73b122f8bab97955632eb964d976fdb0bb",
+    "same_http_session": "644f5b368573d1f1ad630ff79f2ea322",
+    "actions": [
+      "ok",
+      "back"
+    ],
+    "owned_guest_pids": [
+      403
+    ],
+    "owned_guest_processes_reaped": true,
+    "worker_stopped": true,
+    "transport_exit_code": 0,
+    "frames": [
+      {
+        "name": "01-my-menu",
+        "sha256": "efc9558932d0e195a047e8a3875ebf0388fac5a11907599d31fcf34a7bf9d08f",
+        "png_sha256": "2cd668fa33707895706c72b1acb522ff8c708f40baa84c6ca14a4d4433685517",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 279
+      },
+      {
+        "name": "action-0001-ok",
+        "sha256": "18d061f0dd6af80e1664d826f71fef88353549692d37a243360e84e1d87bc613",
+        "png_sha256": "3c1c2d14a54a11622c66127e2116d6e0f37462c750e744f7e92a589166e1163b",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 260
+      },
+      {
+        "name": "action-0002-back",
+        "sha256": "efc9558932d0e195a047e8a3875ebf0388fac5a11907599d31fcf34a7bf9d08f",
+        "png_sha256": "2cd668fa33707895706c72b1acb522ff8c708f40baa84c6ca14a4d4433685517",
+        "width": 720,
+        "height": 480,
+        "bytes": 1036815,
+        "colors": 279
+      }
+    ]
+  },
+  "assistance": {
+    "checkpoint": "0x100531bc",
+    "native_calls": [
+      "0x1012177a(profile 0, 12 zero scratch bytes restored)",
+      "0x1041178a()",
+      "0x10411c10()",
+      "0x10208d02(0xc1833138,1)"
+    ],
+    "input_dispatch": "0x1038449a",
+    "events": {
+      "up": "0x242",
+      "down": "0x243",
+      "left": "0x247",
+      "right": "0x248",
+      "back": "0x249",
+      "ok": "0x24a"
+    },
+    "firmware_file_modified": false,
+    "guest_state_modified": true,
+    "host_synthesized_menu_pixels": false,
+    "frame_masks": []
+  },
+  "limitations": [
+    "Natural power-on remains unverified",
+    "Physical LCD scanout, live-view, sensor and photography are not verified",
+    "Sparse inherited RAM workspace does not measure physical Z50 RAM",
+    "Hardware semantics beyond observed Z50 config registers/display enable latches remain inherited compatibility hypotheses"
+  ],
+  "reproduce": [
+    "bash scripts/boards/nikon-z50/build.sh NEW_PROFILE_DIRECTORY NEW_BUILD_DIRECTORY [QEMU_10.2.4_ARCHIVE]",
+    "python -m devkit.nikon_z50_lab prepare DEVICE --home HOME",
+    "python -m devkit.nikon_z50_lab probe DEVICE --home HOME --seconds 60",
+    "qemu-everything --home HOME nikon-lab DEVICE"
+  ]
+}

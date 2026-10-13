@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "recorded_utc": "2026-10-12T04:03:04.610370+00:00",
+  "model": "GoPro HERO8 Black",
+  "version": "HD8.01.02.51.00",
+  "profile": "gopro-hero8-tara-ui-v1",
+  "source_and_frozen_gui": {
+    "source": {
+      "ok": true,
+      "frozen": false,
+      "original_ui_verified": true,
+      "native_touch_verified": true,
+      "single_instance_menu_roundtrip_verified": true,
+      "owned_guest_processes_reaped": true,
+      "errors": [],
+      "guest_png_sha256": "47d3d31e2cfb46586c518c12d4d28aa0e83f2d7bfde0ac697cce6944705042b9"
+    },
+    "frozen": {
+      "ok": true,
+      "frozen": true,
+      "original_ui_verified": true,
+      "native_touch_verified": true,
+      "single_instance_menu_roundtrip_verified": true,
+      "owned_guest_processes_reaped": true,
+      "errors": [],
+      "guest_png_sha256": "47d3d31e2cfb46586c518c12d4d28aa0e83f2d7bfde0ac697cce6944705042b9"
+    }
+  },
+  "host_tests": {
+    "passed": 93,
+    "scope": "GoPro importer, board runner, camera routing, library support and inspection"
+  },
+  "assisted_startup": true,
+  "natural_power_on_verified": false,
+  "full_rtos_boot_verified": false,
+  "physical_camera_used": false,
+  "frozen_exe_sha256": "fb71bf4e83a17ca191ed703403fc4e22f1afae04cd3ba09ec63fab6397c6afd3",
+  "frozen_transport_exit_code": 0,
+  "cleanup_errors": []
+}

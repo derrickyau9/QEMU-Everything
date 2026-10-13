@@ -24,11 +24,273 @@ def rtos_helper(monkeypatch):
     return module
 
 
-@pytest.mark.parametrize('seconds', [0, 16, True, 1.5])
+@pytest.mark.parametrize('seconds', [0, 61, True, 1.5])
 def test_rtos_invalid_duration_rejected_before_any_files(tmp_path, monkeypatch, seconds):
     module = rtos_helper(monkeypatch)
     with pytest.raises(ValueError, match='duration'):
         module.probe(tmp_path/'missing', tmp_path/'missing-manifest', tmp_path/'out', seconds)
+
+
+def test_rtos_gate_idle_requires_explicit_latch_model(tmp_path, monkeypatch):
+    module = rtos_helper(monkeypatch)
+    with pytest.raises(ValueError, match='requires experimental latches'):
+        module.probe(tmp_path/'missing', tmp_path/'missing-manifest', tmp_path/'out',
+                     experimental_gate_idle=True)
+    assert not (tmp_path/'out').exists()
+
+
+def test_sric_failure_snapshot_has_exact_instruction_gate_and_preserves_gui(monkeypatch):
+    module = rtos_helper(monkeypatch)
+    with pytest.raises(ValueError, match='function bytes'):
+        module.diagnostic_sric_failure_image(b'unknown input')
+    image = bytearray(0x961f5c + 8)
+    for offset in (0x961ed4, 0x961f5c):
+        image[offset:offset+8] = bytes.fromhex('0dc0a0e17110ffe6')
+    image[0x180000:0x180010] = bytes(range(16))
+    original = bytes(image)
+    execution, changes = module.diagnostic_sric_failure_image(original)
+    assert original == bytes(image) and execution[:0x960000] == original[:0x960000]
+    assert execution != original and len(changes) == 2
+    assert all(c['semantic'].endswith('no ready/ACK is generated') for c in changes)
+    with pytest.raises(ValueError, match='requires experimental'):
+        module.probe(Path('absent'), Path('absent'), Path('absent'), diagnostic_skip_sric_wait=True)
+
+
+@pytest.mark.parametrize('direct', [False, True])
+def test_auxiliary_main_entry_uses_reviewed_original_functions_only(monkeypatch, direct):
+    import struct
+    module = rtos_helper(monkeypatch)
+    with pytest.raises(ValueError, match='MainTask'):
+        module.diagnostic_main_ui_image(b'unknown input', direct)
+    image = bytearray(0xa78830)
+    image[0xa7881c:0xa78824] = bytes.fromhex('1a0c00eb7420d4e5')
+    image[0x180000:0x180010] = bytes(range(16))
+    original = bytes(image)
+    execution, changes = module.diagnostic_main_ui_image(original, direct)
+    assert execution[:0xa7881c] == original[:0xa7881c]
+    assert execution[0xa78824:] == original[0xa78824:]
+    assert original == bytes(image) and len(changes) == 1
+    if direct:
+        for address, expected in ((0x53a7881c, 0x53182830), (0x53a78820, 0x53a788b4)):
+            instruction = struct.unpack_from('<I', execution, address-0x53000000)[0]
+            displacement = instruction & 0xffffff
+            if displacement & 0x800000: displacement -= 0x1000000
+            assert address+8+displacement*4 == expected
+    with pytest.raises(ValueError, match='requires experimental'):
+        module.probe(Path('absent'), Path('absent'), Path('absent'),
+                     diagnostic_main_ui=not direct, diagnostic_gui_entry=direct)
+    with pytest.raises(ValueError, match='Choose either'):
+        module.probe(Path('absent'), Path('absent'), Path('absent'),
+                     experimental_latches=True, experimental_memory_layout=True,
+                     diagnostic_main_ui=True, diagnostic_gui_entry=True)
+
+
+def test_original_domain_bridge_preserves_firmware_and_addresses_original_code(monkeypatch):
+    import struct
+    module = rtos_helper(monkeypatch)
+    image = bytearray(0xa78830)
+    image[0xa7881c:0xa78824] = bytes.fromhex('1a0c00eb7420d4e5')
+    original = bytes(image)
+    execution, changes = module.diagnostic_main_ui_image(original, True, True)
+    assert execution[:0xa7881c] == original[:0xa7881c]
+    assert execution[0xa78824:len(original)] == original[0xa78824:]
+    scratch = 0x13d3000
+    # Decode the authored PC-relative literal loads, not just expected opcodes.
+    for offset, expected in ((4, 0x53a81480), (32, 0x53182830)):
+        word = struct.unpack_from('<I', execution, scratch+offset)[0]
+        literal = scratch+offset+8+(word&0xfff)
+        assert struct.unpack_from('<I', execution, literal)[0] == expected
+    assert len(changes) == 2 and changes[1]['original_bytes'] is None
+    with pytest.raises(ValueError, match='requires direct'):
+        module.probe(Path('absent'), Path('absent'), Path('absent'), diagnostic_domain_init=True)
+
+
+def test_unavailable_settings_storage_returns_failure_in_owned_snapshot_only(monkeypatch):
+    module = rtos_helper(monkeypatch)
+    with pytest.raises(ValueError, match='missing-file'):
+        module.diagnostic_empty_domain_image(b'unknown input')
+    image = bytearray(0xa7f390)
+    for offset in (0xa7f374, 0xa7ec70):
+        image[offset:offset+8] = bytes.fromhex('0dc0a0e13c20a0e3')
+    original = bytes(image)
+    execution, changes = module.diagnostic_empty_domain_image(original)
+    assert original == bytes(image)
+    assert execution[:0xa7ec70] == original[:0xa7ec70]
+    assert execution[0xa7ec78:0xa7f374] == original[0xa7ec78:0xa7f374]
+    assert execution[0xa7f37c:] == original[0xa7f37c:]
+    assert len(changes) == 2 and 'NULL (missing file)' in changes[0]['semantic']
+    with pytest.raises(ValueError, match='requires original domain'):
+        module.probe(Path('absent'), Path('absent'), Path('absent'),
+                     diagnostic_empty_domain_storage=True)
+
+
+def test_null_filesystem_guard_keeps_nonnull_original_prologue(monkeypatch):
+    import struct
+    module = rtos_helper(monkeypatch)
+    with pytest.raises(ValueError, match='filesystem method bytes'):
+        module.diagnostic_null_filesystem_image(b'unknown input')
+    image = bytearray(0x83b260)
+    image[0x83b22c:0x83b234] = bytes.fromhex('c83801e30dc0a0e1')
+    image[0x83a3c4:0x83a3cc] = bytes.fromhex('0dc0a0e1f0df2de9')
+    original = bytes(image)
+    execution, changes = module.diagnostic_null_filesystem_image(original)
+    assert original == bytes(image)
+    assert execution[:0x83a3c4] == original[:0x83a3c4]
+    assert execution[0x83a3c8:0x83b22c] == original[0x83a3c8:0x83b22c]
+    assert execution[0x83b230:len(original)] == original[0x83b230:]
+    for offset, scratch in ((0x83b22c, 0x13d3100), (0x83a3c4, 0x13d3200)):
+        words = struct.unpack_from('<5I', execution, scratch)
+        assert words[:2] == (0xe3500000, 0x012fff1e)  # NULL-only return
+        assert execution[scratch+8:scratch+16] == original[offset:offset+8]
+        displacement = words[4]&0xffffff
+        if displacement&0x800000: displacement -= 0x1000000
+        assert 0x53000000+scratch+16+8+displacement*4 == 0x53000000+offset+8
+    assert len(changes) == 4 and 'nonnull' in changes[0]['semantic']
+
+
+@pytest.mark.skipif(os.name != 'posix' or not os.environ.get('RICOH_RTOS_TEST_MANIFEST'),
+                    reason='Requires explicitly selected, locally built Ricoh RTOS QEMU')
+def test_rtos_actual_board_register_isolation(tmp_path):
+    """An authored ARM program catches overlapping windows and false ready bits.
+
+    No camera firmware is needed or executed. Firmware/UI boot is validated
+    separately by rtos_probe, never inferred from this peripheral regression.
+    """
+    path = Path(__file__).parents[1] / 'scripts/boards/ricoh/rtos_probe.py'
+    spec = importlib.util.spec_from_file_location('ricoh_rtos_test_board', path)
+    module = importlib.util.module_from_spec(spec); spec.loader.exec_module(module)
+    manifest = json.loads(Path(os.environ['RICOH_RTOS_TEST_MANIFEST']).read_text())
+    binary = Path(manifest['binary'])
+    assert manifest['sources']['ricoh-rtos-lab.c'] == module.BOARD_SHA256
+    assert hashlib.sha256(binary.read_bytes()).hexdigest() == manifest['binary_sha256']
+    assembly = tmp_path/'authored.S'
+    assembly.write_text('''
+.syntax unified
+.arm
+.global _start
+_start:
+    mrc p15, 0, r0, c0, c0, 5
+    ands r0, r0, #3
+    bne idle
+    ldr r0, =0x1e0000d0
+    mov r1, #0
+    str r1, [r0]
+    ldr r1, =6749
+    str r1, [r0, #8]
+    ldr r2, [r0, #8]
+    cmp r1, r2
+    bne fail
+    ldr r0, =0x1dffb000
+    mov r1, #1
+    str r1, [r0, #0x108]
+    ldr r2, [r0, #0x108]
+    cmp r2, #1
+    bne fail
+    ldr r1, =0x00010001
+    str r1, [r0, #8]
+    ldr r2, [r0, #8]
+    cmp r2, #1
+    bne fail
+    ldr r1, =0x00010000
+    str r1, [r0, #8]
+    ldr r2, [r0, #8]
+    cmp r2, #0
+    bne fail
+    ldr r0, =0x1d021000
+    mov r1, #0
+    str r1, [r0, #0xc]
+    ldr r2, [r0, #0x38]
+    cmp r2, #0
+    bne fail
+    mov r1, #3
+    str r1, [r0, #0x54]
+    ldr r2, [r0, #0x54]
+    cmp r2, #1
+    bne fail
+    mov r1, #2
+    str r1, [r0, #0x54]
+    ldr r2, [r0, #0x54]
+    cmp r2, #0
+    bne fail
+    ldr r0, =0x28000000
+    mov r1, #0
+    str r1, [r0, #0xc]
+    ldr r2, [r0, #0x38]
+    cmp r2, #1
+    bne fail
+    ldr r0, =0x1d022000
+    mov r1, #1
+    str r1, [r0, #0x118]
+    ldr r1, =0x00010001
+    str r1, [r0, #0x18]
+    ldr r2, [r0, #0x18]
+    cmp r2, #1
+    bne fail
+    ldr r0, =0x1e003400
+    mov r1, #255
+    str r1, [r0, #0x14]
+    mov r1, #1
+    str r1, [r0, #0xc]
+    ldr r3, =1000000
+start_poll:
+    ldr r2, [r0, #4]
+    cmp r2, #0x81
+    beq start_done
+    subs r3, r3, #1
+    bne start_poll
+    b fail
+start_done:
+    mov r1, #0x65
+    str r1, [r0]
+    mov r1, #0x80
+    str r1, [r0, #0xc]
+    ldr r3, =1000000
+nack_poll:
+    ldr r2, [r0, #4]
+    cmp r2, #0x89
+    beq nack_done
+    subs r3, r3, #1
+    bne nack_poll
+    b fail
+nack_done:
+    mov r1, #2
+    str r1, [r0, #0xc]
+    ldr r2, [r0, #8]
+    tst r2, #1
+    bne fail
+    ldr r0, =0x1de00000
+    mov r1, #84
+    strh r1, [r0, #4]
+    mov r0, #4
+    ldr r1, =passed
+    svc 0x123456
+    mov r0, #0x18
+    ldr r1, =0x20026
+    svc 0x123456
+fail:
+    mov r0, #4
+    ldr r1, =failed
+    svc 0x123456
+idle:
+    wfi
+    b idle
+passed: .asciz "RICOH AUTHORED DEVICE CHECK PASSED\\n"
+failed: .asciz "RICOH AUTHORED DEVICE CHECK FAILED\\n"
+''')
+    obj, elf, image = (tmp_path/name for name in ('authored.o','authored.elf','authored.bin'))
+    subprocess.run(['arm-linux-gnueabihf-as','-march=armv7-a',str(assembly),'-o',str(obj)],check=True)
+    subprocess.run(['arm-linux-gnueabihf-ld','-Ttext=0x53000000',str(obj),'-o',str(elf)],check=True)
+    subprocess.run(['arm-linux-gnueabihf-objcopy','-O','binary',str(elf),str(image)],check=True)
+    command = [str(binary),'-M','ricoh-rtos-lab,experimental-latches=on,experimental-gate-idle=on,experimental-memory-layout=on',
+               '-m','2048','-display','none','-monitor','none','-serial',f'file:{tmp_path/"serial.log"}',
+               '-nic','none','-semihosting-config','enable=on,target=native',
+               '-device',f'loader,file={image},addr=0x53000000,force-raw=on']
+    for cpu in range(3): command += ['-device',f'loader,addr=0x53000000,cpu-num={cpu}']
+    result = subprocess.run(command, capture_output=True, timeout=8)
+    assert result.returncode == 0
+    assert b'RICOH AUTHORED DEVICE CHECK PASSED' in result.stderr
+    assert b'FAILED' not in result.stderr
+    assert (tmp_path/'serial.log').read_bytes() == b'T'
 
 
 def test_rtos_unknown_board_rejected_before_execution(tmp_path, monkeypatch):

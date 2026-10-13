@@ -1,0 +1,100 @@
+{
+  "date": "2026-10-11",
+  "firmware": {
+    "model": "Sony A7R V / ILCE-7RM5",
+    "version": "4.00",
+    "sha256": "51e1176a255a9a4b4782dfbcfa6c5f332b71173bdfe9ed2bcf4fca6bcbc6c2e2"
+  },
+  "mode": "QEMU AArch64 user-mode original diagnostic component",
+  "original_diagnostic_ui_verified": true,
+  "normal_camera_ui_verified": false,
+  "whole_firmware_boot_verified": false,
+  "public_launcher_integrated": false,
+  "source_elf_sha256": {
+    "appFw.so": "41bd8f4cda1f44c7038912837737e1ce6a650065f2108061ada30e5c7f9ce7c7",
+    "libObj.so": "0d0be8f1e48b3c74330f9afab698ac352b3c2a922f7231ffc836591529a9fdf9",
+    "libgpe.so": "80fc6236379933f80c2689aa002e0cf39483da8d45e876705d2a427cd1a2a7d1",
+    "AdjChkConfig.so": "6ce496fd057c677ced6b1539292b736a00725ac00f98f8d65fd8b807bfbe0a41"
+  },
+  "pixel_frames": [
+    {
+      "component": "sample original image widgets",
+      "width": 640,
+      "height": 480,
+      "format": "RGBA4444 little-endian",
+      "raw_sha256": "44ae1e9a3fce609e35577d0ca41dddd948b0a65169c7dc7de2c2bca1b44de57e",
+      "original_resource_id": "0x02001a76",
+      "original_resource_width": 70,
+      "original_resource_height": 55,
+      "compressed_bytes": 1574,
+      "decoded_bytes": 8800,
+      "gpe_requests_completed": 7,
+      "unsupported_gpe_requests": 0
+    },
+    {
+      "component": "jiritsu original text widgets and fonts",
+      "width": 640,
+      "height": 480,
+      "format": "RGBA4444 little-endian",
+      "raw_sha256": "dc465794468f7381348caf74920cc11b6cc75a1c49e7006a24b293ca9b1cc428",
+      "text_origin": "Four developer supplied diagnostic strings, not original camera menu text"
+    }
+  ],
+  "final_input_validation": {
+    "verified": true,
+    "runner_exit_code": 0,
+    "gpe_requests_completed": 29,
+    "unsupported_gpe_requests": 0,
+    "original_pointer_callbacks_observed": 2,
+    "route": "Host pointer -> original UXEngine mouse APIs and original AdjChk marker event -> original renderer -> actual framebuffer",
+    "events": [
+      {
+        "x": 210,
+        "y": 160,
+        "pixels_changed": true,
+        "before_sha256": "be049d4e905c3113661420f3372bc8a8b667657e9183ef88f517d1852e2e7ba3",
+        "after_sha256": "5c3056d365b71a454a4b42de8a59da4c0466aee47de4b641c6ca1ed0ae9d0c36"
+      },
+      {
+        "x": 420,
+        "y": 320,
+        "pixels_changed": true,
+        "before_sha256": "5c3056d365b71a454a4b42de8a59da4c0466aee47de4b641c6ca1ed0ae9d0c36",
+        "after_sha256": "3bb571b0ef1cfba1d39b1fb3ba8e3ead65631f4d4c22d17eed8886e5cc37f0af"
+      }
+    ]
+  },
+  "native_abi_references": {
+    "arena_setup_appFw_va": "0x17feba8",
+    "arena_bytes": "0xb02040",
+    "original_image_bank_selection_appFw_va": "0x1ec47c4..0x1ec480c",
+    "image_banks": [[0, 5], [1, 0], [2, 3]],
+    "GRM_gpermRectblit_libObj_va": "0x102a00",
+    "A7RV_BitBlit_tail": "p72 global alpha; p73 darker alpha; p74 SPC; p75 pattern; p76 effect; p78 Hflip; p79 Vflip; p7a sync flag; callback p80 and userdata p88",
+    "darker_alpha_libgpe_va": "0xce5c..0xd00c: p73 only used by mode2; verified mode1 ignores it",
+    "SPC_parser_libgpe_va": "0xb974: effect p76 and pattern p75",
+    "work_image_libgpe_va": "0xa5c4 dispatches opcode6 without completion; 0xc62c stores native work-image state; the software adapter adds bounds validation"
+  },
+  "interventions": [
+    "Isolated QEMU user-mode syscall execution; original kernel absent in component mode",
+    "Pure A7R V original libraries/resources; original libcrypto.so preloaded for native X509_free dependency",
+    "Original arena setup, ResourceManager database and original bank-selection API invoked",
+    "Original AdjChk constructors, layout, widgets, original fonts and original UXEngine draw loop",
+    "Sample visibility parameters explicitly activated; no original ARM instruction patches",
+    "Shared physical-memory/DMM, OSAL queues and monotonic timers supplied by compatibility devices",
+    "Original LDEC stream decoded by verified software compatibility device",
+    "Strict A7R V BitBlit tail normalization for verified mode1/global255/no-flip operations",
+    "WorkImage opcode6 registers actual validated MA backing; it does not fabricate pixels",
+    "Software RGBA4444 source-over and native A8 glyph tint; no claim of physical GPU rounding being bit-exact",
+    "Original OSD completion follows real pixel writes; browser only converts actual raw framebuffer to PNG",
+    "Four diagnostic strings are developer content rendered by original firmware, not its camera menu text"
+  ],
+  "scope_limits": [
+    "Original diagnostic GUI component only; normal camera application/menu not verified",
+    "Not a complete camera firmware boot or a sensor/capture pipeline demonstration",
+    "Not integrated into the public Camera UI launcher",
+    "Unknown hardware operations remain unsupported; no fabricated hardware-ready replies",
+    "No physical camera devices or network available to the isolated guest",
+    "This file contains facts and hashes, not firmware bytes, images, proprietary resource blobs or Backup values"
+  ]
+}

@@ -3,7 +3,7 @@ from pathlib import Path
 import sys
 import sysconfig
 
-FAMILIES = frozenset(('canon', 'insta360', 'nikon-z30', 'nikon-z6', 'ricoh', 'sony'))
+FAMILIES = frozenset(('canon', 'gopro', 'insta360', 'nikon-z30', 'nikon-z6', 'nikon-z50', 'ricoh', 'sony'))
 
 
 def board_directory(family: str) -> Path:

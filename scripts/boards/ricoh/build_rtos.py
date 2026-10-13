@@ -60,7 +60,9 @@ def main():
     manifest = {'qemu_version':'10.2.4','machine':'ricoh-rtos-lab','binary':str(binary),
                 'binary_sha256':digest(binary),'upstream_archive_sha256':ARCHIVE_SHA256,
                 'sources':{n:digest(ROOT/n) for n in ('ricoh-rtos-lab.c','build_rtos.py')},
-                'configure':options,'scope':'Three secure RTOS cores, guest-written SRAM, GIC, timer 13, 40 MHz ARM system counter and USB3_JT_ADJ configuration retention; no USB transfers, IPC replies or display'}
+                'configure':options,
+                'diagnostic_options_default_off':['experimental-latches','experimental-gate-idle','experimental-memory-layout'],
+                'scope':'Three secure RTOS cores, guest-written SRAM, GIC, timer 13, 40 MHz ARM system counter, USB3_JT_ADJ retention and polled USIO TX; opt-in diagnostic sparse register/reset/idle/memory hypotheses are recorded separately; no USB transfers, DMA completion, IPC replies or display'}
     (work/'build-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
     print(json.dumps(manifest,indent=2))
 

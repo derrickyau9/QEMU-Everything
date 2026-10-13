@@ -280,7 +280,7 @@ class Window(QMainWindow):
         row.addWidget(self.unpack_button); row.addWidget(self.report_button); row.addWidget(self.export_button)
         row.addStretch(); layout.addLayout(row)
         row = QHBoxLayout()
-        self.nikon_lab_button = self.button('Nikon menu lab', '尼康原厂菜单实验', self.launch_nikon_lab)
+        self.nikon_lab_button = self.button('Original UI lab', '原厂 UI 实验', self.launch_nikon_lab)
         row.addWidget(self.nikon_lab_button)
         self.camera_lab_button = self.button('Camera Linux lab', '相机 Linux 实验', self.launch_camera_lab)
         row.addWidget(self.camera_lab_button)
@@ -306,10 +306,10 @@ class Window(QMainWindow):
 
     def launch_nikon_lab(self, *_):
         if not self.device or self.busy(): return
-        from .nikon_menus import run_lab
+        from .camera_ui import run_lab
         device = self.device
         self.run_job(lambda task: run_lab(device, self.home, task, on_ready=self.job.url_ready.emit),
-                     lambda _: self.log(self.tr('Nikon menu lab stopped.', '尼康菜单实验已停止。')))
+                     lambda _: self.log(self.tr('Original UI lab stopped.', '原厂 UI 实验已停止。')))
 
     def launch_camera_lab(self, *_):
         if not self.device or self.busy(): return
@@ -426,7 +426,7 @@ class Window(QMainWindow):
         card = self.card(layout); card.addWidget(self.label('Credits & scope', '致谢与范围', 'subtitle'))
         card.addWidget(self.label('Material theme adapted from Derrick Yao’s tsla-infotainment-lab (MIT). Powered by QEMU, Android, Qt for Python and 7-Zip. Firmware is supplied by you and remains local. Unaffiliated with Hasselblad.', 'Material 主题改编自 Derrick Yao 的 tsla-infotainment-lab（MIT）。基于 QEMU、Android、Qt for Python 和 7-Zip。固件由你提供并保留在本地。本项目与哈苏无隶属关系。', 'muted'))
         card.addWidget(self.button('Radium Wang · Hasselblad firmware research ↗', 'Radium Wang · 哈苏固件研究与致谢 ↗', lambda: QDesktopServices.openUrl(QUrl('https://github.com/radium-wang/Hasselblad-X-System-CIM-Firmware-Research-Feature-Extensions'))))
-        card.addWidget(self.button('View source & documentation ↗', '查看源码与文档 ↗', lambda: QDesktopServices.openUrl(QUrl('https://github.com/derrickyau9/Hasselblad-X-System-QEMU-DevKit'))))
+        card.addWidget(self.button('View source & documentation ↗', '查看源码与文档 ↗', lambda: QDesktopServices.openUrl(QUrl('https://github.com/derrickyau9/QEMU-Everything'))))
         layout.addStretch()
 
     def navigate(self, n):
@@ -556,7 +556,7 @@ class Window(QMainWindow):
         from .packages import remove_package
         self.run_job(lambda task: remove_package(self.device, *key), lambda _: self.refresh_apps())
     def launch(self, checked=False, mode='live'):
-        from .nikon_menus import available_lab as menu_available
+        from .camera_ui import available_lab as menu_available
         if self.device and mode == 'live' and menu_available(self.device, self.home):
             return self.launch_nikon_lab()
         from .camera_lab import available_lab
@@ -635,9 +635,10 @@ class Window(QMainWindow):
         busy = self.busy(); live = bool(self.session and self.session.isRunning()); ready = bool(live and self.session.ready)
         profile = read_json(self.device / 'device.json') if self.device else {}
         camera = bool(self.device and is_camera(profile))
-        from .nikon_menus import available_lab as menu_available
+        from .camera_ui import available_lab as menu_available
         nikon_menu = menu_available(self.device, self.home) if self.device else None
         nikon_lab = bool(nikon_menu)
+        assisted_menu = bool(nikon_menu and nikon_menu.get('assisted_startup', True))
         from .camera_lab import available_lab
         linux_lab = available_lab(self.device, self.home) if self.device else None
         configured = False
@@ -645,7 +646,7 @@ class Window(QMainWindow):
             try:
                 validate_profile(read_json(self.device / 'boot.json'), self.device); configured = True
             except (OSError, ValueError, TypeError, KeyError): pass
-        self.start.setText(self.tr('Start Nikon menu lab', '启动尼康菜单实验') if nikon_lab else self.tr('Start camera Linux lab', '启动相机 Linux 实验') if linux_lab else self.tr('Start original UI', '启动原厂 UI') if camera else self.tr('Start QEMU', '启动 QEMU'))
+        self.start.setText(self.tr('Start original UI lab', '启动原厂 UI 实验') if nikon_lab else self.tr('Start camera Linux lab', '启动相机 Linux 实验') if linux_lab else self.tr('Start original UI', '启动原厂 UI') if camera else self.tr('Start QEMU', '启动 QEMU'))
         self.start.setEnabled((camera or configured or nikon_lab or bool(linux_lab)) and not busy); self.stop.setEnabled(live)
         self.nikon_lab_button.setEnabled(nikon_lab and not busy)
         self.camera_lab_button.setEnabled(bool(linux_lab) and not busy)
@@ -675,13 +676,13 @@ class Window(QMainWindow):
         statuses = {'starting': ('Starting…', '启动中…'), 'running': ('Running', '运行中'), 'stopping': ('Stopping…', '停止中…'), 'stopped': ('Stopped', '已停止')}
         self.badge.setText(self.tr('QEMU running · boot unverified', 'QEMU 运行中 · 启动未验证') if live and not camera and phase == 'running' else self.tr(*statuses[phase])); self.badge.setProperty('phase', phase)
         if nikon_lab and self.job and self.job.isRunning():
-            self.badge.setText(self.tr('Nikon assisted menu lab', '尼康辅助菜单实验中'))
+            self.badge.setText(self.tr('Assisted original UI lab', '原厂 UI 辅助实验中') if assisted_menu else self.tr('Original ROM UI lab', '原厂 ROM 界面实验中'))
         elif linux_lab and self.job and self.job.isRunning():
             self.badge.setText(self.tr('Camera Linux lab', '相机 Linux 实验中'))
         self.badge.style().unpolish(self.badge); self.badge.style().polish(self.badge)
         self.screen.caption = self.tr('Click Start original UI', '点击「启动原厂 UI」') if camera else self.tr('Use Platform support to review and save a boot configuration.', '在「平台适配」中查看报告并保存启动配置。')
         if nikon_lab:
-            self.screen.caption = self.tr('The assisted Nikon menu lab opens in your browser. Cancel stops its guest.', '尼康菜单实验在浏览器打开，使用辅助启动；点击「取消」停止虚拟机。')
+            self.screen.caption = self.tr('The assisted original UI opens in your browser. Cancel stops its guest.', '原厂 UI 在浏览器打开，使用辅助启动；点击「取消」停止虚拟机。') if assisted_menu else self.tr('The original ROM menu opens in your browser. Cancel stops its guest.', '原厂 ROM 菜单在浏览器打开；点击「取消」停止虚拟机。')
         elif linux_lab:
             self.screen.caption = self.tr('A 30-second original Linux boot check. Console records progress; Cancel stops the guest.', '限时 30 秒验证原厂 Linux 启动；控制台显示进度，点击「取消」停止虚拟机。')
         if not self.device: self.screen.caption = self.tr('Import firmware to begin', '导入固件，开始开发')
@@ -689,7 +690,7 @@ class Window(QMainWindow):
         if live and not camera: self.screen.caption = self.tr('Display and input are in the QEMU window. Serial output is in Console and logs.', '显示与输入在 QEMU 独立窗口中，串口输出在控制台中。')
         self.preview_hint.setText(self.tr('Click to tap · Drag to swipe · Camera data is simulated', '鼠标点击 = 触控 · 拖动 = 滑动 · 相机数据为模拟值') if camera else self.tr('Generic QEMU displays open in their own window.', '通用 QEMU 的画面在独立窗口显示。'))
         if nikon_lab:
-            self.preview_hint.setText(self.tr('Menu display and buttons open in your browser.', '菜单画面与按键在浏览器中打开。'))
+            self.preview_hint.setText(self.tr('Original UI and input open in your browser.', '原厂画面与输入在浏览器中打开。'))
         elif linux_lab:
             self.preview_hint.setText(self.tr('Serial boot evidence is saved in the firmware workspace.', '串口启动证据保存在所选固件的工作区。'))
         self.screen.update()
@@ -702,7 +703,7 @@ class Window(QMainWindow):
                 self.details.setText(f"{status}\n{MODELS[model]['abi']} · {profile['version']}")
                 self.screen.message = MODELS[model]['label'].removeprefix('Hasselblad ')
             else:
-                status = self.tr('Assisted menu verified', '辅助启动菜单已验证') if nikon_lab else self.tr('Linux lab configured · UI unverified', 'Linux 实验已配置 · UI 未验证') if linux_lab else self.tr('Configured · boot unverified', '配置有效 · 启动未验证') if configured else self.tr('Inspection · needs adaptation', '已分析 · 待适配')
+                status = (self.tr('Assisted UI lab configured', '原厂 UI 辅助实验已配置') if assisted_menu else self.tr('Original ROM UI lab configured', '原厂 ROM 界面实验已配置')) if nikon_lab else self.tr('Linux lab configured · UI unverified', 'Linux 实验已配置 · UI 未验证') if linux_lab else self.tr('Configured · boot unverified', '配置有效 · 启动未验证') if configured else self.tr('Inspection · needs adaptation', '已分析 · 待适配')
                 self.details.setText(f"{status}\n{nikon_menu['label']}" if nikon_lab else f"{status}\n{linux_lab['label']}" if linux_lab else f"{status}\n{profile.get('architecture') or 'Unknown / 未知'} · {profile['version']}")
                 self.screen.message = 'QEMU Everything'
         else: self.details.setText(self.tr('Your imported firmware will appear here.', '导入的固件会显示在这里。'))
@@ -737,7 +738,7 @@ def main():
         def begin_check():
             if not window.device:
                 return fail('Import firmware before this check')
-            from .nikon_menus import available_lab as menu_available
+            from .camera_ui import available_lab as menu_available
             menu = menu_available(window.device, window.home)
             if menu:
                 # Exercise the same GUI job and URL signal as a normal launch.
@@ -759,7 +760,7 @@ def main():
                         (output / 'guest.png').write_bytes(pixels)
                         window.grab().save(str(output / 'workbench.png'))
                         write_json(output / 'result.json', {'ok': True, 'frozen': bool(getattr(sys, 'frozen', False)),
-                            'model': menu['label'], 'assisted_startup': True,
+                            'model': menu['label'], 'assisted_startup': menu.get('assisted_startup', True),
                             'natural_power_on_verified': False, 'state': state})
                         window.close()
                     except (OSError, ValueError):

@@ -127,7 +127,7 @@ def identify(source: Path, task: Task) -> dict | None:
     return {"id": "insta360-x3", "brand": "Insta360", "model": "X3", "format": "ambarella-segments",
             "summary": f"Insta360 X3 {info['version']}: six verified plaintext firmware segments",
             "extractable": True, "findings": info["checks"] + ["ARM64 Linux plus a separate RTOS payload"],
-            "blockers": ["Ambarella peripherals and RTOS/Linux shared-memory services are not emulated by generic QEMU virt", "Original camera UI boot has not been verified"]}
+            "blockers": ["Ambarella peripherals and RTOS/Linux shared-memory services are not emulated by generic QEMU virt", "Full RTOS boot is unverified; exact v1.1.4.1 original GUI lab requires its separate platform adapter"]}
 
 
 def extract(source: Path, destination: Path, task: Task) -> dict:

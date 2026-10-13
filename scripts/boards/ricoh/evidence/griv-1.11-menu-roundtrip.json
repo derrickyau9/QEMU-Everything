@@ -1,0 +1,417 @@
+{
+  "schema_version": 1,
+  "profile": "ricoh-griv-topmenu-ui-v1",
+  "verified_at": "2026-10-11",
+  "model": "Ricoh GR IV",
+  "firmware": "1.11",
+  "scope": "Original GR IV TopMenu and Focus settings page on auxiliary software display; native Up/Down, Confirm and Back with original font/icon rendering. Original camera power-on, live-view, photography, physical LCD and Linux/RTOS IPC remain unverified.",
+  "input": {
+    "source_sha256": "a2f664dfca034059eb0fd6e18ab08684c326b4a034d85c164dad7e1ec9b5655f",
+    "payload_sha256": "c4e597c7c9ca1bc181b30e35139ed90a4fd876ddcca14f12be0e00b6702233ae",
+    "payload_bytes": 67948280,
+    "rtos_source_offset": 97552,
+    "rtos_load_address": 1392508928,
+    "rtos_bytes": 20785856,
+    "rtos_sha256": "a9a9a51530c35819df47dee1cce9f4f560a17eeed1da258950167d282884fce1"
+  },
+  "gate": {
+    "original_ui_verified": true,
+    "native_input_verified": true,
+    "single_instance_menu_roundtrip_verified": true,
+    "owned_guest_processes_reaped": true,
+    "original_gui_code_modified": false,
+    "source_firmware_modified": false,
+    "natural_power_on_verified": false
+  },
+  "actual_run": {
+    "identifier": "public-probe-03",
+    "evidence_sha256": "d714a59336be1e388b0a0cb674bc7c7bcb315352fa3a27395eecebd78968b64d",
+    "duration_seconds": 44.951,
+    "trace_sha256": "521738adc0128d82b311b02e9eeea7d1289294f54bd1a97e5531e9a2410483fa",
+    "serial_sha256": "83246efbe68359085f2e01086685951dd4c3459d9e297d656540bbef0416c7ad",
+    "data_abort_count": 0,
+    "probe_source_sha256": "933a8bf99f908854af8023e7196af26881f85b27d74aaa72a5f9b9dd710a3d5d",
+    "resource_builder_source_sha256": "04bb6d0551cfe5b972a56a5bc815048b735056340da8d03d304e340135a24296"
+  },
+  "build": {
+    "qemu_version": "10.2.4",
+    "machine": "ricoh-rtos-lab",
+    "binary_sha256": "2cf943410e8f25603b6518ecb177d03ecf2b8db53e154d3c5437956ab88ac10b",
+    "upstream_archive_sha256": "821b545b92f165e57dddccac5077d76d4d436a226595b8813ad59306bbfd0746",
+    "sources": {
+      "ricoh-rtos-lab.c": "0afe2fd9c3b04846507b1a4c417b38efc5646951c00d982ef5dc39daf24839fd",
+      "build_rtos.py": "abaa99d1202f304d6adff9a7d0cb8561f826b1e544baba3e1706bede07c8aed7"
+    }
+  },
+  "final_platform": {
+    "source_sha256": {
+      "build_ui.py": "fbd026e809807a40784ce0fe5eb7d930a47a97ac70c036694c48b8d40f2cec1e",
+      "run_ui.py": "78bc66457c7d60ee0fe27a3b1d6e01157409350d087162e6bc3cb198f1438480",
+      "rtos_probe.py": "933a8bf99f908854af8023e7196af26881f85b27d74aaa72a5f9b9dd710a3d5d",
+      "resource_boot.py": "cf7cb205f33f9c52ea9f0c4f39712d42bbb5204978fbb94bf5f29b7c9eae6757",
+      "resource_backend.c": "236a15f76fb3507220aa3c656ef26bcdb1698fccb295ddaa234df5a9850d612a",
+      "resources.py": "7d294544e6c74b0f6c5289ecaa09ff1842cc213d29003a1e7e74d5aa2e032150",
+      "component_control.py": "89a043366dae5aff135cf3e031e6025d34c36a49296865ccd87d8749f7b16a24",
+      "component_viewer.py": "724fc777025e1a65a244a4a778870d14ef1dfe5b6b936a13d568f8fc13239149",
+      "ricoh-rtos-lab.c": "0afe2fd9c3b04846507b1a4c417b38efc5646951c00d982ef5dc39daf24839fd"
+    },
+    "bridge_sha256": "fa154fad6c10e721094e1da6ccdf33ce5d528ad7efce439296451f311ad50ea7",
+    "backend_sha256": "abc26a018c252d0dc498b1373aa82e70783cbe23a40ce04bee309b95614a2393",
+    "provenance": "Final compiled bridge/backend byte hashes equal the actual public-probe-03 platform. Subsequent source changes update intervention metadata and add the HTTP running/starting status field; historical actual-run source hashes remain unchanged."
+  },
+  "display": {
+    "width": 720,
+    "height": 480,
+    "format": 5,
+    "memory_order": "RGBA",
+    "synthetic_pixels": false,
+    "initial_raw_sha256": "9e5547674f997ebbc8174bd99bf7868d495979d3876a1650fe12da619210b143",
+    "down_raw_sha256": "1bf74ac09bf0b4323717444978c378efcb97ecd647c93c237e3ef424219ed13f",
+    "up_raw_sha256": "9e5547674f997ebbc8174bd99bf7868d495979d3876a1650fe12da619210b143",
+    "confirm_raw_sha256": "39a987632b0ac000d4c71792205a1656a900d950277052abeae077afbdcb373c",
+    "back_raw_sha256": "9e5547674f997ebbc8174bd99bf7868d495979d3876a1650fe12da619210b143",
+    "down_changes_pixels": true,
+    "up_restores_initial_pixels": true,
+    "confirm_changes_page": true,
+    "back_restores_initial_pixels": true
+  },
+  "native_events": [
+    {
+      "sequence": 1,
+      "key": "down",
+      "native_event": "0xd7",
+      "completed_sequence": 1,
+      "status": 1,
+      "raw_sha256": "1bf74ac09bf0b4323717444978c378efcb97ecd647c93c237e3ef424219ed13f",
+      "png_sha256": "ac2c838d3ceff7cfb6442f440d091b117815f729032aeb3a79bd13c80033b520",
+      "original_handler": "current controller vtable+0x28",
+      "native_current_id": "0x2000060",
+      "original_transition_settle": "0x535713bc",
+      "transition_animations": false,
+      "original_draw": "0x5356dde4",
+      "selection_or_pixels_written_by_host": false
+    },
+    {
+      "sequence": 2,
+      "key": "up",
+      "native_event": "0xd6",
+      "completed_sequence": 2,
+      "status": 1,
+      "raw_sha256": "9e5547674f997ebbc8174bd99bf7868d495979d3876a1650fe12da619210b143",
+      "png_sha256": "16bb48f2feb89abf39faa13c21299356d2e4d8b9d85a91fd73ebb66ecc824d7e",
+      "original_handler": "current controller vtable+0x28",
+      "native_current_id": "0x2000060",
+      "original_transition_settle": "0x535713bc",
+      "transition_animations": false,
+      "original_draw": "0x5356dde4",
+      "selection_or_pixels_written_by_host": false
+    },
+    {
+      "sequence": 3,
+      "key": "confirm",
+      "native_event": "0xe0",
+      "completed_sequence": 3,
+      "status": 1,
+      "raw_sha256": "39a987632b0ac000d4c71792205a1656a900d950277052abeae077afbdcb373c",
+      "png_sha256": "4087d5d27c5295df6f2a621fbfeecb92ae2d784feaf43a082f9992a75c98bde6",
+      "original_handler": "current controller vtable+0x28",
+      "native_current_id": "0x2000073",
+      "original_transition_settle": "0x535713bc",
+      "transition_animations": false,
+      "original_draw": "0x5356dde4",
+      "selection_or_pixels_written_by_host": false
+    },
+    {
+      "sequence": 4,
+      "key": "back",
+      "native_event": null,
+      "completed_sequence": 4,
+      "status": 1,
+      "raw_sha256": "9e5547674f997ebbc8174bd99bf7868d495979d3876a1650fe12da619210b143",
+      "png_sha256": "16bb48f2feb89abf39faa13c21299356d2e4d8b9d85a91fd73ebb66ecc824d7e",
+      "original_handler": "0x53182e9c",
+      "native_current_id": "0x2000060",
+      "original_transition_settle": "0x535713bc",
+      "transition_animations": false,
+      "original_draw": "0x5356dde4",
+      "selection_or_pixels_written_by_host": false
+    }
+  ],
+  "original_resources": {
+    "icon": {
+      "item": 2,
+      "name": "IconBinaryData",
+      "capacity": 14480480,
+      "pixels": "0x5d8a0040",
+      "status_pointer": "0x50adf00c",
+      "source_sha256": "bd4ff32196d24dda4e0be568e5107ad0426e526984f3169876079c2a2c289d84",
+      "synthetic_icon_pixels": false,
+      "logical_block_bytes": 4,
+      "original_validity_word": "0xa55a5aa5",
+      "bytes": 14480480,
+      "captured_sha256": "bd4ff32196d24dda4e0be568e5107ad0426e526984f3169876079c2a2c289d84",
+      "destination_matches_original_bytes": true,
+      "actual_block_read": {
+        "storage": "0x5961b6b0",
+        "vtable": "0x543d59bc",
+        "read_count": 1,
+        "destination": "0x5d8a0040",
+        "bytes": 14480480,
+        "start_block": 0,
+        "completed_exact_source_read": true
+      }
+    },
+    "files": [
+      {
+        "path": "A:\\Resource\\Font\\RT_Latin.bin",
+        "bytes": 53880,
+        "destination": "0x5e71dcc0",
+        "file_offset": 0,
+        "source_sha256": "3f895099f3f121b2aaa52ed5f8673c5822961d673e3adcfae804190fd7a390c5",
+        "captured_destination_sha256": "3f895099f3f121b2aaa52ed5f8673c5822961d673e3adcfae804190fd7a390c5",
+        "destination_matches_original_bytes": true,
+        "note": "Captured after pausing all CPUs; original consumer may have subsequently reused a destination buffer"
+      },
+      {
+        "path": "A:\\Resource\\Font\\LE_Latin.bin",
+        "bytes": 20784,
+        "destination": "0x5e8c8240",
+        "file_offset": 0,
+        "source_sha256": "d19d0cc91094635f130a8575942c4e8a46e80a19495415d2bf4352c83c911a75",
+        "captured_destination_sha256": "d19d0cc91094635f130a8575942c4e8a46e80a19495415d2bf4352c83c911a75",
+        "destination_matches_original_bytes": true,
+        "note": "Captured after pausing all CPUs; original consumer may have subsequently reused a destination buffer"
+      },
+      {
+        "path": "A:\\Resource\\Sound\\Shut.wav",
+        "bytes": 19088,
+        "destination": "0x591fe600",
+        "file_offset": 0,
+        "source_sha256": "94cc9ec0f387895e7f6ece331ddbf7c43470487e27ef71ba5d3cd8ffde1a1339",
+        "captured_destination_sha256": "94cc9ec0f387895e7f6ece331ddbf7c43470487e27ef71ba5d3cd8ffde1a1339",
+        "destination_matches_original_bytes": true,
+        "note": "Captured after pausing all CPUs; original consumer may have subsequently reused a destination buffer"
+      },
+      {
+        "path": "A:\\Resource\\Sound\\ShutF.wav",
+        "bytes": 8420,
+        "destination": "0x59203100",
+        "file_offset": 0,
+        "source_sha256": "d5ed1a218b997f884bbe2a5a93c41e1dff4933dd18087fea785fdd60da58b103",
+        "captured_destination_sha256": "d5ed1a218b997f884bbe2a5a93c41e1dff4933dd18087fea785fdd60da58b103",
+        "destination_matches_original_bytes": true,
+        "note": "Captured after pausing all CPUs; original consumer may have subsequently reused a destination buffer"
+      },
+      {
+        "path": "A:\\Resource\\Sound\\ShutB.wav",
+        "bytes": 15428,
+        "destination": "0x59205280",
+        "file_offset": 0,
+        "source_sha256": "b32b543ba4d4e76771e7c374be4044730cb4b2d8902d2a4038af9d706f71e52e",
+        "captured_destination_sha256": "b32b543ba4d4e76771e7c374be4044730cb4b2d8902d2a4038af9d706f71e52e",
+        "destination_matches_original_bytes": true,
+        "note": "Captured after pausing all CPUs; original consumer may have subsequently reused a destination buffer"
+      },
+      {
+        "path": "A:\\Resource\\Sound\\InFocus.wav",
+        "bytes": 25604,
+        "destination": "0x59208f80",
+        "file_offset": 0,
+        "source_sha256": "9ac6f1da12a35b58c9498a50c3ab80bb9d632a4bd01b3e3279cc0d66ee03b099",
+        "captured_destination_sha256": "9ac6f1da12a35b58c9498a50c3ab80bb9d632a4bd01b3e3279cc0d66ee03b099",
+        "destination_matches_original_bytes": true,
+        "note": "Captured after pausing all CPUs; original consumer may have subsequently reused a destination buffer"
+      },
+      {
+        "path": "A:\\Resource\\Font\\RT_JP.bin",
+        "bytes": 702228,
+        "destination": "0x5e66f540",
+        "file_offset": 0,
+        "source_sha256": "057ece2d3d8a454a9186a95f276b0257fbc1d0e9d63a2257e2b06e2651a15173",
+        "captured_destination_sha256": "057ece2d3d8a454a9186a95f276b0257fbc1d0e9d63a2257e2b06e2651a15173",
+        "destination_matches_original_bytes": true,
+        "note": "Captured after pausing all CPUs; original consumer may have subsequently reused a destination buffer"
+      },
+      {
+        "path": "A:\\Resource\\Font\\LE_JP.bin",
+        "bytes": 12112,
+        "destination": "0x5e71acc0",
+        "file_offset": 0,
+        "source_sha256": "435f8f51693327077fc42c1efd2e893cf4f3f3beae90fb5d56db89052b50844e",
+        "captured_destination_sha256": "435f8f51693327077fc42c1efd2e893cf4f3f3beae90fb5d56db89052b50844e",
+        "destination_matches_original_bytes": true,
+        "note": "Captured after pausing all CPUs; original consumer may have subsequently reused a destination buffer"
+      }
+    ]
+  },
+  "execution_adaptations": [
+    {
+      "address": "0x53961ed4",
+      "size": 8,
+      "original_sha256": "52917c17ca9372e5a4a5f83b3748b9f7493b3038eaa96337453faf3b8f4c1c34",
+      "execution_sha256": "6dcd5e75586fe6683156c0d559d4827b73bd48d501fa5781a1c6099aacd7c877",
+      "semantic": "SricM343PeripheralController GPIO wait returns false (failure); no ready/ACK is generated"
+    },
+    {
+      "address": "0x53961f5c",
+      "size": 8,
+      "original_sha256": "52917c17ca9372e5a4a5f83b3748b9f7493b3038eaa96337453faf3b8f4c1c34",
+      "execution_sha256": "6dcd5e75586fe6683156c0d559d4827b73bd48d501fa5781a1c6099aacd7c877",
+      "semantic": "SricM343PeripheralController GPIO wait returns false (failure); no ready/ACK is generated"
+    },
+    {
+      "address": "0x53a7881c",
+      "size": 8,
+      "original_sha256": "3c52f87c0c0730ab99533ea2d0078fa194be33176220cfe270a98a49efdef97c",
+      "execution_sha256": "26c47f84e21f898764a4be9ad2378ffe3a5ae683619f2caa51a1d2ad2ab79d8c",
+      "semantic": "Auxiliary MainTask calls recorded original DomainDataFactory initialization bridge then original UI factory, then original task epilogue; hardware startup/cleanup sequence is bypassed"
+    },
+    {
+      "address": "0x543d3000",
+      "size": 52,
+      "original_sha256": null,
+      "execution_sha256": "133877bfe8b2abf249412dbd23c7e52fdc5ecd887827ccde247b37d8c28596e6",
+      "semantic": "Authored auxiliary call bridge in new snapshot extension: original singleton 0x53a81480, original Initialize virtual method +8 (0x53a80a70), original UI factory 0x53182830; no fabricated settings or peripheral responses"
+    },
+    {
+      "address": "0x53a7f374",
+      "size": 8,
+      "original_sha256": "71bfdb0d4287297afa1acf2c6b532046880fd8c9f7a3b50b1c455a293018d933",
+      "execution_sha256": "6dcd5e75586fe6683156c0d559d4827b73bd48d501fa5781a1c6099aacd7c877",
+      "semantic": "DomainDataStorage file load returns NULL (missing file), an original negative result; no persistent settings, camera state or successful read is fabricated"
+    },
+    {
+      "address": "0x53a7ec70",
+      "size": 8,
+      "original_sha256": "71bfdb0d4287297afa1acf2c6b532046880fd8c9f7a3b50b1c455a293018d933",
+      "execution_sha256": "6dcd5e75586fe6683156c0d559d4827b73bd48d501fa5781a1c6099aacd7c877",
+      "semantic": "DomainDataStorage file existence check returns false (missing file), an original negative result; no persistent settings, camera state or successful read is fabricated"
+    },
+    {
+      "address": "0x5383b22c",
+      "size": 4,
+      "original_sha256": "47315fbc37d34e280af00b3ac94314c8cb49b1bfec5f2f77390e3d5d388684a3",
+      "execution_sha256": "c5ab2a163c3aefbacaabdbdc137e81a8c715ed03190f19721869dfa18fd22e3f",
+      "semantic": "Resource file size redirects to a recorded NULL filesystem guard; missing backend returns original NULL missing-file result, nonnull backend executes displaced original prologue and remaining original function"
+    },
+    {
+      "address": "0x543d3100",
+      "size": 20,
+      "original_sha256": null,
+      "execution_sha256": "793870c710563793702c0c87d58ef165acef6c6974507a717d7edd82705b9f3c",
+      "semantic": "Authored auxiliary guard: CMP r0,#0; BXEQ lr; original two prologue instructions; B original+8. No successful read or file contents are generated"
+    },
+    {
+      "address": "0x5383a3c4",
+      "size": 4,
+      "original_sha256": "1113e21301d2283cbb294a220e5b95bd1c1d20963cfd186715ae2df01645bda6",
+      "execution_sha256": "b721c9aeb9c81521bdafed2c3abc731978c4ebb1c40315c05b3252c5965dd7bb",
+      "semantic": "File/cache lookup redirects to a recorded NULL filesystem guard; missing backend returns original NULL missing-file result, nonnull backend executes displaced original prologue and remaining original function"
+    },
+    {
+      "address": "0x543d3200",
+      "size": 20,
+      "original_sha256": null,
+      "execution_sha256": "74cfe8af8510e6de3d522f841240044d697b50de51458f374e5fb3fefa71ce4c",
+      "semantic": "Authored auxiliary guard: CMP r0,#0; BXEQ lr; original two prologue instructions; B original+8. No successful read or file contents are generated"
+    },
+    {
+      "address": "0x537493c8",
+      "size": 4,
+      "original_sha256": "1113e21301d2283cbb294a220e5b95bd1c1d20963cfd186715ae2df01645bda6",
+      "execution_sha256": "f5122133d2c35d92f0459a8d6cb09406fdd989fd99a740d3dd3291221ea57cf1",
+      "semantic": "Absent persistent-settings object (r0=NULL) returns zero/failure; nonnull object uses original instructions and continuation. No settings, ready state, font or GUI instruction is replaced"
+    },
+    {
+      "address": "0x543d3300",
+      "size": 20,
+      "original_sha256": null,
+      "execution_sha256": "527827a83d03f4dd9a6c38997994b263c59997b5b3ef8eb8b43bc0c72b8fb6ec",
+      "semantic": "Authored NULL-only persistent-settings guard; PC-relative original tail branch is relocated to its original absolute target"
+    },
+    {
+      "address": "0x53749db8",
+      "size": 4,
+      "original_sha256": "fb1c9117bce509927587d2c5b27d057ad590dc102e69212740bbf44e6d6213c6",
+      "execution_sha256": "029c38fc0edf0b7484a3adf0cbc08caed75898821fd90c230521ac9d71a147e8",
+      "semantic": "Absent persistent-settings object (r0=NULL) returns zero/failure; nonnull object uses original instructions and continuation. No settings, ready state, font or GUI instruction is replaced"
+    },
+    {
+      "address": "0x543d3340",
+      "size": 16,
+      "original_sha256": null,
+      "execution_sha256": "887319513d3dd68ca63c070feba1c263327096c03f95db09ec8a986f2b54ca75",
+      "semantic": "Authored NULL-only persistent-settings guard; PC-relative original tail branch is relocated to its original absolute target"
+    },
+    {
+      "address": "0x53a91bc0",
+      "size": 8,
+      "original_sha256": "11faefd507fdadb7acbf1c6d1245e5073ff28f1531db7420e2281e1a11726e59",
+      "execution_sha256": "6dcd5e75586fe6683156c0d559d4827b73bd48d501fa5781a1c6099aacd7c877",
+      "semantic": "Isolated software-display component skips non-GUI SystemControl hardware/NV event dispatch; returns zero and sends no acknowledgement. Original message queues, TopMenu/Canvas/font code and source firmware stay unchanged. This cannot represent a normally booted camera or functioning hardware business state"
+    },
+    {
+      "address": "0x53a7881c",
+      "size": 4,
+      "original_sha256": "80b1261a972e60b2500dacc4758c882a96ccc5acceb94dcc234bc0870d364257",
+      "execution_sha256": "13311716b8be26219f877badb2ee3c233ec66f8dd4bedf10bc12d57b2d313ff9",
+      "semantic": "Replace earlier authored DomainData startup bridge call with authored read-only resource initialization, then invoke the same original DomainData and UI factories"
+    },
+    {
+      "address": "0x543d4000",
+      "size": 1104,
+      "original_sha256": null,
+      "execution_sha256": "fa154fad6c10e721094e1da6ccdf33ce5d528ad7efce439296451f311ad50ea7",
+      "semantic": "Authored AAPCS bridge creates original Resource using original allocator/constructor/init/start; substitutes FileSystemFactory+0x14 read-only backend; initializes original LedControlFactory; constructs original DataRom with absent NV cache (physical-flash init skipped); calls original DomainData init/package link and SystemControl package links modes6/8; then invokes original UI factory. No NV fields or peripheral responses are generated"
+    },
+    {
+      "address": "0x543d5000",
+      "size": 2620,
+      "original_sha256": null,
+      "execution_sha256": "abc26a018c252d0dc498b1373aa82e70783cbe23a40ce04bee309b95614a2393",
+      "semantic": "Authored bounded read-only backend stat/open/read/close; exact user firmware files only, nonexistent files and all writes fail"
+    }
+  ],
+  "interventions": [
+    "Three-core development board, experimental sparse register latches/idle assumptions, dual RAM layout and explicit bootloader GIC flag; real camera reset values unverified.",
+    "Owned execution snapshot bypasses SRIC hardware startup waits with failure results and enters original GUI/domain initialization. Source firmware on disk remains unchanged.",
+    "Missing persistent domain storage returns original negative results; non-GUI SystemControl hardware/NV dispatch is isolated without fabricated ACKs.",
+    "Original heap, Resource constructor and bounded read-only file backend load exact firmware fonts/sounds. Original DataRom and SystemControl load exact ICONBIN through four-byte logical blocks.",
+    "Original constructors/bind/activate/convert create a persistent 720x480 software display. Native SetRect and Canvas draw produce all captured pixels; absent physical LCD gate is bypassed for this component.",
+    "Original DateTime constructor supplies native default fields to ServiceFactory and Log cache; physical RTC initialization is omitted. Native severity setter suppresses Debug only.",
+    "Sequence-numbered owned input mailbox calls current native handler or original Back method. Original AppMain consumes the 0x178 transition queue; its native dispatch mutex synchronizes completed Show.",
+    "Original TopMenu list completion/cancellation API settles transition animations. Full RTOS animation timer scheduling is unverified."
+  ],
+  "limits": {
+    "startup_seconds": [
+      90,
+      180
+    ],
+    "default_session_seconds": 900,
+    "max_session_seconds": 3600,
+    "maximum_native_commands": 256,
+    "physical_camera_access": false
+  },
+  "unverified": [
+    "Complete normal power-on",
+    "Physical LCD and buttons/touch controller",
+    "Live-view/sensor frames",
+    "Photography",
+    "Linux/RTOS IPC",
+    "Persistent settings from a real camera",
+    "All other pages/firmware versions"
+  ],
+  "reproduction": {
+    "builder": "scripts/boards/ricoh/build_ui.py",
+    "runner": "scripts/boards/ricoh/run_ui.py",
+    "home_config": "ricoh-ui-lab.json: explicit Linux distribution and generated UI manifest",
+    "input": "User-supplied exact official GR IV1.11 update. Import preserves and decodes it transactionally.",
+    "control": "Workbench Original UI lab or standalone supervisor. Up/Down, OK and Cancel/Back dispatch native methods; owned session token required."
+  },
+  "primary_sources": [
+    "https://www.ricoh-imaging.co.jp/english/support/digital/gr4_s.html",
+    "https://www.ricoh-imaging.co.jp/resources/japan/products/oss/gr-4/GRIV_111.tar.gz",
+    "https://download.qemu.org/qemu-10.2.4.tar.xz"
+  ],
+  "distribution": "No camera firmware, resources or captured images are included. Hashes and independently authored adapters only."
+}

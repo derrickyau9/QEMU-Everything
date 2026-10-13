@@ -1,10 +1,11 @@
-"""Dispatch exact Z7/Z30/Z6 assisted menus without cross-model substitution."""
-from . import nikon_lab, nikon_z30_lab, nikon_z6_lab
+"""Dispatch exact Z7/Z30/Z6/Z50 assisted menus without cross-model substitution."""
+from . import nikon_lab, nikon_z30_lab, nikon_z6_lab, nikon_z50_lab
 
 LABS = (
     ('z7', 'Nikon Z7 C3.80', nikon_lab, '/api/status', '/api/frame'),
     ('z30', 'Nikon Z30 C1.20', nikon_z30_lab, '/status', '/frame.png'),
     ('z6', 'Nikon Z6 C3.80', nikon_z6_lab, '/status', '/frame.png'),
+    ('z50', 'Nikon Z50 C2.60', nikon_z50_lab, '/status', '/frame.png'),
 )
 
 

@@ -1,0 +1,157 @@
+{
+  "profile": "insta360-x3-ui-v1",
+  "firmware_sha256": "a89070d6edc57cd489c9f5e3e81afca7750d08dd5d39d423e7a86efef73a7569",
+  "assisted_startup": true,
+  "full_threadx_boot_verified": false,
+  "natural_power_on_verified": false,
+  "firmware_file_modified": false,
+  "guest_ram_modified": true,
+  "camera_access": false,
+  "original_ui_verified": true,
+  "native_touch_verified": true,
+  "single_instance_menu_roundtrip_verified": true,
+  "frames": [
+    {
+      "name": "01-resolution-72mp",
+      "sha256": "22da241868da95972d6186d86c8565a67d8dceb3fef7e8ad30736ec3e80cd90b",
+      "width": 352,
+      "height": 476
+    },
+    {
+      "name": "02-resolution-18mp",
+      "sha256": "321f75b875fd4baee60ba64a1ccd41a3af807a9657c030e516395759340aee2f",
+      "width": 352,
+      "height": 476
+    },
+    {
+      "name": "03-resolution-72mp-return",
+      "sha256": "270dfd77bddba7c0be7430ea4e455505dd62cdc8924a1ffc757ad33df13c73d1",
+      "width": 352,
+      "height": 476
+    }
+  ],
+  "interventions": [
+    "ARMv7 Cortex-A15 execution of original ARM32 emWin GUI",
+    "Direct entry to original GUI task 0x8ca5f4 with identity MMU/VFP",
+    "Eight RAM platform hook regions (68 bytes): clock/delay/task identity/LCD buffer and present/GUI and app dispatch",
+    "Original handlers dispatched synchronously; ThreadX scheduler and other tasks bypassed",
+    "Original resolution screen requested through its native handler",
+    "Diagnostic zero/latch peripheral bank; DSP and camera pipeline absent"
+  ],
+  "ram_hooks": [
+    {
+      "address": "0x5975bc",
+      "size": 16,
+      "bytes": "04009fe5000090e51eff2fe10000fe1f"
+    },
+    {
+      "address": "0x5975d0",
+      "size": 8,
+      "bytes": "04f01fe59c00fc1f"
+    },
+    {
+      "address": "0x597604",
+      "size": 8,
+      "bytes": "340201e31eff2fe1"
+    },
+    {
+      "address": "0x597728",
+      "size": 8,
+      "bytes": "04f01fe50801fc1f"
+    },
+    {
+      "address": "0x8cec64",
+      "size": 8,
+      "bytes": "04f01fe57400fc1f"
+    },
+    {
+      "address": "0x8cecd8",
+      "size": 8,
+      "bytes": "04f01fe57400fc1f"
+    },
+    {
+      "address": "0x8ced44",
+      "size": 4,
+      "bytes": "e046f9ea"
+    },
+    {
+      "address": "0x597744",
+      "size": 8,
+      "bytes": "04f01fe52801fc1f"
+    }
+  ],
+  "platform_sha256": "d2b8f7c3f33d11a914dc69722395c5ea4b55f2e0b2f24291514235fd1bd9b070",
+  "qemu_sha256": "68ea0ce0392ff117eb16ff11150d12d5283b625d9603504aa9baa7c0aa5a88f7",
+  "overlay_sha256": {
+    "build_ui.py": "f2dbe1fc7a8234b73fbeb18a257c9ee3b5ff09c833772af8fe30aeec0693943c",
+    "run_ui.py": "9d67a3ad56574a2edfc5df8eb792c3f79d7019ad5f2783662d3aa400862809fd",
+    "x3-ui-lab.c": "7661379375ca25f81e93b70529680415a6c8c60e12a8ad534333e7d92c4f3d37",
+    "ui-platform.S": "e28478c2b5c22c5b901871b7aa64b32c11cd4ecc6045090977df0008c9d1d90c",
+    "ui-platform.ld": "c4a56e8cac276a9062bdb48b907284300dd59fea2a5ea38efae833111a1c8ad3"
+  },
+  "resolution_fingerprints": [
+    "115999d4a7290b3b6285c75f29f93a33212a1868b5ca2505d3f7af91c359c1cb",
+    "963796e380ecb3fe8414aa9801c9c0de808349e5d12b219b1a83cea3130d176e",
+    "115999d4a7290b3b6285c75f29f93a33212a1868b5ca2505d3f7af91c359c1cb"
+  ],
+  "source_sha256_verified_after": true,
+  "owned_guest_processes_reaped": true,
+  "process_reaped": true,
+  "errors": [],
+  "date": "2026-10-11",
+  "brand": "Insta360",
+  "model": "X3",
+  "firmware_version": "v1.1.4.1_build1",
+  "qemu_version": "10.2.4",
+  "machine": "insta360-x3-ui-lab",
+  "frame_dimensions": [
+    352,
+    476
+  ],
+  "probe": "One QEMU instance: 72MP -> 18MP -> 72MP; original touch handlers",
+  "source_gui": {
+    "entry": "Original UI lab",
+    "single_session_stable_seconds": 5.265,
+    "rgb_sha256": "22da241868da95972d6186d86c8565a67d8dceb3fef7e8ad30736ec3e80cd90b",
+    "owned_cleanup_verified": true
+  },
+  "comparison_region": {
+    "x": 0,
+    "y": 210,
+    "width": 352,
+    "height": 120,
+    "reason": "Original preset-change toast above the selector has independent timing; full saved pixels are not altered"
+  },
+  "visual_review": "Complete original menus and preset-change toast checked with decoded RGB and JPEG; PNG preview tool omitted content while decoded source pixels remained correct",
+  "portable_gui": {
+    "exe_sha256": "e8343f3d2e3473919ec4c071e18147cef5cddb5b6d138016961263d8265c565a",
+    "firmware_changed": false,
+    "assisted_gui_component": true,
+    "full_threadx_boot": false,
+    "single_instance_native_menu_roundtrip": true,
+    "owned_guest_processes_reaped": true,
+    "ok": true,
+    "frames": [
+      {
+        "name": "01-resolution-72mp",
+        "full_pixel_sha256": "22da241868da95972d6186d86c8565a67d8dceb3fef7e8ad30736ec3e80cd90b",
+        "resolution_roi_sha256": "115999d4a7290b3b6285c75f29f93a33212a1868b5ca2505d3f7af91c359c1cb"
+      },
+      {
+        "name": "02-resolution-18mp",
+        "full_pixel_sha256": "321f75b875fd4baee60ba64a1ccd41a3af807a9657c030e516395759340aee2f",
+        "resolution_roi_sha256": "963796e380ecb3fe8414aa9801c9c0de808349e5d12b219b1a83cea3130d176e"
+      },
+      {
+        "name": "03-resolution-72mp-return",
+        "full_pixel_sha256": "270dfd77bddba7c0be7430ea4e455505dd62cdc8924a1ffc757ad33df13c73d1",
+        "resolution_roi_sha256": "115999d4a7290b3b6285c75f29f93a33212a1868b5ca2505d3f7af91c359c1cb"
+      }
+    ]
+  },
+  "host_regression": {
+    "passed": 566,
+    "skipped": 4,
+    "source": "Full Windows pytest suite after original UI integration"
+  }
+}

@@ -1,0 +1,320 @@
+{
+  "schema": 1,
+  "profile": "gopro-hero8-tara-ui-v1",
+  "verified_utc": "2026-10-12T03:58:19.890613+00:00",
+  "model": "GoPro HERO8 Black",
+  "version": "HD8.01.02.51.00",
+  "rtos_size": 70503296,
+  "firmware_sha256": "49e0d40253f517fc6512f4bc9ff59a9d63c9a86e7cd84a6b0c97f523278de2e5",
+  "source_sha256_after_run": "49e0d40253f517fc6512f4bc9ff59a9d63c9a86e7cd84a6b0c97f523278de2e5",
+  "qemu_version": "10.2.4",
+  "upstream_archive_sha256": "821b545b92f165e57dddccac5077d76d4d436a226595b8813ad59306bbfd0746",
+  "qemu_sha256": "7ba9e65bb269ee1245fc307297518adc8304f31688bf978e5bacbae82b4ef7aa",
+  "bridge_sha256": "e415dec83baa14c659e064a42169154b7743c902d388a7929bde84e56db6d1c4",
+  "owned_snapshot_sha256": "a227ae10ac7042d7df9284eba8c22065aff05e8d3cae19a2bfd6efc7a640a7be",
+  "overlay_sha256": {
+    "build_ui.py": "0fc24444b831e39aef79f926e5dc743b8b5fcbe88c4f19424fc18183ed1341cd",
+    "run_ui.py": "61b156d44045045766102cdc6efde48df8011f07a15a329f5e85e949bdf54e6e",
+    "component.py": "d773ed69c4f03f896dee98dca7e5254b65562467ad9d940faad2ec4fb10d37b9",
+    "component_viewer.py": "a2eccdd833a8f56cebc4ac89b26b715277efca523d9ef2116a358dd02933af11",
+    "gopro-hero8-reset-lab.c": "de4e8c6ca8ed0dd6cae320ece8f64fc7bfb755bd4f67218b4c3afb448e2dd66a",
+    "ew_component.c": "f92fd577598e6fe7c3b924d6ae7ba26b7d2467780d68f6f652e5fd85d2383b3b",
+    "ew_entry.S": "e049464d25e2bd2b584f8de1a6023ef9c450ebe4aee250b52482eb9e3fcc2d79"
+  },
+  "scope": "Original HERO8 Tara ApplicationTav shooting/preset UI and native Back; sensor/capture/physical LCD unverified",
+  "original_ui_verified": true,
+  "native_touch_verified": true,
+  "single_instance_menu_roundtrip_verified": true,
+  "cycles_verified": 3,
+  "same_guest_pid": 118797,
+  "natural_power_on_verified": false,
+  "full_rtos_boot_verified": false,
+  "sensor_verified": false,
+  "capture_verified": false,
+  "physical_lcd_verified": false,
+  "synthetic_pixels": false,
+  "firmware_file_modified": false,
+  "camera_access": false,
+  "owned_guest_processes_reaped": true,
+  "errors": [],
+  "original_root_class": "RootDialogsTav::ApplicationTav",
+  "viewport": [
+    1058,
+    540
+  ],
+  "rear_display_region": [
+    0,
+    0,
+    480,
+    320
+  ],
+  "frame_fingerprints": {
+    "shooting_rgba": "6e479746029ed434fe1ae5641fd11cd4c5d291ed724f4a6eedf9154bd52b7127",
+    "video_preset_rgba": "b9a6208933604906fe8b72999cd12654d09c946d36b001c6bd32606da21e1dfb",
+    "returned_shooting_rgba": "6e479746029ed434fe1ae5641fd11cd4c5d291ed724f4a6eedf9154bd52b7127"
+  },
+  "native_input_route": {
+    "mailbox": "0xA920005C",
+    "time": "0xA0FF7FE0",
+    "move": "0xA0FF7FF8",
+    "hit": "0xA0FF8024",
+    "standard_coordinates": [
+      240,
+      250
+    ],
+    "back_coordinates": [
+      54,
+      43
+    ],
+    "writes": "Only input mailbox/coordinates. Original handlers/timers/signals/GC/raster execute; no widget selection or pixels written."
+  },
+  "native_gc": {
+    "collector": "0xA11D2C68",
+    "original_tara_callsite": "0xA0E5CA4C",
+    "canvas_lifecycle": "Original temporary Canvas each frame, detach, EndUpdate, native collector"
+  },
+  "cycles": [
+    {
+      "index": 0,
+      "menu_rgba_sha256": "b9a6208933604906fe8b72999cd12654d09c946d36b001c6bd32606da21e1dfb",
+      "returned_rgba_sha256": "6e479746029ed434fe1ae5641fd11cd4c5d291ed724f4a6eedf9154bd52b7127",
+      "verified": true,
+      "heap_used_bytes_after_return": 13189504
+    },
+    {
+      "index": 1,
+      "menu_rgba_sha256": "b9a6208933604906fe8b72999cd12654d09c946d36b001c6bd32606da21e1dfb",
+      "returned_rgba_sha256": "6e479746029ed434fe1ae5641fd11cd4c5d291ed724f4a6eedf9154bd52b7127",
+      "verified": true,
+      "heap_used_bytes_after_return": 13390656
+    },
+    {
+      "index": 2,
+      "menu_rgba_sha256": "b9a6208933604906fe8b72999cd12654d09c946d36b001c6bd32606da21e1dfb",
+      "returned_rgba_sha256": "6e479746029ed434fe1ae5641fd11cd4c5d291ed724f4a6eedf9154bd52b7127",
+      "verified": true,
+      "heap_used_bytes_after_return": 13561984
+    }
+  ],
+  "final_oracle": {
+    "magic": 1196442967,
+    "stage": 14,
+    "result": 1,
+    "heap_next": 2865688704,
+    "alloc_count": 7476,
+    "free_count": 4953,
+    "failed_size": 0,
+    "fatal_code": 0,
+    "exception": 0,
+    "exception_lr": 0,
+    "dfar": 0,
+    "dfsr": 0,
+    "root": 2852391168,
+    "viewport": 2855582208,
+    "bitmap": 2855582216,
+    "canvas": 0,
+    "width": 1058,
+    "height": 540,
+    "rect_x0": 0,
+    "rect_y0": 0,
+    "rect_x1": 480,
+    "rect_y1": 293,
+    "frames": 340,
+    "request": 49,
+    "complete": 49,
+    "operation": 4,
+    "event_result": 1,
+    "hit_result": 1,
+    "mutex_created": 6,
+    "mutex_wait": 1319,
+    "mutex_unlock": 1319,
+    "mutex_error": 56,
+    "log_bytes": 4835,
+    "log_calls": 52,
+    "log_truncated": 0,
+    "display_updates": 340,
+    "display_error": 0,
+    "native_bitmap": 2855582464,
+    "native_pixels": 2855582484,
+    "native_stride": 4232
+  },
+  "interventions": [
+    "Original Cortex-A7 code, original MMU table 0x8000, original data/BSS initialization",
+    "Auxiliary original RootDialogsTav::ApplicationTav entry; CPU1/2 park and proprietary RTOS tasks bypassed",
+    "Reviewed 20 eight-byte veneers in owned RAM image: real bounded heap/calloc, deferred free, software recursive mutex, clock, logging, original HERO8 configuration and software display",
+    "Original HERO8 model setter A0BCE408(A5293118) and original settings initializer A0984AE8",
+    "Empty NV backend fails naturally; original firmware chooses its own ROM defaults",
+    "Original driver/battery registries initialize empty and missing hardware errors remain",
+    "Original debug flag mask4 disabled; error mask1 preserved",
+    "Original CoreRoot time/pointer handlers and EW timers/signals/raster/EndUpdate; software mailbox polling",
+    "Original EW garbage collector A11D2C68 after EndUpdate; original root locked, new temporary original Canvas each update as in Tara",
+    "64 MiB deferred-free heap: finite experiment, not a long-running reusable allocator"
+  ],
+  "ram_hooks": [
+    {
+      "address": "0xa11d2070",
+      "original_bytes": "10482de908b08de2",
+      "replacement_bytes": "04f01fe5540100a9",
+      "target": "0xa9000154",
+      "semantic": "Bounded real 64 MiB EW heap"
+    },
+    {
+      "address": "0xa0c0f5a8",
+      "original_bytes": "30482de94c4603e3",
+      "replacement_bytes": "04f01fe5540100a9",
+      "target": "0xa9000154",
+      "semantic": "Bounded real native SDK heap"
+    },
+    {
+      "address": "0xa0c0f5e4",
+      "original_bytes": "78482de90040a0e1",
+      "replacement_bytes": "04f01fe5b40100a9",
+      "target": "0xa90001b4",
+      "semantic": "Free deferred until owned session cleanup"
+    },
+    {
+      "address": "0xa0212c9c",
+      "original_bytes": "10402de908d04de2",
+      "replacement_bytes": "04f01fe5540100a9",
+      "target": "0xa9000154",
+      "semantic": "Native malloc with real backing"
+    },
+    {
+      "address": "0xa0212d78",
+      "original_bytes": "10402de908d04de2",
+      "replacement_bytes": "04f01fe5d00100a9",
+      "target": "0xa90001d0",
+      "semantic": "Reentrant malloc context/size ABI"
+    },
+    {
+      "address": "0xa0212e54",
+      "original_bytes": "10402de908d04de2",
+      "replacement_bytes": "04f01fe5b40100a9",
+      "target": "0xa90001b4",
+      "semantic": "Standard free deferred until cleanup"
+    },
+    {
+      "address": "0xa0212f60",
+      "original_bytes": "10402de908d04de2",
+      "replacement_bytes": "04f01fe5280200a9",
+      "target": "0xa9000228",
+      "semantic": "Reentrant free context/pointer ABI"
+    },
+    {
+      "address": "0xa11d20f0",
+      "original_bytes": "00482de904b08de2",
+      "replacement_bytes": "04f01fe5b40100a9",
+      "target": "0xa90001b4",
+      "semantic": "EW free deferred; finite session only"
+    },
+    {
+      "address": "0xa11d2170",
+      "original_bytes": "00482de904b08de2",
+      "replacement_bytes": "04f01fe5b80700a9",
+      "target": "0xa90007b8",
+      "semantic": "Actual 40 MHz counter to milliseconds"
+    },
+    {
+      "address": "0xa11d2180",
+      "original_bytes": "00482de904b08de2",
+      "replacement_bytes": "04f01fe5b80700a9",
+      "target": "0xa90007b8",
+      "semantic": "Actual 40 MHz counter to milliseconds"
+    },
+    {
+      "address": "0xa0c10f20",
+      "original_bytes": "00482de904b08de2",
+      "replacement_bytes": "04f01fe5b80700a9",
+      "target": "0xa90007b8",
+      "semantic": "Native scalar SDK monotonic clock"
+    },
+    {
+      "address": "0xa0c0ff84",
+      "original_bytes": "f0492de9046080e2",
+      "replacement_bytes": "04f01fe5f80300a9",
+      "target": "0xa90003f8",
+      "semantic": "Owned software recursive mutex object"
+    },
+    {
+      "address": "0xa0c10194",
+      "original_bytes": "70482de90050a0e1",
+      "replacement_bytes": "04f01fe5b80400a9",
+      "target": "0xa90004b8",
+      "semantic": "Valid single-thread recursive acquisition"
+    },
+    {
+      "address": "0xa0c10264",
+      "original_bytes": "70482de910b08de2",
+      "replacement_bytes": "04f01fe5200500a9",
+      "target": "0xa9000520",
+      "semantic": "Valid held mutex release"
+    },
+    {
+      "address": "0xa02113d8",
+      "original_bytes": "0f002de930402de9",
+      "replacement_bytes": "04f01fe5d80500a9",
+      "target": "0xa90005d8",
+      "semantic": "Original formatter with bounded real character capture"
+    },
+    {
+      "address": "0xa092e240",
+      "original_bytes": "10482de908b08de2",
+      "replacement_bytes": "04f01fe5ec0300a9",
+      "target": "0xa90003ec",
+      "semantic": "Select original HERO8 table A5265E18"
+    },
+    {
+      "address": "0xa11bbd20",
+      "original_bytes": "f04f2de920b08de2",
+      "replacement_bytes": "04f01fe5480600a9",
+      "target": "0xa9000648",
+      "semantic": "Copy actual original native raster to software display"
+    },
+    {
+      "address": "0xa11d2100",
+      "original_bytes": "d03f00e329354ae3",
+      "replacement_bytes": "04f01fe51c0800a9",
+      "target": "0xa900081c",
+      "semantic": "Preserve fatal failure, record and park"
+    },
+    {
+      "address": "0xa021306c",
+      "original_bytes": "30402de90cd04de2",
+      "replacement_bytes": "04f01fe5440200a9",
+      "target": "0xa9000244",
+      "semantic": "Checked calloc with actual zeroed allocation"
+    },
+    {
+      "address": "0xa0213170",
+      "original_bytes": "30402de90cd04de2",
+      "replacement_bytes": "04f01fe5180300a9",
+      "target": "0xa9000318",
+      "semantic": "Checked reentrant calloc"
+    }
+  ],
+  "finite_heap": {
+    "capacity_bytes": 67108864,
+    "deferred_free": true,
+    "default_session_seconds": 900,
+    "maximum_session_seconds": 3600,
+    "not_long_running_support": true
+  },
+  "strict_reset": {
+    "verified": false,
+    "original_fault_pc": "0xA0000320",
+    "missing_mmio": "0x28828240",
+    "description": "Original cold reset reads unavailable DRAM configuration register; component startup is independent."
+  },
+  "native_hardware_errors_preserved": [
+    "Empty NV read/erase failure and native settings ROM fallback",
+    "Unimplemented RTC and battery service failures",
+    "Native analytics/preset diagnostic assertions"
+  ],
+  "official_update_url": "https://gopro.com/en/us/update/hero8-black",
+  "prior_art": {
+    "repository": "https://github.com/hypoxic/GoPro-Research",
+    "commit": "a9a35a453c6008134c3ac12c9ce0b127cd5360ca",
+    "usage": "Read-only format research; unlicensed source not copied/executed"
+  },
+  "reproduction": "Build scripts/boards/gopro/build_ui.py; run run_ui.py with exact RTOS and mode=probe. No firmware included."
+}

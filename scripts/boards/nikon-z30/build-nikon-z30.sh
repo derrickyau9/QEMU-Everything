@@ -6,7 +6,7 @@ if [[ $# != 3 ]]; then
   echo 'Usage: build-nikon-z30.sh /absolute/z30-qemu /absolute/qemu-10.2.4.tar.xz /absolute/new-work-dir' >&2
   exit 2
 fi
-python3 - "$1" "$2" "$3" <<'PY'
+python3 -I -S - "$1" "$2" "$3" <<'PY'
 import hashlib
 import os
 from pathlib import Path
@@ -43,7 +43,8 @@ if digest(archive) != '821b545b92f165e57dddccac5077d76d4d436a226595b8813ad59306b
     raise ValueError('Original QEMU 10.2.4 archive checksum differs')
 if work.exists():
     raise ValueError('Choose a new work directory; existing Z7/Z30 builds are preserved')
-environment = {k: v for k, v in os.environ.items() if k not in ('PYTHONPATH', 'PYTHONHOME')}
-subprocess.run([sys.executable, '-B', str(project / 'tools/build.py'), '--work-dir', str(work),
-                '--archive', str(archive), '--jobs', '4'], check=True, env=environment, cwd=project)
+environment = {k: v for k, v in os.environ.items() if k not in ('PYTHONPATH', 'PYTHONHOME', 'PYTHONSAFEPATH')}
+environment['PYTHONNOUSERSITE'] = '1'
+subprocess.run([sys.executable, '-I', '-S', '-B', str(project / 'tools/build.py'), '--work-dir', str(work),
+                '--archive', str(archive), '--jobs', '2'], check=True, env=environment, cwd=project)
 PY

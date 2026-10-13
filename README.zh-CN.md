@@ -8,7 +8,7 @@
 
 这里是 QEMU Everything 的新仓库。在此发布便携版之前，请使用下方的源码启动方式。
 
-![QEMU Everything 中保留的哈苏原厂 UI 适配器](docs/workbench.png)
+![QEMU Everything CRT Retro 工作台中运行的哈苏原厂 UI 适配器](docs/workbench-zh.png)
 
 ## 快速开始
 
@@ -36,7 +36,7 @@
 - 校验并离线解包适马 fp 5.02 的 DFI/LZSS 主程序；输出已与原厂解压函数执行结果逐字节核对，UI 启动仍在开发。
 - 从工作台或 CLI 限时验证索尼 A7 IV、理光 GR 和 Insta360 X3 的原厂 Linux/根文件系统启动。
 - QEMU 中原厂 UI 实时画面、鼠标触控、启动 / 停止、PNG 截图。
-- 中文 / English、跟随系统 / 浅色 / 深色、紫 / 蓝 / 绿主题。
+- 中文 / English；默认 **CRT Retro** 主题，采用墨黑、磷绿与琥珀配色。保留跟随系统 / 浅色 / 深色主题，经典主题可选择紫 / 蓝 / 绿强调色。
 - 开发工作区、按机型选择架构的 `hello.c` 示例、NDK clang 编译及虚拟机运行。
 - 在本地 QEMU 中导入、选择和移除经过校验的第三方 Wayland 应用包。
 - 可为 X1D 或 X2D II 虚拟机应用会话构建[NetSurf 浏览器原型](docs/BROWSER_PROTOTYPE.md)，支持触摸键盘和 X2D II 可选 QEMU 网络。

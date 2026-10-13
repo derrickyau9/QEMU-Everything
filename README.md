@@ -8,7 +8,7 @@ Formerly **Hasselblad X System QEMU DevKit**. The existing camera UI adapters re
 
 This is the new QEMU Everything repository. Use the source launcher below until a portable build is published here.
 
-![QEMU Everything with the preserved Hasselblad original UI adapter](docs/workbench.png)
+![QEMU Everything CRT Retro workbench running the original Hasselblad UI adapter](docs/workbench.png)
 
 ## Start with your firmware
 
@@ -38,7 +38,7 @@ The camera UI runtime download is approximately **615 MB**. Allow **8 GB free di
 - Run bounded original Linux/rootfs checks for Sony A7 IV / A7R V, Ricoh GR and Insta360 X3 from the workbench or CLI.
 - Original firmware UI, streamed directly from a minimal Wayland compositor in QEMU.
 - Start/stop controls, correctly scaled mouse touch input and PNG screenshots.
-- English / Simplified Chinese; system / light / dark themes; Iris / Blue / Leaf accents.
+- English / Simplified Chinese; a default **CRT Retro** theme in ink black, phosphor green and amber. System / light / dark themes remain available, with Iris / Blue / Leaf accents for those classic themes.
 - A guest console, persistent logs and an editable **hello.c** development workspace.
 - **Build app → Run app** using an installed Android NDK; no NDK is needed to run the original UI.
 - Import, select and remove validated third-party Wayland app packages for the local QEMU guest.

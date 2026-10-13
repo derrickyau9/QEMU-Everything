@@ -1,4 +1,4 @@
-"""Native Qt workbench, with Material surfaces from Infotainment Lab."""
+"""Native Qt firmware workbench with a retro instrument-panel interface."""
 from pathlib import Path
 import argparse
 import json
@@ -12,9 +12,9 @@ import time
 from PySide6.QtCore import Qt, QTimer, QThread, Signal, QRectF, QUrl
 from PySide6.QtGui import QPainter, QColor, QImage, QDesktopServices, QFont, QPixmap, QIcon
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QFrame, QLabel, QPushButton,
-    QToolButton, QVBoxLayout, QHBoxLayout, QListWidget, QStackedWidget, QFileDialog,
+    QVBoxLayout, QHBoxLayout, QListWidget, QStackedWidget, QFileDialog,
     QPlainTextEdit, QComboBox, QMessageBox, QProgressBar, QLineEdit, QDialog, QCheckBox,
-    QDialogButtonBox, QSplitter)
+    QDialogButtonBox, QSplitter, QScrollArea)
 from .core import ASSETS, Task, Cancelled, data_home, read_json, write_json
 from .library import import_firmware, is_camera
 from .runtime import discover, setup, discover_qemu, setup_qemu
@@ -26,6 +26,9 @@ from .support import create_support, export_support
 from .guest.prepare import network_supported
 from .models import MODELS, model_id, available_models
 from .theme import apply_theme, current_colors
+from .retro_widgets import paint_idle_screen
+
+THEME_MODES = ('retro', 'system', 'light', 'dark')
 
 class Job(QThread):
     message = Signal(str)
@@ -52,7 +55,7 @@ class Screen(QWidget):
         self.caption = 'Import official firmware to begin'
         self.last_move = 0
         self.dragging = False
-        self.setMinimumSize(480, 360)
+        self.setMinimumSize(400, 240)
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
     def bounds(self):
         fw, fh = (self.frame.width(),self.frame.height()) if self.frame is not None else (1024,768)
@@ -66,12 +69,7 @@ class Screen(QWidget):
         if self.frame is not None:
             painter.drawImage(self.bounds(), self.frame)
         else:
-            painter.setPen(QColor('#d0bcff'))
-            painter.setFont(QFont('Segoe UI', 38, QFont.Weight.Light))
-            painter.drawText(self.rect().adjusted(0, -50, 0, -50), Qt.AlignCenter, self.message)
-            painter.setPen(QColor('#938f99'))
-            painter.setFont(QFont('Segoe UI', 12))
-            painter.drawText(self.rect().adjusted(20, 65, -20, 65), Qt.AlignCenter | Qt.TextWordWrap, self.caption)
+            paint_idle_screen(painter, self.rect(), self.message, self.caption, current_colors())
         painter.end()
     def send(self, operation, event):
         r = self.bounds(); p = event.position()
@@ -97,10 +95,15 @@ class DropArea(QFrame):
     def __init__(self, title, caption):
         super().__init__()
         self.setAcceptDrops(True); self.setFocusPolicy(Qt.StrongFocus)
-        layout = QVBoxLayout(self); layout.setContentsMargins(24, 22, 24, 22)
-        self.title = QLabel(title); self.title.setObjectName('subtitle')
+        self.setCursor(Qt.PointingHandCursor)
+        layout = QHBoxLayout(self); layout.setContentsMargins(20, 16, 20, 16); layout.setSpacing(18)
+        symbol = QLabel('+'); symbol.setObjectName('importSymbol'); symbol.setAlignment(Qt.AlignCenter); symbol.setFixedSize(46, 46)
+        layout.addWidget(symbol)
+        text = QVBoxLayout(); text.setSpacing(5); layout.addLayout(text, 1)
+        self.title = QLabel(title); self.title.setObjectName('subtitle'); self.title.setWordWrap(True)
         self.caption = QLabel(caption); self.caption.setWordWrap(True); self.caption.setObjectName('muted')
-        layout.addWidget(self.title); layout.addWidget(self.caption)
+        text.addWidget(self.title); text.addWidget(self.caption)
+        self.action = QLabel(); self.action.setObjectName('importAction'); layout.addWidget(self.action)
     def dragEnterEvent(self, event):
         urls = event.mimeData().urls()
         if len(urls) == 1 and urls[0].isLocalFile() and Path(urls[0].toLocalFile()).is_file():
@@ -118,6 +121,8 @@ class Window(QMainWindow):
         self.home = home
         home.mkdir(parents=True, exist_ok=True)
         self.preferences = read_json(home / 'preferences.json')
+        if self.preferences.get('appearance_version') != 1:
+            self.preferences.update(theme='retro', appearance_version=1)
         self.lang = self.preferences.get('language', 'zh' if (locale.getlocale()[0] or '').lower().startswith('zh') else 'en')
         self.bindings = []
         self.job = self.session = None
@@ -130,30 +135,38 @@ class Window(QMainWindow):
         cat_logo = QPixmap(str(ASSETS / 'assets' / 'cat-logo.jpg'))
         if not cat_logo.isNull():
             self.setWindowIcon(QIcon(cat_logo))
-        self.resize(1400, 940); self.setMinimumSize(1120, 780)
+        self.resize(1440, 960); self.setMinimumSize(1120, 800)
         self.setAcceptDrops(True)
         app = QApplication.instance()
-        apply_theme(app, self.preferences.get('theme', 'system'), self.preferences.get('accent', 'violet'))
+        apply_theme(app, self.preferences.get('theme', 'retro'), self.preferences.get('accent', 'violet'))
         app.styleHints().colorSchemeChanged.connect(lambda *_: self.appearance())
         body = QWidget(); self.setCentralWidget(body)
-        row = QHBoxLayout(body); row.setContentsMargins(18, 18, 18, 18); row.setSpacing(22)
-        sidebar = QFrame(); sidebar.setObjectName('sidebar'); sidebar.setFixedWidth(224)
-        side = QVBoxLayout(sidebar); side.setContentsMargins(18, 24, 18, 20); side.setSpacing(12)
+        row = QHBoxLayout(body); row.setContentsMargins(16, 16, 16, 8); row.setSpacing(22)
+        sidebar = QFrame(); sidebar.setObjectName('sidebar'); sidebar.setFixedWidth(214)
+        side = QVBoxLayout(sidebar); side.setContentsMargins(18, 20, 18, 18); side.setSpacing(10)
+        side.addWidget(self.label('QE / SYSTEMS LAB', 'QE / 系统实验室', 'brandMeta'))
         brand = QLabel()
         brand.setAccessibleName('Cat logo')
-        brand.setPixmap(cat_logo.scaled(160, 117, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+        brand.setObjectName('catPortrait')
+        brand.setAlignment(Qt.AlignCenter)
+        brand.setPixmap(cat_logo.scaled(156, 110, Qt.KeepAspectRatio, Qt.SmoothTransformation))
         side.addWidget(brand)
-        side.addSpacing(25)
+        side.addWidget(self.label('QEMU\nEVERYTHING', 'QEMU\nEVERYTHING', 'brandTitle'))
+        side.addWidget(self.label('FIRMWARE EXPLORER', '固件探索工作台', 'brandMeta'))
+        side.addSpacing(22)
+        side.addWidget(self.label('WORKSPACE', '工作空间', 'railHeading'))
         self.pages = QStackedWidget(); self.nav = []
         for i, (en, zh) in enumerate([('Firmware library', '固件库'), ('Development', '开发工作区'), ('Platform support', '平台适配'), ('Console and logs', '控制台与日志'), ('Settings', '设置')]):
-            b = QToolButton(); b.setObjectName('nav'); b.setCheckable(True); b.setToolButtonStyle(Qt.ToolButtonTextOnly)
-            self.bind(b.setText, en, zh); b.clicked.connect(lambda _=False, n=i: self.navigate(n))
+            b = QPushButton(); b.setObjectName('nav'); b.setCheckable(True)
+            b.setSizePolicy(b.sizePolicy().Policy.Expanding, b.sizePolicy().Policy.Preferred)
+            self.bind(b.setText, f'{i + 1:02d}  {en}', f'{i + 1:02d}  {zh}'); b.clicked.connect(lambda _=False, n=i: self.navigate(n))
             side.addWidget(b); self.nav.append(b)
         side.addStretch()
-        side.addWidget(self.label('LOCAL WORKBENCH', '本地开发环境', 'eyebrow'))
+        side.addWidget(self.label('HOST / LOCAL', '主机 / 本地', 'railHeading'))
         host_label = 'macOS ARM64' if sys.platform == 'darwin' and platform.machine() == 'arm64' else ('macOS' if sys.platform == 'darwin' else 'Windows x64' if os.name == 'nt' else platform.system())
-        side.addWidget(self.label(f'ARM · x86_64 · RISC-V\n{host_label} · v0.3.0', f'ARM · x86_64 · RISC-V\n{host_label} · v0.3.0', 'muted'))
-        self.official = self.button('Hasselblad firmware ↗', '哈苏官方固件 ↗', lambda: QDesktopServices.openUrl(QUrl('https://www.hasselblad.com/x-system/firmware/')))
+        side.addWidget(self.label(f'{host_label}\nARM / x86 / RISC-V\nv0.3.0', f'{host_label}\nARM / x86 / RISC-V\nv0.3.0', 'brandMeta'))
+        self.official = self.button('Hasselblad downloads ↗', '哈苏官方固件 ↗', lambda: QDesktopServices.openUrl(QUrl('https://www.hasselblad.com/x-system/firmware/')))
+        self.official.setStyleSheet('padding-left: 6px; padding-right: 6px; font-size: 12px;')
         side.addWidget(self.official)
         row.addWidget(sidebar); row.addWidget(self.pages, 1)
         self.make_library(); self.make_development(); self.make_support(); self.make_console(); self.make_settings()
@@ -161,6 +174,7 @@ class Window(QMainWindow):
         self.progress = QProgressBar(); self.progress.setMaximumWidth(170); self.progress.setRange(0, 0); self.progress.hide()
         self.cancel = self.button('Cancel', '取消', self.cancel_job); self.cancel.hide()
         self.statusBar().addPermanentWidget(self.progress); self.statusBar().addPermanentWidget(self.cancel)
+        self.statusBar().setSizeGripEnabled(False)
         self.refresh_library(); self.update_controls()
         self.timer = QTimer(self); self.timer.timeout.connect(self.tick); self.timer.start(16)
 
@@ -178,30 +192,43 @@ class Window(QMainWindow):
     def card(self, layout):
         card = QFrame(); card.setObjectName('card'); inner = QVBoxLayout(card); inner.setContentsMargins(22, 20, 22, 20); inner.setSpacing(12)
         layout.addWidget(card); return inner
-    def page(self, en, zh, sub_en, sub_zh):
-        p = QWidget(); layout = QVBoxLayout(p); layout.setContentsMargins(0, 8, 0, 0); layout.setSpacing(16)
-        layout.addWidget(self.label(en, zh, 'title')); layout.addWidget(self.label(sub_en, sub_zh, 'muted'))
-        self.pages.addWidget(p); return layout
+    def page(self, en, zh, sub_en, sub_zh, scroll=True):
+        p = QWidget(); layout = QVBoxLayout(p); layout.setContentsMargins(0, 6, 0, 0); layout.setSpacing(14)
+        top = QHBoxLayout()
+        eyebrow = self.label('QEMU EVERYTHING / WORKBENCH', 'QEMU EVERYTHING / 开发工作台', 'eyebrow'); eyebrow.setWordWrap(False)
+        top.addWidget(eyebrow); top.addStretch()
+        edition = self.label('LOCAL EDITION', '本地版本', 'brandMeta'); edition.setWordWrap(False)
+        top.addWidget(edition); layout.addLayout(top)
+        layout.addWidget(self.label(en, zh, 'workspaceTitle')); layout.addWidget(self.label(sub_en, sub_zh, 'workspaceSubtitle'))
+        if scroll:
+            area = QScrollArea(); area.setWidgetResizable(True); area.setWidget(p); self.pages.addWidget(area)
+        else: self.pages.addWidget(p)
+        return layout
 
     def make_library(self):
         layout = self.page('QEMU Everything', 'QEMU Everything',
-            'Import firmware. Inspect its platform, configure a guest, and develop verified adapters.', '导入固件，识别平台，配置虚拟机，逐步建立并验证适配器。')
+            'A home for every firmware. A workspace for the next discovery.', '每一份固件，都值得探索。下一次发现，从这里开始。')
         self.drop = DropArea('', '')
-        self.bind(self.drop.title.setText, '↓  Drop firmware or an image here', '↓  将固件或镜像拖到这里')
-        self.bind(self.drop.caption.setText, 'Any firmware file · Hasselblad UI adapters · Linux kernels and disk images', '任意固件文件 · 哈苏 UI 适配器 · Linux 内核与磁盘镜像')
+        self.bind(self.drop.title.setText, 'Load your next discovery', '载入下一次发现')
+        self.bind(self.drop.caption.setText, 'Drop a firmware, kernel or disk image here to inspect it.', '将固件、内核或磁盘镜像拖到这里，开始分析。')
+        self.bind(self.drop.action.setText, 'BROWSE FILES  ↗', '选择文件  ↗')
         self.drop.clicked.connect(self.browse); self.drop.dropped.connect(self.import_file); layout.addWidget(self.drop)
         content = QHBoxLayout(); content.setSpacing(16); layout.addLayout(content, 1)
-        list_card = QFrame(); list_card.setObjectName('card'); list_card.setFixedWidth(242)
-        left = QVBoxLayout(list_card); left.setContentsMargins(18, 20, 18, 20)
-        left.addWidget(self.label('FIRMWARE LIBRARY', '固件库', 'eyebrow'))
+        list_card = QFrame(); list_card.setObjectName('firmwarePanel'); list_card.setFixedWidth(230)
+        left = QVBoxLayout(list_card); left.setContentsMargins(16, 16, 16, 16); left.setSpacing(12)
+        list_header = QHBoxLayout(); list_header.addWidget(self.label('01 / LIBRARY', '01 / 固件库', 'moduleHeader'))
+        self.library_count = QLabel('00'); self.library_count.setObjectName('miniLabel'); list_header.addStretch(); list_header.addWidget(self.library_count); left.addLayout(list_header)
         self.library = QListWidget(); self.library.currentRowChanged.connect(self.select_device); left.addWidget(self.library, 1)
+        self.library.setTextElideMode(Qt.ElideRight); self.library.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        self.empty_library = self.label('NO FIRMWARE YET\n\nDrop a file above to create\nyour first workspace.', '尚未载入固件\n\n拖入文件，建立你的\n第一个开发工作区。', 'emptyLibrary')
+        self.empty_library.setAlignment(Qt.AlignCenter); left.insertWidget(1, self.empty_library, 1)
         self.details = QLabel(); self.details.setWordWrap(True); self.details.setObjectName('muted'); left.addWidget(self.details)
         self.model_choice = QComboBox(); self.model_choice.currentIndexChanged.connect(self.select_model); left.addWidget(self.model_choice)
         self.folder = self.button('Open files', '打开文件目录', self.open_device); left.addWidget(self.folder)
         left.addWidget(self.button('Inspect & configure', '分析与配置', lambda: self.navigate(2)))
         content.addWidget(list_card)
-        preview = QFrame(); preview.setObjectName('card'); right = QVBoxLayout(preview); right.setContentsMargins(16, 14, 16, 16)
-        header = QHBoxLayout(); header.addWidget(self.label('LIVE PREVIEW', '实时预览', 'eyebrow')); header.addStretch()
+        preview = QFrame(); preview.setObjectName('displayPanel'); right = QVBoxLayout(preview); right.setContentsMargins(16, 14, 16, 16); right.setSpacing(12)
+        header = QHBoxLayout(); header.addWidget(self.label('02 / DISPLAY OUTPUT', '02 / 显示输出', 'moduleHeader')); header.addStretch()
         self.badge = QLabel(); self.badge.setObjectName('badge'); header.addWidget(self.badge); right.addLayout(header)
         self.screen = Screen(); self.screen.touch.connect(self.send_touch); right.addWidget(self.screen, 1)
         self.preview_hint = QLabel(); self.preview_hint.setObjectName('muted'); self.preview_hint.setWordWrap(True); right.addWidget(self.preview_hint)
@@ -218,9 +245,23 @@ class Window(QMainWindow):
         self.shot = self.button('Screenshot', '截图', self.screenshot)
         buttons.addWidget(self.start); buttons.addWidget(self.stop); buttons.addStretch(); buttons.addWidget(self.shot); right.addLayout(buttons)
         content.addWidget(preview, 1)
+        readouts = QFrame(); readouts.setObjectName('topbar'); metrics = QHBoxLayout(readouts); metrics.setContentsMargins(18, 12, 18, 12); metrics.setSpacing(24)
+        self.readouts = []
+        for en, zh in [('IMAGES IN LIBRARY', '固件库镜像'), ('LOCAL RUNTIME', '本地运行环境'), ('SESSION', '当前会话')]:
+            column = QVBoxLayout(); column.setSpacing(4); column.addWidget(self.label(en, zh, 'miniLabel'))
+            value = QLabel(); value.setObjectName('retroReadout'); column.addWidget(value); self.readouts.append(value); metrics.addLayout(column, 1)
+        layout.addWidget(readouts)
+        terminal = QFrame(); terminal.setObjectName('terminalBar'); line = QHBoxLayout(terminal); line.setContentsMargins(14, 8, 8, 8)
+        prompt = QLabel('>_'); prompt.setObjectName('eyebrow'); line.addWidget(prompt)
+        self.last_event_message = ''
+        self.last_event = QLabel(); self.last_event.setObjectName('footerStatus')
+        self.last_event.setMinimumWidth(0)
+        self.last_event.setSizePolicy(self.last_event.sizePolicy().Policy.Ignored, self.last_event.sizePolicy().Policy.Preferred)
+        line.addWidget(self.last_event, 1)
+        line.addWidget(self.button('Open log ↗', '查看日志 ↗', lambda: self.navigate(3))); layout.addWidget(terminal)
 
     def make_development(self):
-        layout = self.page('Firmware development.', '固件开发工作区。',
+        layout = self.page('Development', '开发工作区',
             'Camera app tools use the Hasselblad adapter. Generic platforms have a support workspace.', '相机应用工具使用哈苏适配器；通用平台提供独立的适配工作区。')
         card = self.card(layout)
         card.addWidget(self.label('01  Create your workspace', '01  创建开发工作区', 'subtitle'))
@@ -401,7 +442,7 @@ class Window(QMainWindow):
             except (OSError, ValueError) as error: self.error(str(error))
 
     def make_console(self):
-        layout = self.page('See what is happening.', '查看运行状态。', 'Commands run only inside the local development guest.', '命令只在本地开发虚拟机中执行。')
+        layout = self.page('Console & logs', '控制台与日志', 'Commands run only inside the local development guest.', '命令只在本地开发虚拟机中执行。')
         self.logs = QPlainTextEdit(); self.logs.setReadOnly(True); self.logs.setMaximumBlockCount(2500); self.logs.setFont(QFont('Cascadia Mono', 10)); layout.addWidget(self.logs, 1)
         row = QHBoxLayout(); self.command = QLineEdit(); self.bind(self.command.setPlaceholderText, 'Guest shell command, e.g. uname -a', '虚拟机 Shell 命令，例如 uname -a')
         self.command.returnPressed.connect(self.send_command); row.addWidget(self.command, 1)
@@ -409,14 +450,17 @@ class Window(QMainWindow):
         row = QHBoxLayout(); row.addWidget(self.button('Open logs folder', '打开日志目录', self.open_device)); row.addWidget(self.button('Clear view', '清空显示', self.logs.clear)); row.addStretch(); layout.addLayout(row)
 
     def make_settings(self):
-        layout = self.page('Make it yours.', '设置你的工作环境。', 'Native Qt on your desktop. Additional camera board labs use separately configured WSL builds.', '桌面原生 Qt；新增相机板级实验使用单独配置的 WSL 构建。')
+        layout = self.page('Settings', '设置', 'Native Qt on your desktop. Additional camera board labs use separately configured WSL builds.', '桌面原生 Qt；新增相机板级实验使用单独配置的 WSL 构建。')
         card = self.card(layout); card.addWidget(self.label('Appearance', '外观', 'subtitle'))
         row = QHBoxLayout(); self.language = QComboBox(); self.language.addItems(['English', '简体中文']); self.language.setCurrentIndex(int(self.lang == 'zh'))
         self.language.currentIndexChanged.connect(self.change_language); row.addWidget(self.language)
-        self.theme = QComboBox(); self.theme.addItems(['System / 跟随系统', 'Light / 浅色', 'Dark / 深色']); self.theme.setCurrentIndex(['system','light','dark'].index(self.preferences.get('theme','system')))
+        self.theme = QComboBox(); self.theme.addItems(['Retro / CRT 实验台', 'System / 跟随系统', 'Light / 浅色', 'Dark / 深色'])
+        theme = self.preferences.get('theme', 'retro')
+        self.theme.setCurrentIndex(THEME_MODES.index(theme) if theme in THEME_MODES else 0)
         self.theme.currentIndexChanged.connect(self.appearance); row.addWidget(self.theme)
         self.accent = QComboBox(); self.accent.addItems(['Iris / 鸢尾紫', 'Blue / 蓝色', 'Leaf / 叶绿']); self.accent.setCurrentIndex(['violet','blue','green'].index(self.preferences.get('accent','violet')))
         self.accent.currentIndexChanged.connect(self.appearance); row.addWidget(self.accent); card.addLayout(row)
+        self.accent.setEnabled(self.theme.currentIndex() != 0)
         card = self.card(layout); card.addWidget(self.label('Runtime', '运行环境', 'subtitle'))
         self.runtime_label = QLabel(); self.runtime_label.setWordWrap(True); self.runtime_label.setObjectName('muted'); card.addWidget(self.runtime_label)
         self.setup_button = self.button('Set up runtime', '安装运行环境', self.install_runtime, True); card.addWidget(self.setup_button)
@@ -424,7 +468,7 @@ class Window(QMainWindow):
         card.addWidget(self.label('Base setup downloads about 615 MB; X1D adds about 78 MB of Linux libraries. Reserve 8 GB, or 12 GB for X1D, plus space for each firmware. CPU emulation and Qt software rendering are used; GPU acceleration is unavailable in this ARM64 guest.', '基础环境下载约 615 MB，X1D 另需约 78 MB Linux 运行库。请预留 8 GB，X1D 建议 12 GB，多份固件需额外空间。当前使用 CPU 模拟与 Qt 软件渲染，此 ARM64 环境尚未提供 GPU 加速。', 'muted'))
         card.addWidget(self.button('Open DevKit data folder', '打开 DevKit 数据目录', lambda: self.open_path(self.home)))
         card = self.card(layout); card.addWidget(self.label('Credits & scope', '致谢与范围', 'subtitle'))
-        card.addWidget(self.label('Material theme adapted from Derrick Yao’s tsla-infotainment-lab (MIT). Powered by QEMU, Android, Qt for Python and 7-Zip. Firmware is supplied by you and remains local. Unaffiliated with Hasselblad.', 'Material 主题改编自 Derrick Yao 的 tsla-infotainment-lab（MIT）。基于 QEMU、Android、Qt for Python 和 7-Zip。固件由你提供并保留在本地。本项目与哈苏无隶属关系。', 'muted'))
+        card.addWidget(self.label('Retro workbench for QEMU Everything. Classic themes adapted from Derrick Yao’s tsla-infotainment-lab (MIT). Powered by QEMU, Android, Qt for Python and 7-Zip. Firmware is supplied by you and remains local. Unaffiliated with Hasselblad.', 'QEMU Everything 复古工作台；经典主题改编自 Derrick Yao 的 tsla-infotainment-lab（MIT）。基于 QEMU、Android、Qt for Python 和 7-Zip。固件由你提供并保留在本地。本项目与哈苏无隶属关系。', 'muted'))
         card.addWidget(self.button('Radium Wang · Hasselblad firmware research ↗', 'Radium Wang · 哈苏固件研究与致谢 ↗', lambda: QDesktopServices.openUrl(QUrl('https://github.com/radium-wang/Hasselblad-X-System-CIM-Firmware-Research-Feature-Extensions'))))
         card.addWidget(self.button('View source & documentation ↗', '查看源码与文档 ↗', lambda: QDesktopServices.openUrl(QUrl('https://github.com/derrickyau9/QEMU-Everything'))))
         layout.addStretch()
@@ -438,7 +482,8 @@ class Window(QMainWindow):
         self.save_preferences(); self.update_controls()
     def appearance(self, *_):
         if not hasattr(self, 'accent'): return
-        self.preferences.update(theme=['system','light','dark'][self.theme.currentIndex()], accent=['violet','blue','green'][self.accent.currentIndex()])
+        self.preferences.update(theme=THEME_MODES[self.theme.currentIndex()], accent=['violet','blue','green'][self.accent.currentIndex()])
+        self.accent.setEnabled(self.preferences['theme'] != 'retro')
         apply_theme(QApplication.instance(), self.preferences['theme'], self.preferences['accent']); self.save_preferences()
     def save_preferences(self): write_json(self.home / 'preferences.json', self.preferences)
     def open_path(self, path): QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
@@ -495,10 +540,15 @@ class Window(QMainWindow):
         self.run_job(lambda task: setup_qemu(self.home, task, required), done)
     def refresh_library(self, select=None):
         self.devices = sorted((self.home / 'library').glob('*/device.json'))
+        self.library_count.setText(f'{len(self.devices):02d}')
+        self.empty_library.setVisible(not self.devices)
+        self.library.setVisible(bool(self.devices))
+        self.details.setVisible(bool(self.devices))
         self.library.blockSignals(True); self.library.clear()
         selected = 0
         for i, path in enumerate(self.devices):
             data = read_json(path); self.library.addItem(f"{data['name']}\n{data['version']}")
+            self.library.item(i).setToolTip(f"{data['name']}\n{data['version']}")
             if select and path.parent == select: selected = i
         self.library.blockSignals(False)
         self.library.setCurrentRow(selected if self.devices else -1)
@@ -510,7 +560,7 @@ class Window(QMainWindow):
         if self.device:
             profile = read_json(self.device / 'device.json')
             if is_camera(profile):
-                for model in available_models(profile): self.model_choice.addItem(MODELS[model]['label'],model)
+                for model in available_models(profile): self.model_choice.addItem(MODELS[model]['label'].removeprefix('Hasselblad '),model)
                 self.model_choice.setCurrentIndex(self.model_choice.findData(model_id(profile)))
             self.boot_editor.setPlainText(json.dumps(read_json(self.device / 'boot.json'), indent=2, ensure_ascii=False))
             self.refresh_support()
@@ -680,6 +730,10 @@ class Window(QMainWindow):
         elif linux_lab and self.job and self.job.isRunning():
             self.badge.setText(self.tr('Camera Linux lab', '相机 Linux 实验中'))
         self.badge.style().unpolish(self.badge); self.badge.style().polish(self.badge)
+        self.readouts[0].setText(f'{len(self.devices):02d}')
+        self.readouts[1].setText(self.tr('READY', '已就绪') if self.runtime or self.qemu_runtime else self.tr('NOT INSTALLED', '尚未安装'))
+        self.readouts[2].setText(self.tr(*statuses[phase]).upper() if live else self.tr('WORKING', '任务执行中') if busy else self.tr('IDLE', '空闲'))
+        self.render_last_event()
         self.screen.caption = self.tr('Click Start original UI', '点击「启动原厂 UI」') if camera else self.tr('Use Platform support to review and save a boot configuration.', '在「平台适配」中查看报告并保存启动配置。')
         if nikon_lab:
             self.screen.caption = self.tr('The assisted original UI opens in your browser. Cancel stops its guest.', '原厂 UI 在浏览器打开，使用辅助启动；点击「取消」停止虚拟机。') if assisted_menu else self.tr('The original ROM menu opens in your browser. Cancel stops its guest.', '原厂 ROM 菜单在浏览器打开；点击「取消」停止虚拟机。')
@@ -693,12 +747,14 @@ class Window(QMainWindow):
             self.preview_hint.setText(self.tr('Original UI and input open in your browser.', '原厂画面与输入在浏览器中打开。'))
         elif linux_lab:
             self.preview_hint.setText(self.tr('Serial boot evidence is saved in the firmware workspace.', '串口启动证据保存在所选固件的工作区。'))
+        self.preview_hint.setVisible(bool(self.device))
         self.screen.update()
         self.runtime_label.setText(self.tr('Camera runtime ready · QEMU + Android ARM64', '相机运行环境已就绪 · QEMU + Android ARM64') if self.runtime else self.tr('Camera runtime not installed.', '尚未安装相机运行环境。'))
         self.runtime_label.setText(self.runtime_label.text() + '\n' + self.tr('Generic QEMU ready', '通用 QEMU 已就绪') if self.qemu_runtime else self.runtime_label.text() + '\n' + self.tr('Generic QEMU not installed', '尚未安装通用 QEMU'))
         if self.device:
             if camera:
                 model = model_id(profile)
+                self.model_choice.setToolTip(MODELS[model]['label'])
                 status = self.tr('UI verified','UI 已验证') if profile.get('validated') and model == 'x2dii' else self.tr('UI development preview','UI 开发预览')
                 self.details.setText(f"{status}\n{MODELS[model]['abi']} · {profile['version']}")
                 self.screen.message = MODELS[model]['label'].removeprefix('Hasselblad ')
@@ -706,10 +762,21 @@ class Window(QMainWindow):
                 status = (self.tr('Assisted UI lab configured', '原厂 UI 辅助实验已配置') if assisted_menu else self.tr('Original ROM UI lab configured', '原厂 ROM 界面实验已配置')) if nikon_lab else self.tr('Linux lab configured · UI unverified', 'Linux 实验已配置 · UI 未验证') if linux_lab else self.tr('Configured · boot unverified', '配置有效 · 启动未验证') if configured else self.tr('Inspection · needs adaptation', '已分析 · 待适配')
                 self.details.setText(f"{status}\n{nikon_menu['label']}" if nikon_lab else f"{status}\n{linux_lab['label']}" if linux_lab else f"{status}\n{profile.get('architecture') or 'Unknown / 未知'} · {profile['version']}")
                 self.screen.message = 'QEMU Everything'
-        else: self.details.setText(self.tr('Your imported firmware will appear here.', '导入的固件会显示在这里。'))
+        else:
+            self.details.setText(self.tr('Your imported firmware will appear here.', '导入的固件会显示在这里。'))
+            self.screen.message = 'QEMU Everything'
+    def render_last_event(self):
+        message = self.last_event_message or (self.tr('Firmware selected. Review its support status before starting.', '已选中固件，确认适配状态后即可启动。') if self.device else self.tr('Workbench ready. Load a firmware to begin.', '工作台已就绪，载入固件以开始。'))
+        self.last_event.setToolTip(message)
+        self.last_event.setText(self.last_event.fontMetrics().elidedText(message, Qt.ElideRight, max(60, self.last_event.width())))
+    def resizeEvent(self, event):
+        super().resizeEvent(event)
+        if hasattr(self, 'last_event'): self.render_last_event()
     def log(self, message):
         if message.strip():
             self.logs.appendPlainText(message); self.statusBar().showMessage(message.splitlines()[-1][:180])
+            self.last_event_message = message.splitlines()[-1]
+            self.render_last_event()
     def error(self, message):
         self.log('ERROR: ' + message)
         QMessageBox.warning(self, self.tr('DevKit needs attention', 'DevKit 提示'), message)

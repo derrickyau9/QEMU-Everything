@@ -195,7 +195,15 @@ See [verification details](docs/VERIFICATION.md). Menu controls backed by unimpl
 QEMU Everything is **AGPL-3.0-or-later**, including the requirements of its Dissect filesystem dependency. The adapted theme retains its MIT notice. The portable package includes project source and third-party license notices; Qt libraries remain separately replaceable in the distribution. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Manufacturer firmware, fonts, artwork, libraries and trademarks belong to their respective owners. They are **not distributed in this repository or release**. Users supply their own official firmware. This project is not affiliated with or endorsed by Hasselblad or other firmware manufacturers.
+## Star History
 
+<a href="https://www.star-history.com/?repos=derrickyau9%2FQEMU-Everything">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=derrickyau9/QEMU-Everything&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=derrickyau9/QEMU-Everything&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=derrickyau9/QEMU-Everything&type=date&legend=top-left" />
+ </picture>
+</a>
 ## Disclaimer
 
 Provided **as is**, without warranty. You use it at your own risk. You are solely responsible for consequences including any loss of warranty, camera damage, data loss or other loss arising from your use or modifications. This DevKit operates locally and does not provide camera flashing or installation functions.

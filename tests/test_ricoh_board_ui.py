@@ -158,3 +158,14 @@ raise SystemExit(m.main(dict(destination=sys.argv[2],mode='probe',payload='x',se
     finally:
         if process.poll() is None:process.kill();process.wait()
         for stream in (process.stdin,process.stdout,process.stderr):stream.close()
+
+
+@pytest.mark.parametrize('key', ['display', 'adj', 'native_adj', 'native_half_press',
+                               'native_half_release', 'mode_0', 'native_fn'])
+def test_native_shortcuts_reject_wrong_page_before_guest_access(runner, monkeypatch, key):
+    monkeypatch.delitem(sys.modules, 'component_control', raising=False)
+    import component_control
+    control = object.__new__(component_control.ComponentControl)
+    control.last = {'native_current_id': '0x400000f'}
+    with pytest.raises(ValueError):
+        control.key(key)

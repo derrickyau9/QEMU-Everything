@@ -21,7 +21,7 @@ from .insta360_lab import _linux_path
 SOURCE_SHA256 = 'a2f664dfca034059eb0fd6e18ab08684c326b4a034d85c164dad7e1ec9b5655f'
 PAYLOAD_SHA256 = 'c4e597c7c9ca1bc181b30e35139ed90a4fd876ddcca14f12be0e00b6702233ae'
 PAYLOAD_SIZE = 67948280
-PROFILE = 'ricoh-griv-topmenu-ui-v1'
+PROFILE = 'ricoh-griv-native-controls-v1'
 
 PORT = 8792
 RUNNER = board_directory('ricoh') / 'run_ui.py'

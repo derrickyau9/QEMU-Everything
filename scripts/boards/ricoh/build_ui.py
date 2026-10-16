@@ -11,7 +11,7 @@ from rtos_probe import ARCHIVE_SHA256, BOARD_SHA256, digest, regular
 from resource_boot import build_bridge
 
 ROOT=Path(__file__).resolve().parent
-PROFILE='ricoh-griv-topmenu-ui-v1'
+PROFILE='ricoh-griv-native-controls-v1'
 SOURCES=('build_ui.py','run_ui.py','rtos_probe.py','resource_boot.py','resource_backend.c',
          'resources.py','component_control.py','component_viewer.py','ricoh-rtos-lab.c')
 
@@ -32,7 +32,7 @@ def prepare(manifest,work):
     value=dict(profile=PROFILE,qemu_build=build,overlay_sha256={n:digest(ROOT/n) for n in SOURCES},
                bridge=str(work/'bridge.bin'),bridge_sha256=digest(work/'bridge.bin'),
                backend=str(work/'backend.bin'),backend_sha256=digest(work/'backend.bin'),
-               platform_metadata=metadata,scope='Original GR IV 1.11 TopMenu/Focus assisted UI; full camera boot unverified')
+               platform_metadata=metadata,scope='Original GR IV 1.11 LiveView HUD, AdjModeController, TopMenu/Focus and empty PlaybackError assisted UI; full camera boot unverified')
     target=work/'ricoh-ui-manifest.json';target.write_text(json.dumps(value,indent=2)+'\n')
     return target
 

@@ -139,7 +139,10 @@ def main(cfg):
     try:
         manifest=validate(cfg);out=Path(cfg['destination']);out.mkdir(parents=True,exist_ok=False);created=True
         threading.Thread(target=stdin_owner,daemon=True).start()
-        with tempfile.TemporaryDirectory(prefix='ricoh-ui-owned-',dir='/tmp' if os.name=='posix' else None) as temporary:
+        # macOS exposes /tmp as a symlink to /private/tmp; the probe rejects
+        # symlinked ancestors, so use the real path on this host.
+        temporary_root = '/private/tmp' if sys.platform == 'darwin' else '/tmp'
+        with tempfile.TemporaryDirectory(prefix='ricoh-ui-owned-',dir=temporary_root) as temporary:
             stage=Path(temporary);build=dict(manifest['qemu_build'])
             binary=freeze(build['binary'],stage/'qemu-system-arm',build['binary_sha256'],128*1024**2,True)
             build['binary']=str(binary);qemu_manifest=stage/'qemu.json';qemu_manifest.write_text(json.dumps(build))
@@ -150,7 +153,7 @@ def main(cfg):
                 platform.append(path.read_bytes())
             def ready(viewer,control,value):
                 emit('ready',url=value['viewer_url'],session=viewer.session,profile=PROFILE,
-                     original_ui_verified=True,native_input_verified=True,single_instance_menu_roundtrip_verified=True)
+                     original_ui_verified=True,native_input_verified=True,single_instance_menu_roundtrip_verified=True,native_pages_verified=value.get('native_pages_roundtrip',{}).get('verified') is True)
             # WSL DrvFS can raise ENODATA while a second process appends a log
             # and pathlib reads it. Keep all live QEMU/capture files native;
             # export exact artifacts only after the probe confirms child reap.
@@ -175,7 +178,7 @@ def main(cfg):
         if not record['owned_guest_processes_reaped']:raise RuntimeError('Owned guest cleanup incomplete')
         if not stop.is_set() and not record.get('original_ui_verified'):raise RuntimeError('Original menu roundtrip was not verified')
         if cfg['mode']=='probe' and record.get('original_ui_verified'):
-            emit('result',original_ui_verified=True,native_input_verified=True,single_instance_menu_roundtrip_verified=True)
+            emit('result',original_ui_verified=True,native_input_verified=True,single_instance_menu_roundtrip_verified=True,native_pages_verified=record.get('native_pages_roundtrip',{}).get('verified') is True)
         return 0
     except BaseException as error:
         record['runner_error']=str(error) or type(error).__name__

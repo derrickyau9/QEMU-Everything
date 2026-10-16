@@ -182,6 +182,20 @@ def diagnostic_missing_settings_objects_image(original):
                          'semantic':'Absent persistent-settings object (r0=NULL) returns zero/failure; nonnull object uses original instructions and continuation. No settings, ready state, font or GUI instruction is replaced'},
                         {'address':hex(scratch),'size':len(guard),'original_bytes':None,'execution_bytes':guard.hex(),
                          'semantic':'Authored NULL-only persistent-settings guard; PC-relative original tail branch is relocated to its original absolute target'}])
+    # Original page transitions stop AudioService before switching controllers.
+    # The isolated GUI has no AudioService; retain the native path for nonnull
+    # instances and make only the absent-instance stop a no-op.
+    site=0x53775afc;scratch=0x543d3380;offset=site-0x53000000
+    expected=bytes.fromhex('c83801e30dc0a0e1')
+    if patched[offset:offset+8]!=expected:raise ValueError('Original AudioService Stop bytes mismatch')
+    words=[0xe3500000,0x012fff1e,*struct.unpack('<2I',expected),branch(scratch+16,site+8)]
+    guard=struct.pack('<5I',*words)
+    patched.extend(bytes(scratch-0x53000000-len(patched)));patched.extend(guard)
+    replacement=struct.pack('<I',branch(site,scratch));patched[offset:offset+4]=replacement
+    changes.extend([{'address':hex(site),'size':4,'original_bytes':expected[:4].hex(),'execution_bytes':replacement.hex(),
+                     'semantic':'Absent AudioService Stop is a no-op only when r0=NULL. No sound device, successful audio playback or peripheral reply is fabricated; nonnull original execution continues unchanged'},
+                    {'address':hex(scratch),'size':len(guard),'original_bytes':None,'execution_bytes':guard.hex(),
+                     'semantic':'Authored NULL-only guard for AudioService Stop; displaced prologue and original continuation retained'}])
     site=0x53a91bc0;offset=site-0x53000000
     expected=bytes.fromhex('0dc0a0e1f0db2de9');replacement=bytes.fromhex('0000a0e31eff2fe1')
     if patched[offset:offset+8]!=expected:raise ValueError('Original SystemControl event handler bytes mismatch')
@@ -205,7 +219,7 @@ def capture_native_canvas(stream, output):
         return target.read_bytes()
     def ram(p,n):
         return n>=0 and ((0x40000000<=p and p+n<=0x80000000) or (0xa0000000<=p and p+n<=0xe0000000))
-    result={'scope':'Original TopMenu software-display component; original camera power-on and physical LCD are not verified','synthetic_pixels':False}
+    result={'scope':'Original firmware controller on assisted software display; camera power-on and physical LCD unverified','synthetic_pixels':False}
     controller=struct.unpack('<I',save(0x55080dc0,4,'original-topmenu-pointer.bin'))[0]
     datarom=struct.unpack('<I',save(0x5538c510,4,'component-datarom.bin'))[0]
     if ram(datarom,28):
@@ -215,13 +229,29 @@ def capture_native_canvas(stream, output):
             if state[9]:controller=state[9]
             result['native_current_id']=hex(state[11])
 
+    user=save(0x55084dd8+0x1400,0x20,'native-user-display-state.bin')
+    result['original_display_info']=user[9]
+    appmain=save(0x550822c0,0x420,'native-appmain-bindings.bin')
+    result['original_appmain_context']=appmain[4]
+    result['original_fn_override_bound']=any(appmain[0x198:0x1a8])
+    utility=save(0x5539fc64,32,'native-image-utility-factory.bin')
+    translator=struct.unpack_from('<I',utility,20)[0]
+    result['original_resolution_translator']=hex(translator)
+    if ram(translator,4):
+        result['original_resolution_translator_vtable']=hex(struct.unpack('<I',save(translator,4,'native-resolution-translator.bin'))[0])
+    key_state=save(0x550874d0,0x260,'native-key-state.bin')
+    result['original_mode_dial_param']=list(struct.unpack_from('<2I',key_state,0x114+39*8))
     result['controller']=hex(controller)
-    if not ram(controller,0x13ec):return {**result,'blocker':'Original TopMenuController is not allocated'}
+    if not ram(controller,0x13ec):return {**result,'blocker':'Original controller is not allocated'}
     header=save(controller,0x158,'original-topmenu-header.bin')
+    result['controller_vtable']=hex(struct.unpack_from('<I',header)[0])
     result['controller_return_id']=hex(struct.unpack_from('<I',header,0x150)[0])
+    if struct.unpack_from('<I',header)[0]==0x53d950e8:
+        native=save(controller,0x2e0,'native-liveview-state.bin')
+        result['original_preview_timer']=hex(struct.unpack_from('<I',native,0x2d8)[0])
     canvas=struct.unpack_from('<I',header,4)[0]
     result['canvas']=hex(canvas)
-    if not ram(canvas,0xf0):return {**result,'blocker':'Original TopMenu primary Canvas is absent'}
+    if not ram(canvas,0xf0):return {**result,'blocker':'Original controller primary Canvas is absent'}
     canvas_header=save(canvas,0xf0,'original-canvas-header.bin')
     result['canvas_bounds']=list(struct.unpack_from('<4i',canvas_header,0x20))
     result['canvas_clip']=list(struct.unpack_from('<4i',canvas_header,0x54))
@@ -232,7 +262,7 @@ def capture_native_canvas(stream, output):
         for i,child in enumerate(children):
             if not ram(child,0xa4):
                 result['children'].append({'index':i,'pointer':hex(child),'invalid':True});continue
-            h=save(child,0xa4,f'original-canvas-child-{i:02d}.bin')
+            h=save(child,0x120,f'original-canvas-child-{i:02d}.bin')
             result['children'].append({'index':i,'pointer':hex(child),'vtable':hex(struct.unpack_from('<I',h)[0]),
                                        'bounds':list(struct.unpack_from('<4i',h,0x20)),
                                        'clip':list(struct.unpack_from('<4i',h,0x54)),
@@ -546,9 +576,14 @@ def probe(payload, manifest, output, seconds=5, bootloader_gic_flag=False,
                         record['log_limit_reached'] = True; break
                     serial = output/'serial.log'
                     if diagnostic_ui_component and control is None and serial.exists() and b'[UI COMPONENT READY]' in serial.read_bytes():
-                        from component_control import ComponentControl, roundtrip
+                        from component_control import ComponentControl, native_pages_roundtrip
                         control=ComponentControl(qmp,gdb,output,stop_event)
-                        record['original_native_ui_roundtrip']=roundtrip(control)
+                        menu_test,pages_test=native_pages_roundtrip(control)
+                        record['original_native_ui_roundtrip']=menu_test
+                        record['native_pages_roundtrip']=pages_test
+                        if not pages_test['verified']:raise ValueError('Original native pages roundtrip failed')
+                        if b'Data Abort' in serial.read_bytes() or b'recursive_init_error' in serial.read_bytes():
+                            raise ValueError('Guest exception during native page startup')
                         if not record['original_native_ui_roundtrip']['verified']:
                             raise ValueError('Original Confirm/Back menu roundtrip failed')
                         if viewer_port is not None:
@@ -573,7 +608,7 @@ def probe(payload, manifest, output, seconds=5, bootloader_gic_flag=False,
                             try:with_qmp.request({'execute':'human-monitor-command','arguments':{'command-line':'log guest_errors,unimp'}})
                             finally:with_qmp.close()
                             record['viewer_trace_scope']='After exact native roundtrip, verbose instruction/SVC tracing disabled; guest_errors and unimplemented accesses remain enabled. Frame/event audit retained.'
-                            (output/'viewer-ready.json').write_text(json.dumps({'url':record['viewer_url'],'original_native_ui_roundtrip':record['original_native_ui_roundtrip'],'original_icon_read_verification':icon_check,'scope':'Original TopMenu auxiliary component; no normal camera boot or photography'},indent=2)+'\n')
+                            (output/'viewer-ready.json').write_text(json.dumps({'url':record['viewer_url'],'original_native_ui_roundtrip':record['original_native_ui_roundtrip'],'original_icon_read_verification':icon_check,'scope':'Original preview/menu/no-image playback components; assisted entries, no normal camera boot or photography'},indent=2)+'\n')
                             if on_ready is not None:on_ready(viewer,control,record)
                             else:print('RICOH_ORIGINAL_UI_READY '+record['viewer_url'],flush=True)
                         if finish_after_ui:break
@@ -656,7 +691,7 @@ def probe(payload, manifest, output, seconds=5, bootloader_gic_flag=False,
     record['blockers'] = ['Original RTOS camera tasks still require unimplemented peripherals and bootloader inputs. Linux/camera-control IPC and the physical LCD path are not connected.']
     if record.get('original_native_ui_roundtrip',{}).get('verified') and record.get('original_icon_read_verification',{}).get('destination_matches_original_bytes'):
         record['original_ui_verified']=True
-        record['original_ui_scope']='Original GR IV TopMenu and Focus settings page on auxiliary software display; native Up/Down, Confirm and Back with original font/icon rendering. Original camera power-on, live-view, photography, physical LCD and Linux/RTOS IPC remain unverified.'
+        record['original_ui_scope']='Original GR IV LiveView HUD, AdjModeController, TopMenu/Focus and no-image PlaybackError on assisted software display. Menu directions/Confirm/Back and native frame equality verified; preview/playback component entries and empty-playback return are assisted. Full camera power-on, sensor feed, image playback and physical key dispatch remain unverified.'
     if any(address == '28825000' for _, address in record['data_abort_faults']):
         record['blockers'].insert(0, 'Original PC 0x53acc2dc reads 0x28825000 before updating 32 configuration entries; this peripheral block has no confirmed reset values or register behavior in the reviewed official GPL source, so the access remains a real abort.')
     (output/'result.json').write_text(json.dumps(record, indent=2)+'\n')
@@ -699,7 +734,7 @@ def main():
                    args.diagnostic_skip_sric_wait, args.diagnostic_main_ui, args.diagnostic_gui_entry,
                    args.diagnostic_domain_init, args.diagnostic_empty_domain_storage,
                    args.diagnostic_resources,args.diagnostic_ui_component,args.viewer_port)
-    print(json.dumps({key: record.get(key) for key in ('model','original_reset_executed','irq_exceptions','svc_exceptions','data_abort_faults','original_ui_verified','process_reaped','error')}, indent=2))
+    print(json.dumps({key: record.get(key) for key in ('model','original_reset_executed','irq_exceptions','svc_exceptions','data_abort_faults','original_ui_verified','process_reaped','error','native_page_candidate_capture')}, indent=2))
     if record.get('error') or not record.get('process_reaped') or not record['original_reset_executed'] or (args.diagnostic_ui_component and record.get('original_ui_verified') is not True):
         raise SystemExit(1)
 

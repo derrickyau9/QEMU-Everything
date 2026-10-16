@@ -190,3 +190,7 @@ Standard system-counter offsets and EN/HDBG bits were checked against [ARM's CSA
 Earlier public [GR IIIx firmware exploration](https://github.com/hhornbacher/gr3x-fw-hack/tree/dc84ad50a0e5afc86d7273eb75e86ff889b83b19) identified the split Linux services and shared-memory/IPCU dependencies. Its unlicensed mock-library source is not copied or installed here.
 
 The C board and DTS are GPL-2.0-or-later. QEMU's original license notices remain in the local build tree. Download firmware directly from the official [GR III](https://www.ricoh-imaging.co.jp/english/support/digital/gr3_s.html), [GR IIIx](https://www.ricoh-imaging.co.jp/english/support/digital/gr3x_s.html) and [GR IV](https://www.ricoh-imaging.co.jp/english/support/digital/gr4_s.html) support pages.
+
+## Extended original UI controls
+
+See [NATIVE_CONTROLS.md](NATIVE_CONTROLS.md) for the assisted original LiveView HUD, empty playback, ADJ, WB/Drive, Fn, dial and P/Av/Tv/M controls, reproduction commands and remaining limitations. Rebuild the UI manifest for this profile.

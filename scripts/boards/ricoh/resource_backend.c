@@ -105,6 +105,14 @@ void *icon_storage_vtable[32] = {
     [12] = icon_read_blocks, [19] = icon_block_bytes
 };
 
+void native_page_checkpoint(u32 stage) {
+    if(stage==1)log("[NATIVE PAGE constructor complete]\n");
+    if(stage==2)log("[NATIVE PAGE Show begin]\n");
+    if(stage==3)log("[NATIVE PAGE Show complete]\n");
+    if(stage==4)log("[NATIVE PAGE render complete]\n");
+    if(stage==5)log("[NATIVE PAGE draw complete]\n");
+}
+
 /* Commands affect the original controller only through its original handler.
  * The host pauses all CPUs before submitting a new sequence. Completed frames
  * are captured only after the native handler and native Canvas draw return.
@@ -122,25 +130,98 @@ void ui_component_loop(u32 *controller, struct icon_storage *storage) {
     int bounds[4]={0,0,720,480};
     storage->current_controller=(u32)controller;
     storage->current_canvas=controller[1];
-    storage->current_id=0x02000060;
+    storage->current_id=*(u32 *)manager_get(app());
     log("[UI COMPONENT READY]\n");
     for (;;) {
-        u32 sequence=storage->command_sequence, operation; u32 body[3]={0,0,0};
+        u32 sequence=storage->command_sequence, operation; u32 body[3]={0,0,0};void *render_manager=0;
         if (sequence==storage->completed_sequence) { __asm__ volatile("yield"); continue; }
         operation=storage->operation;
-        if (operation<1 || operation>6) { storage->status=2; storage->completed_sequence=sequence; continue; }
+        if (operation<1 || operation>45) { storage->status=2; storage->completed_sequence=sequence; continue; }
         if (operation==4) { storage->status=1; storage->completed_sequence=sequence; return; }
-        if (operation==5 || operation==6) {
+        /* Explicit assisted component entries use original factory/Show APIs.
+         * Playback has no image/storage task in this profile. Its menu parent
+         * alias 0x04000000 would enter Single and wait for image loading; the
+         * adapter returns to the already verified native empty component.
+         * This is recorded as an assisted return, never a camera key claim. */
+        u32 assisted_empty_return=operation==6 && controller[0x150/4]==0x04000000u;
+        if((operation>=11 && operation<=13) || assisted_empty_return) {
+            u32 target=assisted_empty_return || operation==12 ? 0x0400000fu :
+                       operation==11 ? 0x08000003u : 0x02000060u;
+            void *manager=manager_get(app());
+            ((void (*)(void *,u32))0x538dfe24u)((u8 *)manager+0x38,0xffffffffu);
+            void *factory=((void *(*)(void))0x53185f14u)();
+            controller=((u32 *(*)(void *,u32))0x53185f7cu)(factory,target);
+            ((void (*)(void *,u32))0x5325ca0cu)(manager,target);
+            ((void (*)(void *,u32,u32,u32))0x53184558u)(controller,target,0x10000000u,0);
+            ((void (*)(void *))(((u32 *)controller[0])[11]))(controller);
+            ((void (*)(void *))(((u32 *)controller[0])[12]))(controller);
+            storage->current_controller=(u32)controller;
+            storage->current_id=*(u32 *)manager;
+            storage->current_canvas=controller[1];
+            ((void (*)(void *))0x538dff78u)((u8 *)manager+0x38);
+            operation=3;
+            log("[UI original assisted component entry complete]\n");
+        }
+        if(operation>=15) {
+            /* Original AppMain raw-key handler consumes native key type/count.
+             * The adapter submits presses/releases, never a target page or UI
+             * selection. Dial pulses are single original raw events. */
+            static const u8 keys[]={9,10,11,12,8,27,20,29,31,32,33,34,35,36,37,2,2,3,1,5,4,39,38};
+            u32 key=operation>=38 ? 39 : keys[operation-15];
+            void *manager=manager_get(app());
+            ((void (*)(void *,u32))0x538dfe24u)((u8 *)manager+0x38,0xffffffffu);
+            if(key==39) {
+                void *keyboard=((void *(*)(void *))0x5323eef8u)(app());
+                ((void (*)(void *,u32,u32,u32))0x532710c0u)(keyboard,key,operation>=38 ? operation-38 : 0,0);
+            } else {
+                u32 parameter[2]={1,0};body[0]=key;body[1]=(u32)parameter;
+                void *main=((void *(*)(void *))0x5323ead8u)(app());
+                if(operation!=31)((void (*)(void *,u32 *))0x53255db4u)(main,body);
+                if((key<31 || key==35) && operation!=30) {
+                    parameter[0]=2;((void (*)(void *,u32 *))0x53255db4u)(main,body);
+                }
+            }
+            ((void (*)(void *))0x538dff78u)((u8 *)manager+0x38);
+            /* Give the original queued dispatch time to run, then acquire its
+             * native mutex before capturing a completed current controller. */
+            u32 lo,hi,start,now;
+            __asm__ volatile("mrrc p15,0,%0,%1,c14":"=r"(lo),"=r"(hi));start=lo;
+            do {__asm__ volatile("yield");__asm__ volatile("mrrc p15,0,%0,%1,c14":"=r"(now),"=r"(hi));} while(now-start<20000000u);
+            ((void (*)(void *,u32))0x538dfe24u)((u8 *)manager+0x38,0xffffffffu);
+            controller=current(manager);
+            storage->current_controller=(u32)controller;storage->current_id=*(u32 *)manager;storage->current_canvas=controller[1];
+            if(controller[0]==0x53da2af8u)settle((void *)controller[0x174/4]);
+            if(controller[0]==0x53da5e00u)settle((void *)controller[0x17c/4]);
+            if(controller[0]==0x53d9f6a0u)settle((void *)controller[0x1f8/4]);
+            if(controller[0]==0x53d9c3f8u)settle((void *)controller[0x1ac/4]);
+            if(controller[0]==0x53da2c70u)settle((void *)controller[0x198/4]);
+            render_manager=manager;
+        }
+        /* On a selected TopMenu row, native Right enters the selected page
+         * through the same asynchronous AppMain transition as Confirm. */
+        u32 right_enters_page=operation==8 && controller[0]==0x53d9c3f8u &&
+                              ((volatile u8 *)controller)[0x1f0]==2;
+        if (operation==5 || operation==6 || operation==9 || operation==14 || right_enters_page) {
             void *manager=manager_get(app());
             u32 previous_id=*(volatile u32 *)manager;
             if(operation==6 && controller[0x150/4]==0x10000000u){storage->status=2;storage->completed_sequence=sequence;continue;}
-            if (operation==5) {
+            if (operation==9 || operation==14) {
+                if(operation==14 && controller[0]!=0x53d950e8u){storage->status=2;storage->completed_sequence=sequence;continue;}
+                body[0]=operation==14 ? 0x8e : 0x8f;
+                if(controller[0]==0x53d950e8u) {
+                    void *op=((void *(*)(void *))0x5323f49cu)(app());
+                    ((void (*)(void *,u32 *))0x5325b644u)(op,body);
+                } else ((void (*)(void *,u32 *))(((u32 *)controller[0])[10]))(controller,body);
+            } else if (operation==5) {
                 body[0]=0xe0;
                 ((void (*)(void *,u32 *))(((u32 *)controller[0])[10]))(controller,body);
-            } else {
+            } else if (operation==6) {
                 ((void (*)(void *))0x53182e9cu)(controller);
+            } else {
+                body[0]=0xd5;
+                ((void (*)(void *,u32 *))(((u32 *)controller[0])[10]))(controller,body);
             }
-            log("[UI original transition queued]\n");
+            log("[UI native transition requested]\n");
             /* The original AppMain consumes its real transition queue. */
             u32 lo,hi,start,now;
             __asm__ volatile("mrrc p15,0,%0,%1,c14":"=r"(lo),"=r"(hi));start=lo;
@@ -156,17 +237,41 @@ void ui_component_loop(u32 *controller, struct icon_storage *storage) {
             storage->current_canvas=controller[1];
             log("[UI original current obtained]\n");
         }
-        if (operation==1 || operation==2) {
-            body[0]=operation==1 ? 0xd7 : 0xd6;
+        if (operation==1 || operation==2 || operation==7 || (operation==8 && !right_enters_page)) {
+            body[0]=operation==1 ? 0xd7 : operation==2 ? 0xd6 : operation==7 ? 0xd4 : 0xd5;
             ((void (*)(void *,u32 *))(((u32 *)controller[0])[10]))(controller,body);
             /* Original completion/cancellation primitive used by the next
-             * real key. Full RTOS animation timing is not modeled here. */
+             * real key. TopMenu stores its list at +0x1ac; SelectMenu's
+             * original Up/Down handlers operate on the list at +0x198.
+             * ADJ Mode Settings has a third original list at +0x170.
+             * Full RTOS animation timing is not modeled here. */
             if(controller[0]==0x53d9c3f8u)settle((void *)controller[0x1ac/4]);
+            if(controller[0]==0x53da2c70u)settle((void *)controller[0x198/4]);
+            if(controller[0]==0x53da2af8u)settle((void *)controller[0x174/4]);
+            if(controller[0]==0x53da5e00u)settle((void *)controller[0x17c/4]);
+            if(controller[0]==0x53d9f6a0u)settle((void *)controller[0x1f8/4]);
+            if(controller[0]==0x53da6680u)settle((void *)controller[0x170/4]);
         }
-        resize((void *)controller[1],bounds);
-        bind((void *)controller[1],surface);
-        dirty((void *)controller[1]);
-        draw((void *)controller[1]);
+        if(operation==10) {
+            if(controller[0]!=0x53d950e8u){storage->status=2;storage->completed_sequence=sequence;continue;}
+            render_manager=manager_get(app());
+            ((void (*)(void *,u32))0x538dfe24u)((u8 *)render_manager+0x38,0xffffffffu);
+            body[0]=0xb9;
+            void *op=((void *(*)(void *))0x5323f49cu)(app());
+            ((void (*)(void *,u32 *))0x5325b644u)(op,body);
+        }
+        if(controller[0]==0x53d950e8u) {
+            /* Assisted UI timer tick: original callback with its own original
+             * timer handle, then original Update. No dirty flag is written. */
+            ((void (*)(void *,u32))0x5318973cu)(controller,controller[0x2d8/4]);
+            ((void (*)(void *))(((u32 *)controller[0])[11]))(controller);
+        }
+        for(u32 layer=0;layer<4;layer++) {
+            void *canvas=(void *)controller[(4+layer*48)/4];
+            if(!canvas)continue;
+            resize(canvas,bounds);bind(canvas,surface);dirty(canvas);draw(canvas);
+        }
+        if(render_manager)((void (*)(void *))0x538dff78u)((u8 *)render_manager+0x38);
         storage->status=1; storage->completed_sequence=sequence;
         log("[UI NATIVE EVENT COMPLETE]\n");
     }

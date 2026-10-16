@@ -6,6 +6,8 @@ are invoked. Only the low-level backend is replaced with exact RES files.
 """
 import hashlib
 from pathlib import Path
+
+NATIVE_PAGE_ID = 0x08000003
 import struct
 import subprocess
 
@@ -101,23 +103,32 @@ def build_bridge(directory, ui_component=False, icon_info=None):
  blx r3
  ldr r3, =0x53185f14
  blx r3
- ldr r1, =0x02000060
+ ldr r1, ={NATIVE_PAGE_ID:#x}
  ldr r3, =0x53185f7c
  blx r3
  mov r7,r0
+ mov r0,#1
+ ldr r3, ={symbols["native_page_checkpoint"]:#x}
+ blx r3
  ldr r3, =0x5323ea84
  blx r3
  ldr r3, =0x5323ebf8
  blx r3
- ldr r1, =0x02000060
+ ldr r1, ={NATIVE_PAGE_ID:#x}
  ldr r3, =0x5325ca0c
  blx r3
+ mov r0,#2
+ ldr r3, ={symbols["native_page_checkpoint"]:#x}
+ blx r3
  mov r0,r7
- ldr r1, =0x02000060
+ ldr r1, ={NATIVE_PAGE_ID:#x}
  mov r2,#0x10000000
  mov r3,#0
  ldr r8, =0x53184558
  blx r8
+ mov r0,#3
+ ldr r3, ={symbols["native_page_checkpoint"]:#x}
+ blx r3
  mov r0,r7
  ldr r3,[r7]
  ldr r3,[r3,#0x2c]
@@ -125,6 +136,9 @@ def build_bridge(directory, ui_component=False, icon_info=None):
  mov r0,r7
  ldr r3,[r7]
  ldr r3,[r3,#0x30]
+ blx r3
+ mov r0,#4
+ ldr r3, ={symbols["native_page_checkpoint"]:#x}
  blx r3
  mov r0,#40
  ldr r3, =0x538e09b0
@@ -152,19 +166,76 @@ def build_bridge(directory, ui_component=False, icon_info=None):
  mov r1,r4
  ldr r3, =0x538fcb3c
  blx r3
- ldr r0,[r7,#0x158]
+ ldr r0,[r7,#4]
  ldr r1, =software_canvas_rectangle
  ldr r3, =0x53587c3c
  blx r3
- ldr r0,[r7,#0x158]
+ ldr r0,[r7,#4]
  add r1,r7,#0xc
  ldr r3, =0x5356dd00
  blx r3
- ldr r0,[r7,#0x158]
+ ldr r0,[r7,#4]
  ldr r3, =0x535899fc
  blx r3
- ldr r0,[r7,#0x158]
+ ldr r0,[r7,#4]
  ldr r3, =0x5356dde4
+ blx r3
+ ldr r0,[r7,#0x34]
+ cmp r0,#0
+ beq extra_done_52
+ ldr r1, =software_canvas_rectangle
+ ldr r3, =0x53587c3c
+ blx r3
+ ldr r0,[r7,#0x34]
+ add r1,r7,#0xc
+ ldr r3, =0x5356dd00
+ blx r3
+ ldr r0,[r7,#0x34]
+ ldr r3, =0x535899fc
+ blx r3
+ ldr r0,[r7,#0x34]
+ ldr r3, =0x5356dde4
+ blx r3
+extra_done_52:
+ ldr r0,[r7,#0x64]
+ cmp r0,#0
+ beq extra_done_100
+ ldr r1, =software_canvas_rectangle
+ ldr r3, =0x53587c3c
+ blx r3
+ ldr r0,[r7,#0x64]
+ add r1,r7,#0xc
+ ldr r3, =0x5356dd00
+ blx r3
+ ldr r0,[r7,#0x64]
+ ldr r3, =0x535899fc
+ blx r3
+ ldr r0,[r7,#0x64]
+ ldr r3, =0x5356dde4
+ blx r3
+extra_done_100:
+ ldr r0,[r7,#0x94]
+ cmp r0,#0
+ beq extra_done_148
+ ldr r1, =software_canvas_rectangle
+ ldr r3, =0x53587c3c
+ blx r3
+ ldr r0,[r7,#0x94]
+ add r1,r7,#0xc
+ ldr r3, =0x5356dd00
+ blx r3
+ ldr r0,[r7,#0x94]
+ ldr r3, =0x535899fc
+ blx r3
+ ldr r0,[r7,#0x94]
+ ldr r3, =0x5356dde4
+ blx r3
+extra_done_148:
+ mov r0,#5
+ ldr r3, ={symbols["native_page_checkpoint"]:#x}
+ blx r3
+ add r0,r6,#0x38
+ ldr r3, =0x538dff78
  blx r3
  mov r0,r7
  ldr r3, =0x53830808
@@ -264,6 +335,22 @@ _start:
  mov r1,#8
  ldr r3, =0x53a8bce8
  blx r3
+ /* Original image-resolution translator sub-initializer only.
+  * Full ImageUtilityFactory hardware initialization is intentionally absent.
+  * Native model selection and allocation install the native table object. */
+ ldr r3, =0x538d05f0
+ blx r3
+ ldr r3, =0x538d054c
+ blx r3
+ ldr r3, =0x5323ea84
+ blx r3
+ ldr r3, =0x5323ebf8
+ blx r3
+ mov r6,r0
+ add r0,r6,#0x38
+ mvn r1,#0
+ ldr r3, =0x538dfe24
+ blx r3
  ldr r3, =0x53182830
  blx r3
 {component}
@@ -287,14 +374,14 @@ software_canvas_rectangle:
     return bridge, backend, {'backend_source_sha256': hashlib.sha256(source_bytes).hexdigest(),
                              'builder_source_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                              'commands': commands, 'symbols': {name: hex(value) for name,value in symbols.items()},
-                             'original_factory_init_calls':['Resource 0x538385c8','LedControlFactory 0x5393f5bc','DataRom original ctor 0x538371ac only: NV cache absent, physical-flash initialization skipped','DomainDataFactory original init and package link 0x53a8107c','SystemControl package link 0x53a8bce8 (modes 6,8): refresh original keyboard, LED, resource and domain references'],
+                             'original_factory_init_calls':['ImageUtilityFactory resolution translator sub-initializer 0x538d054c only; original model selection, allocator and tables; full hardware initialization skipped','Resource 0x538385c8','LedControlFactory 0x5393f5bc','DataRom original ctor 0x538371ac only: NV cache absent, physical-flash initialization skipped','DomainDataFactory original init and package link 0x53a8107c','SystemControl package link 0x53a8bce8 (modes 6,8): refresh original keyboard, LED, resource and domain references'],
                              'original_logging_configuration':{'native_setter':'0x538ed63c','address':'0x553a091c','value':1,'scope':'Existing original Log minimum-severity API (Log control+0x38); original 0x538ebbec filters debug-level0 through its native branch. Warning/error logging and original code stay unchanged; minimizes unconsumed debug log allocations in component startup'},
                              'original_log_datetime':{'constructor':'0x538ea670','bytes':32,'factory_getter':'0x538f21a0','factory_field':4,'log_cache_address':'0x553a0934','scope':'Original DateTime constructor and its original default fields, installed at the same ServiceFactory+4 and Log control+0x50 cache used by original package link 0x538edba8. Full ServiceFactory physical initialization and RTC updates are omitted. No clock/date or camera-ready value is fabricated; warnings/errors retain original logging.'},
-                             'original_ui_component': {'enabled':ui_component,'scope':'Original TopMenuController construction, original UIManager current-ID setter, original Show and render callbacks; camera startup/ready state not injected',
+                             'original_ui_component': {'enabled':ui_component,'scope':'Original LiveViewController, TopMenu and PlaybackError components; original factory/current-ID/Show/update/render. Assisted component entry; camera startup/ready state not injected','initial_component_id':hex(NATIVE_PAGE_ID),'preview_component_id':'0x08000003','empty_playback_component_id':'0x0400000f','assisted_empty_playback_return':True,'native_adj_logic':'UIOperation event 0x8e -> original AdjModeController 0x02000000; original transition queue and Back/Confirm', 'physical_adj_dispatch_verified':False,'native_disp_logic':'UIOperation event 0xb9 -> ChangeDispInfo 0x5325ac78','assisted_preview_refresh':'original OnAppTimerHandler 0x5318973c with controller timer ID then original Update','physical_disp_dispatch_verified':False,
                                                        'ui_id':'0x02000060','selector':'0x53185f7c','constructor':'0x531b421c','show':'0x53184558','render':'0x531835cc',
                                                        'font_initialization':'Original DrawFactory 0x5323bbb8, original lazy FontManager 0x5323bda0 and original language selection 0x5323d2f0(index0 Latin). Exact user-supplied Latin resources; no host font or glyph substitution.',
                                                        'icon_storage':{'enabled':ui_component,'block_bytes':4,'staging_address':'0x52000000','real_icon_bytes':icon_info['size'] if icon_info else None,'scope':'Authored read-only logical word storage; real original ICONBIN bytes only. Original DataRom constructor, native byte-size/ceil/block-read methods and original SystemControl 0x53a8e520 load the blob; only the original validity setter follows the actual copy result. A new development metadata table exposes item4 only; absent entries remain zero. This is not physical NAND geometry or hardware ACK.'},
-                                                       'input_harness':{'enabled':ui_component,'native_handler':'current controller vtable+0x28; TopMenu 0x531b38e8','down_event':'0xd7','up_event':'0xd6','confirm_event':'0xe0','back_primitive':'0x53182e9c','native_transition_queue':'0x178 consumed by original AppMain/UIManager','completion_barrier':'original UIManager dispatch mutex +0x38','native_transition_settle':'0x535713bc','scope':'Authored heap mailbox is sequence-numbered and polled with ARM YIELD. Inputs call the current original controller handler. Confirm and Back enqueue native transitions consumed by the original AppMain task; the harness waits for the original current-ID change and original dispatch mutex before binding the completed page to the real software surface. TopMenu list animation uses its original completion/cancellation primitive before original Canvas drawing. Transitional animations are disabled for this component because full RTOS animation timer scheduling is unverified. Host submits commands only; no selection fields, captions or pixels are written.'},
+                                                       'input_harness':{'enabled':ui_component,'native_handler':'current controller vtable+0x28; preview MENU via original UIOperation 0x5325b644','assisted_entries':'original factory 0x53185f7c + Show 0x53184558; empty playback menu parent alias resolved to original empty component because image-loading task is unavailable','down_event':'0xd7','up_event':'0xd6','confirm_event':'0xe0','back_primitive':'0x53182e9c','native_transition_queue':'0x178 consumed by original AppMain/UIManager','completion_barrier':'original UIManager dispatch mutex +0x38','native_transition_settle':'0x535713bc','scope':'Authored heap mailbox is sequence-numbered and polled with ARM YIELD. Inputs call the current original controller handler. Confirm and Back enqueue native transitions consumed by the original AppMain task; the harness waits for the original current-ID change and original dispatch mutex before binding the completed page to the real software surface. TopMenu list animation uses its original completion/cancellation primitive before original Canvas drawing. Transitional animations are disabled for this component because full RTOS animation timer scheduling is unverified. Host submits commands only; no selection fields, captions or pixels are written.'},
                                                        'software_display':{'width':720,'height':480,'pitch_pixels':720,'bytes':1382400,'format':5,'memory_order':'RGBA','scope':'Original ScreenControl constructor binds real configuration state to ScreenFactory+4; physical DeviceFactory initialization remains skipped. Original input-buffer constructor, persistent original-heap backing, bind/activate/conversion, original Widget SetRect 0x53587c3c sets software-display bounds/clip to720x480, and original Canvas setter/draw; physical LCD ready gate is bypassed only for this component draw; no synthetic pixels or font replacements'}},
                              'readonly_adapter_error_convention':'Nonzero development error codes 2=missing/write unsupported, 5=read bounds, 9=invalid handle, 16=busy; not claimed as original vendor filesystem error numbering'}
 

@@ -118,7 +118,7 @@ def test_component_viewer_rejects_foreign_origins_and_never_accepts_arbitrary_co
     spec=importlib.util.spec_from_file_location('ricoh_viewer_test',path.with_name('component_viewer.py'))
     viewer_module=importlib.util.module_from_spec(spec);spec.loader.exec_module(viewer_module)
     class Control:
-        lock=threading.Lock();frame=b'original png bytes';audit=[]
+        lock=threading.Lock();frame=b'original png bytes';audit=[];last={'native_current_id':'0x2000000'}
         def key(self,key):
             assert key=='down';return {},{'sequence':1,'key':key}
     viewer=viewer_module.Viewer(Control(),0);port=viewer.server.server_address[1]
@@ -226,6 +226,8 @@ def test_original_canvas_capture_keeps_actual_rgba_and_rejects_invalid_extents(t
     s=bytearray(40);s[0]=valid;s[2]=fmt;struct.pack_into('<I',s,8,pixels);struct.pack_into('<4H',s,0x18,pitch,0,width,height)
     raw=bytes.fromhex('ff0000ff00ff00ff0000ffffffffffff')
     memory={0x55080dc0:struct.pack('<I',ctrl),0x5538c510:bytes(4),ctrl:bytes(h),canvas:bytes(c),surface:bytes(s),pixels:raw}
+    memory.update({0x550861d8: bytes(0x20), 0x550822c0: bytes(0x420),
+                   0x5539fc64: bytes(32), 0x550874d0: bytes(0x260)})
     class QMP:
         def __init__(self):self.commands=[]
         def write(self,value):
@@ -246,7 +248,7 @@ def test_original_canvas_capture_keeps_actual_rgba_and_rejects_invalid_extents(t
         assert zlib.decompress(compressed)==b'\0'+raw[:8]+b'\0'+raw[8:]
     else:
         assert 'blocker' in record and not (tmp_path/'original-canvas.png').exists()
-        assert len(qmp.commands)==5  # no invalid framebuffer read
+        assert len(qmp.commands)==9  # metadata only; no invalid framebuffer read
 
 
 @pytest.mark.parametrize('changed',[False,True])

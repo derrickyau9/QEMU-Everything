@@ -441,6 +441,8 @@ def inspect_firmware(source: Path, task: Task | None = None) -> dict:
         camera = identify_camera(source, task)
         if camera:
             report['camera'] = camera
+            if report['architecture'] is None and camera.get('architecture'):
+                report['architecture'] = camera['architecture']
             if report['format'] == 'unknown':
                 report['format'], report['summary'] = camera['format'], camera['summary']
             report['findings'].extend(camera.get('findings', []))

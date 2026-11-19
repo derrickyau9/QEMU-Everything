@@ -8,7 +8,7 @@ from pathlib import Path
 
 from ..core import Task
 
-MODULES = ('ricoh', 'sony', 'insta360', 'canon', 'nikon', 'sigma')
+MODULES = ('ricoh', 'sony', 'insta360', 'canon', 'nikon', 'sigma', 'sunp')
 
 
 def readers():

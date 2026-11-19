@@ -9,12 +9,12 @@ import shutil
 import struct
 import sys
 import time
-from PySide6.QtCore import Qt, QTimer, QThread, Signal, QRectF, QUrl
+from PySide6.QtCore import Qt, QTimer, QThread, Signal, Slot, QRectF, QUrl
 from PySide6.QtGui import QPainter, QColor, QImage, QDesktopServices, QFont, QPixmap, QIcon
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QFrame, QLabel, QPushButton,
     QVBoxLayout, QHBoxLayout, QListWidget, QStackedWidget, QFileDialog,
     QPlainTextEdit, QComboBox, QMessageBox, QProgressBar, QLineEdit, QDialog, QCheckBox,
-    QDialogButtonBox, QSplitter, QScrollArea)
+    QDialogButtonBox, QInputDialog, QSplitter, QScrollArea)
 from .core import ASSETS, Task, Cancelled, data_home, read_json, write_json
 from .library import import_firmware, is_camera
 from .runtime import discover, setup, discover_qemu, setup_qemu
@@ -27,6 +27,7 @@ from .guest.prepare import network_supported
 from .models import MODELS, model_id, available_models
 from .theme import apply_theme, current_colors
 from .retro_widgets import paint_idle_screen
+from .x2dii_ota import FinalOtaKeyRequired, parse_key
 
 THEME_MODES = ('retro', 'system', 'light', 'dark')
 
@@ -35,19 +36,29 @@ class Job(QThread):
     url_ready = Signal(str)
     result = Signal(object)
     failed = Signal(str)
-    def __init__(self, operation):
+    def __init__(self, operation, on_ota_key=None):
         super().__init__()
         self.operation, self.task = operation, Task(self.message.emit)
+        self.on_ota_key = on_ota_key
+        self.needs_ota_key = False
     def run(self):
         try:
             self.result.emit(self.operation(self.task))
         except Cancelled:
             self.message.emit('Cancelled / 已取消')
+        except FinalOtaKeyRequired as error:
+            if self.on_ota_key:
+                self.needs_ota_key = True
+            else:
+                self.failed.emit(str(error))
         except Exception as error:
             self.failed.emit(str(error))
+        finally:
+            self.operation = None
 
 class Screen(QWidget):
     touch = Signal(str, int, int)
+    key_input = Signal(int, bool)
     def __init__(self):
         super().__init__()
         self.frame = None
@@ -55,6 +66,10 @@ class Screen(QWidget):
         self.caption = 'Import official firmware to begin'
         self.last_move = 0
         self.dragging = False
+        self.keyboard_enabled = False
+        self.held_keys = {}
+        self.setFocusPolicy(Qt.StrongFocus)
+        self.setMouseTracking(True)
         self.setMinimumSize(400, 240)
         self.setSizePolicy(self.sizePolicy().Policy.Expanding, self.sizePolicy().Policy.Expanding)
     def bounds(self):
@@ -80,15 +95,56 @@ class Screen(QWidget):
         y = max(0, min(fh-1, int((p.y()-r.y())*fh/r.height())))
         self.touch.emit(operation, x, y)
     def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton and self.bounds().contains(event.position()):
+        if self.bounds().contains(event.position()) and (event.button() == Qt.LeftButton or self.keyboard_enabled):
+            self.setFocus()
             self.dragging = True
-            self.send('down', event)
+            operation = {Qt.RightButton:'right_down', Qt.MiddleButton:'middle_down'}.get(event.button(), 'down')
+            self.send(operation, event)
     def mouseMoveEvent(self, event):
-        if self.dragging and time.monotonic()-self.last_move > .016:
+        if (self.dragging or self.keyboard_enabled) and time.monotonic()-self.last_move > .016:
             self.last_move = time.monotonic(); self.send('move', event)
     def mouseReleaseEvent(self, event):
-        if event.button() == Qt.LeftButton and self.dragging:
-            self.send('up', event); self.dragging = False
+        if self.dragging:
+            operation = {Qt.RightButton:'right_up', Qt.MiddleButton:'middle_up'}.get(event.button(), 'up')
+            self.send(operation, event); self.dragging = False
+    def wheelEvent(self, event):
+        if self.keyboard_enabled:
+            self.send('wheel_up' if event.angleDelta().y()>0 else 'wheel_down', event)
+            event.accept()
+        else: super().wheelEvent(event)
+    def focusNextPrevChild(self, next):
+        return False if self.keyboard_enabled else super().focusNextPrevChild(next)
+    def keyPressEvent(self, event):
+        if not self.keyboard_enabled: return super().keyPressEvent(event)
+        special = {Qt.Key_Escape:0xff1b, Qt.Key_Return:0xff0d, Qt.Key_Enter:0xff0d,
+                   Qt.Key_Backspace:0xff08, Qt.Key_Tab:0xff09, Qt.Key_Backtab:0xff09,
+                   Qt.Key_Delete:0xffff, Qt.Key_Insert:0xff63, Qt.Key_Home:0xff50,
+                   Qt.Key_End:0xff57, Qt.Key_PageUp:0xff55, Qt.Key_PageDown:0xff56,
+                   Qt.Key_Left:0xff51, Qt.Key_Up:0xff52, Qt.Key_Right:0xff53, Qt.Key_Down:0xff54,
+                   Qt.Key_Shift:0xffe1, Qt.Key_Control:0xffe3, Qt.Key_Alt:0xffe9, Qt.Key_Meta:0xffeb}
+        key = special.get(event.key())
+        if key is None and Qt.Key_F1 <= event.key() <= Qt.Key_F35:
+            key = 0xffbe + event.key()-Qt.Key_F1
+        if key is None:
+            text = event.text()
+            if text and ord(text[0]) >= 32:
+                code = ord(text[0]); key = code if code<=255 else 0x01000000|code
+            elif Qt.Key_A <= event.key() <= Qt.Key_Z:
+                key = event.key()+32
+        if key is not None:
+            self.held_keys[event.key()] = key
+            self.key_input.emit(key, True)
+        event.accept()
+    def keyReleaseEvent(self, event):
+        if self.keyboard_enabled and not event.isAutoRepeat():
+            key = self.held_keys.pop(event.key(), None)
+            if key is not None: self.key_input.emit(key, False)
+            event.accept()
+        else: super().keyReleaseEvent(event)
+    def focusOutEvent(self, event):
+        for key in self.held_keys.values(): self.key_input.emit(key, False)
+        self.held_keys.clear()
+        super().focusOutEvent(event)
 class DropArea(QFrame):
     dropped = Signal(str)
     clicked = Signal()
@@ -230,7 +286,7 @@ class Window(QMainWindow):
         preview = QFrame(); preview.setObjectName('displayPanel'); right = QVBoxLayout(preview); right.setContentsMargins(16, 14, 16, 16); right.setSpacing(12)
         header = QHBoxLayout(); header.addWidget(self.label('02 / DISPLAY OUTPUT', '02 / 显示输出', 'moduleHeader')); header.addStretch()
         self.badge = QLabel(); self.badge.setObjectName('badge'); header.addWidget(self.badge); right.addLayout(header)
-        self.screen = Screen(); self.screen.touch.connect(self.send_touch); right.addWidget(self.screen, 1)
+        self.screen = Screen(); self.screen.touch.connect(self.send_touch); self.screen.key_input.connect(self.send_guest_key); right.addWidget(self.screen, 1)
         self.preview_hint = QLabel(); self.preview_hint.setObjectName('muted'); self.preview_hint.setWordWrap(True); right.addWidget(self.preview_hint)
         key_row = QHBoxLayout(); self.camera_keys = []
         for i in range(1,6):
@@ -242,8 +298,11 @@ class Window(QMainWindow):
         buttons = QHBoxLayout()
         self.start = self.button('Start original UI', '启动原厂 UI', self.launch, True)
         self.stop = self.button('Stop', '停止', self.stop_session)
+        self.desktop_start = self.button('Desktop lab', '桌面实验', self.launch_desktop)
+        self.desktop_switch = self.button('Open XFCE', '打开 XFCE', self.switch_desktop)
+        self.desktop_switch.hide()
         self.shot = self.button('Screenshot', '截图', self.screenshot)
-        buttons.addWidget(self.start); buttons.addWidget(self.stop); buttons.addStretch(); buttons.addWidget(self.shot); right.addLayout(buttons)
+        buttons.addWidget(self.start); buttons.addWidget(self.desktop_start); buttons.addWidget(self.desktop_switch); buttons.addWidget(self.stop); buttons.addStretch(); buttons.addWidget(self.shot); right.addLayout(buttons)
         content.addWidget(preview, 1)
         readouts = QFrame(); readouts.setObjectName('topbar'); metrics = QHBoxLayout(readouts); metrics.setContentsMargins(18, 12, 18, 12); metrics.setSpacing(24)
         self.readouts = []
@@ -509,12 +568,35 @@ class Window(QMainWindow):
         def done(device):
             self.refresh_library(device)
             self.log(self.tr('Imported. Review support status before launching.', '已导入，请查看适配状态后启动。'))
-        self.run_job(lambda task: import_firmware(path, self.home / 'library', task), done)
-    def run_job(self, operation, done):
+        def with_key():
+            text, accepted = QInputDialog.getText(
+                self, self.tr('X2D II final OTA', 'X2D II 最终版 OTA'),
+                self.tr('Enter your ota.sig decryption key (16 bytes in hexadecimal).',
+                        '请输入你自己的 ota.sig 解密密钥（16 字节十六进制）。'),
+                QLineEdit.EchoMode.Password)
+            if not accepted:
+                return
+            try:
+                key = parse_key(text)
+            except ValueError:
+                self.error(self.tr('Enter a 16-byte hexadecimal ota.sig decryption key.',
+                                   '请输入 16 字节十六进制的 ota.sig 解密密钥。'))
+                return
+            self.run_job(lambda task: import_firmware(path, self.home / 'library', task, ota_key=key), done)
+        self.run_job(lambda task: import_firmware(path, self.home / 'library', task), done, on_ota_key=with_key)
+    def run_job(self, operation, done, *, on_ota_key=None):
         if self.busy(): return
-        self.job = Job(operation); self.job.message.connect(self.log); self.job.failed.connect(self.error); self.job.result.connect(done)
+        self.job = Job(operation, on_ota_key); self.job.message.connect(self.log); self.job.failed.connect(self.error); self.job.result.connect(done)
         self.job.url_ready.connect(lambda url: QDesktopServices.openUrl(QUrl(url)))
-        self.job.finished.connect(self.update_controls); self.job.start(); self.update_controls()
+        self.job.finished.connect(self.update_controls)
+        if on_ota_key is not None:
+            self.job.finished.connect(self.request_ota_key)
+        self.job.start(); self.update_controls()
+    @Slot()
+    def request_ota_key(self):
+        job = self.sender()
+        if job is self.job and job.needs_ota_key and not job.task.cancelled.is_set():
+            job.on_ota_key()
     def cancel_job(self):
         if self.job: self.job.task.cancelled.set()
     def install_runtime(self, *_ , then=None):
@@ -606,6 +688,10 @@ class Window(QMainWindow):
         from .packages import remove_package
         self.run_job(lambda task: remove_package(self.device, *key), lambda _: self.refresh_apps())
     def launch(self, checked=False, mode='live'):
+        if getattr(self, 'instax_native_run', None) and self.device == self.instax_native_device and mode == 'live':
+            return self.attach_instax_native(self.instax_native_run)
+        if self.device and mode == 'live' and (self.device/'subsystem-runtime.json').exists():
+            return self.launch_desktop()
         from .camera_ui import available_lab as menu_available
         if self.device and mode == 'live' and menu_available(self.device, self.home):
             return self.launch_nikon_lab()
@@ -657,6 +743,62 @@ class Window(QMainWindow):
     def on_phase(self, phase):
         self.current_phase = phase; self.update_controls()
         self.statusBar().showMessage(self.badge.text())
+    def attach_instax_native(self, run_directory):
+        from .instax_native import NativeInstaxSession
+        if self.busy(): return
+        self.instax_native_run = Path(run_directory)
+        self.instax_native_device = self.device
+        self.screen.frame = None; self.last_frame = None
+        self.session = NativeInstaxSession(run_directory)
+        self.session.message.connect(self.log); self.session.console.connect(self.logs.appendPlainText)
+        self.session.phase.connect(self.on_phase); self.session.failed.connect(self.error)
+        self.session.finished.connect(self.update_controls)
+        self.session.status_changed.connect(self.update_controls)
+        self.setWindowTitle('QEMU Everything · Instax mini Evo 2 · Native guest')
+        self.session.start(); self.navigate(0); self.update_controls()
+    def launch_desktop(self):
+        from .desktop_session import DesktopSession, discover_desktop
+        if self.busy() or not self.device: return
+        if not self.runtime: return self.install_runtime(then=self.launch_desktop)
+        subsystem = read_json(self.device/'subsystem-runtime.json')
+        desktop = subsystem or discover_desktop(self.home)
+        if not desktop: return self.error(self.tr('Prepare the local ARM64 XFCE runtime first.', '请先准备本地 ARM64 XFCE 运行环境。'))
+        self.screen.frame = None; self.last_frame = None
+        memory_profile = read_json(self.device/'memory-profile.json')
+        if subsystem:
+            from .subsystem_session import SubsystemSession
+            self.session = SubsystemSession(self.device,self.runtime,subsystem,memory_profile)
+            self.log(self.tr('Guest-owned subsystem lifecycle; one SDK kernel, one display, mock camera services.',
+                             '由虚拟相机内部管理子系统；一个 SDK 内核、一块屏幕；相机硬件服务仍为模拟。'))
+        elif memory_profile:
+            from .memory_lab import MemoryDesktopSession
+            self.session = MemoryDesktopSession(self.device, self.runtime, desktop, memory_profile)
+            self.log(self.tr('CPU/RAM model: 4 Cortex-A55 cores and translated camera carveouts; SDK kernel.',
+                             'CPU/RAM 模型：四核 Cortex-A55 与平移后的真机保留区；使用 SDK 内核。'))
+        else:
+            self.session = DesktopSession(self.device, self.runtime, desktop)
+        self.session.message.connect(self.log); self.session.console.connect(self.logs.appendPlainText)
+        self.session.phase.connect(self.on_phase); self.session.failed.connect(self.error)
+        self.session.finished.connect(self.update_controls)
+        self.session.desktop_phase.connect(self.on_desktop_phase)
+        self.session.start(); self.navigate(0); self.update_controls()
+    def on_desktop_phase(self, phase):
+        self.desktop_switch.setText(self.tr('Return to camera UI', '返回原厂界面') if phase=='desktop' else self.tr('Open XFCE', '打开 XFCE'))
+        self.desktop_switch.setEnabled(phase!='starting' and bool(self.session and self.session.ready))
+        self.screen.keyboard_enabled = phase=='desktop'
+        self.preview_hint.setText(self.tr('ARM64 XFCE userspace, shared SDK kernel; click the image to use mouse and keyboard.', 'ARM64 XFCE 用户态，共享 SDK 内核；点击画面后使用鼠标和键盘。') if phase=='desktop' else self.tr('Original UI adapter; shared SDK kernel and simulated camera services.', '原厂 UI 适配环境；共享 SDK 内核与模拟相机服务。'))
+        if getattr(self.session,'guest_subsystem',False):
+            self.desktop_switch.setText(self.tr('Stop subsystem and return','停止子系统并返回相机') if phase=='desktop' else self.tr('Start in-camera subsystem','启动机内子系统'))
+            self.preview_hint.setText(self.tr('One camera guest owns the display and input. Its GUI is stopped while the Linux subsystem runs.',
+                                             '同一虚拟相机管理屏幕和输入；Linux 子系统运行时，相机 GUI 已退出。') if phase=='desktop' else self.tr('Camera parent environment: SDK kernel and mocked hardware services.',
+                                             '虚拟相机父系统：SDK 内核与模拟硬件服务。'))
+    def switch_desktop(self):
+        from .desktop_session import DesktopSession
+        if isinstance(self.session, DesktopSession):
+            if self.session.desktop_active: self.session.switch_camera()
+            else: self.session.switch_desktop()
+    def send_guest_key(self, keysym, down):
+        if self.session and hasattr(self.session, 'key'): self.session.key(keysym, down)
     def stop_session(self):
         if self.session: self.session.stop()
     def build_app(self):
@@ -683,8 +825,15 @@ class Window(QMainWindow):
                 self.last_frame = latest; self.screen.update(); self.shot.setEnabled(True)
     def update_controls(self):
         busy = self.busy(); live = bool(self.session and self.session.isRunning()); ready = bool(live and self.session.ready)
+        self.stop.setText(self.tr('Stop', '停止')); self.stop.setToolTip('')
         profile = read_json(self.device / 'device.json') if self.device else {}
         camera = bool(self.device and is_camera(profile))
+        from .desktop_session import DesktopSession, discover_desktop
+        desktop_session = live and isinstance(self.session, DesktopSession)
+        self.desktop_start.setEnabled(camera and model_id(profile)=='x2dii' and bool(discover_desktop(self.home)) and not busy)
+        self.desktop_switch.setVisible(desktop_session)
+        self.desktop_switch.setEnabled(bool(desktop_session and ready and not (self.session.desktop_started and not self.session.desktop_guest_ready)))
+        if not desktop_session: self.screen.keyboard_enabled = False
         from .camera_ui import available_lab as menu_available
         nikon_menu = menu_available(self.device, self.home) if self.device else None
         nikon_lab = bool(nikon_menu)
@@ -747,6 +896,8 @@ class Window(QMainWindow):
             self.preview_hint.setText(self.tr('Original UI and input open in your browser.', '原厂画面与输入在浏览器中打开。'))
         elif linux_lab:
             self.preview_hint.setText(self.tr('Serial boot evidence is saved in the firmware workspace.', '串口启动证据保存在所选固件的工作区。'))
+        if desktop_session:
+            self.on_desktop_phase('desktop' if self.session.desktop_active else 'starting' if self.session.desktop_started and not self.session.desktop_guest_ready else 'camera')
         self.preview_hint.setVisible(bool(self.device))
         self.screen.update()
         self.runtime_label.setText(self.tr('Camera runtime ready · QEMU + Android ARM64', '相机运行环境已就绪 · QEMU + Android ARM64') if self.runtime else self.tr('Camera runtime not installed.', '尚未安装相机运行环境。'))
@@ -765,6 +916,19 @@ class Window(QMainWindow):
         else:
             self.details.setText(self.tr('Your imported firmware will appear here.', '导入的固件会显示在这里。'))
             self.screen.message = 'QEMU Everything'
+        if getattr(self.session, 'native_instax', False) and self.device == self.instax_native_device:
+            self.start.setText(self.tr('Attach display', '连接画面')); self.start.setEnabled(not live)
+            self.stop.setText(self.tr('Disconnect display', '断开画面')); self.stop.setEnabled(live)
+            self.stop.setToolTip(self.tr('The independently running guest stays alive.', '虚拟机继续独立运行。'))
+            self.badge.setText(self.tr('Native guest · live', '原厂客体 · 实时') if ready else self.tr('Display disconnected', '画面未连接'))
+            self.details.setText('Instax mini Evo 2\n' + self.session.description(self.lang == 'zh'))
+            self.preview_hint.setText(self.session.description(self.lang == 'zh') + '\n' + self.tr(
+                'Native QMP pixels · Touch → QMP → ST1633I → original kernel driver',
+                'QMP 原始实时帧 · 触摸 → QMP → ST1633I → 原厂内核驱动'))
+            self.preview_hint.setVisible(True)
+            self.screen.message = 'Instax mini Evo 2'; self.screen.caption = self.session.description(self.lang == 'zh')
+            self.readouts[2].setText(self.tr('ATTACHED', '已连接') if ready else self.tr('DISCONNECTED', '未连接'))
+            self.readouts[1].setText(self.tr('EXTERNAL QEMU', '外部 QEMU'))
     def render_last_event(self):
         message = self.last_event_message or (self.tr('Firmware selected. Review its support status before starting.', '已选中固件，确认适配状态后即可启动。') if self.device else self.tr('Workbench ready. Load a firmware to begin.', '工作台已就绪，载入固件以开始。'))
         self.last_event.setToolTip(message)
@@ -783,7 +947,7 @@ class Window(QMainWindow):
     def closeEvent(self, event):
         if self.busy():
             self.closing = True; self.cancel_job(); self.stop_session()
-            self.statusBar().showMessage(self.tr('Stopping the guest before closing…', '正在关闭虚拟机…')); event.ignore()
+            self.statusBar().showMessage(self.tr('Disconnecting display…', '正在断开画面…') if getattr(self.session, 'native_instax', False) else self.tr('Stopping the guest before closing…', '正在关闭虚拟机…')); event.ignore()
         else:
             self.save_preferences(); event.accept()
 
@@ -791,6 +955,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('firmware', nargs='?')
     parser.add_argument('--home', type=Path)
+    parser.add_argument('--instax-native-run', type=Path, help='Attach the native Qt display to an existing Instax controller run directory')
     parser.add_argument('--smoke-test', type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
     app = QApplication(sys.argv[:1]); app.setApplicationName('QEMU Everything'); app.setOrganizationName('QEMU-Everything')
@@ -871,5 +1036,6 @@ def main():
         else:
             QTimer.singleShot(500, begin_check)
         QTimer.singleShot(240000, lambda: fail('Timed out') if not window.closing else None)
+    elif args.instax_native_run: QTimer.singleShot(200, lambda: window.attach_instax_native(args.instax_native_run))
     elif args.firmware: QTimer.singleShot(200, lambda: window.import_file(args.firmware))
     sys.exit(app.exec())

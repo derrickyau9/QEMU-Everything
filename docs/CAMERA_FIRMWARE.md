@@ -1,6 +1,6 @@
 # Camera firmware research / 多品牌相机固件研究
 
-Verified locally on **2026-10-11**. Results apply to the listed model/version,
+Verified locally on **2026-10-11**, with the A7R VI 1.02 entry checked on **2026-10-21**. Results apply to the listed model/version,
 not every product sold by a brand. Vendor firmware, recovered tables and emulator
 binaries are separate local inputs; they are not shipped in this repository.
 
@@ -19,6 +19,7 @@ binaries are separate local inputs; they are not shipped in this repository.
 | Nikon Z7II C1.70, Z8 C3.11 | CRC-checked packages/modules / 包及模块 CRC 通过 | Not locally boot verified / 未验证启动 | Separate model-specific emulator and firmware fingerprint / 各自的模拟器与固件指纹 |
 | Sony A7 IV / ILCE-7M4 2.00 | AES/FDAT and FAT component checks pass / 解密、校验与 FAT 组件提取通过 | Linux/root shell and separate original diagnostic component verified / Linux、root shell 与独立原厂诊断组件已验证 | Normal camera menus and complete boot unverified; original init faults in cryptEmmc_setKeyCovertly / 普通相机菜单与完整开机未验证，原厂 init 在该函数异常 |
 | Sony A7R V / ILCE-7RM5 4.00 | AES/FDAT and FAT component checks pass / 解密、校验与 FAT 组件提取通过 | Linux/root shell and separate original diagnostic component verified / Linux、root shell 与独立原厂诊断组件已验证 | Normal camera menus and complete boot unverified; original init faults in cryptEmmc_setKeyCovertly / 普通相机菜单与完整开机未验证，原厂 init 在该函数异常 |
+| Sony A7R VI / ILCE-7RM6 1.02 | Official BODYDATA.DAT acquired; outer UFU CRC verified; XR2 FDAT remains encrypted / 官方包已取得，外层 CRC 通过，XR2 FDAT 未解密 | Not booted / 未启动 | [Read-only research and replay](sony-a7r6-xr2-20261021.md): device-side XR2 updater/key path needed / 需 XR2 设备侧升级器与密钥路径 |
 | Ricoh GR III 2.10, IIIx 1.60 | Checked ROMFS extraction / ROMFS 提取校验通过 | Linux/root shells verified / Linux 和 root shell 已验证 | camctld restrict mode; camera UI and RTOS IPC unverified / camctld 受限模式，相机 UI 与跨核 IPC 未验证 |
 | Ricoh GR IV 1.11 | Checked ROMFS, SquashFS, RES and ICONBIN extraction / ROMFS、SquashFS、RES 与 ICONBIN 提取校验通过 | Linux/root shell and separate original TopMenu component with native Down/Up verified / Linux、root shell 与独立原厂菜单组件及原生上下键已验证 | Assisted RTOS software-display lab; full cold boot, LCD, capture and IPC unverified / 辅助 RTOS 软件显示实验，完整冷启动、LCD、拍摄与 IPC 未验证 |
 | Insta360 X3 v1.1.4.1_build1 | Six components, MD5/CRC checked / 六组件，MD5/CRC 通过 | **Original emWin menu and 72MP → 18MP → 72MP touch roundtrip / 原厂菜单与触摸往返已验证** | GUI platform adapter: eight RAM hooks, 68 bytes; full ThreadX boot, RTOS/Linux IPC and imaging unverified / 界面适配修改 8 处共 68 字节 RAM；完整开机、跨核 IPC 与成像未验证 |
@@ -106,6 +107,30 @@ hash. The extraction record's hashes describe the bytes at extraction time.
 厂商程序。检查归档路径、链接、特殊文件、文件数与总输出。适配导出只包含解包记录，
 不含厂商组件。刷新检查文件存在与大小；尼康启动再次核对真实载荷哈希。
 解包记录中的哈希对应解包时的文件内容。
+
+## Hasselblad X2D II 1.4.15.7
+
+Drop your official 1.4.15.7 `.cim` into the workbench and enter your own `ota.sig`
+decryption key as 32 hexadecimal digits in the masked prompt. The workbench
+checks the package and decrypted OTA fingerprints, then stages the final UI
+locally. The repository and release ship neither the firmware nor the key.
+The key is used only for the current import and is never saved to the library.
+
+将你自己的官方 1.4.15.7 `.cim` 拖入工作台，在遮蔽输入框中输入自己的 `ota.sig`
+解密密钥（32 个十六进制字符）。工作台核对固件包和解密后 OTA 的指纹，再在本机准备最终版
+界面。仓库与发行包均不分发固件或密钥。密钥仅用于本次导入，固件库不会保存密钥。
+
+```powershell
+# Final OTA. Enter the key when prompted in the terminal.
+qemu-everything import '.\X2DII_100C_v1_4_15_7.cim'
+# Optional transition OTA, 1.3.18.1.
+qemu-everything import '.\X2DII_100C_v1_4_15_7.cim' --bridge
+# Launch your already prepared final ext4 image from a source checkout.
+.\scripts\launch-final-image.ps1 -SystemImage '.\system.img'
+```
+
+The final and transition versions appear as separate library entries.
+最终版与过渡版在固件库中使用各自的条目。
 
 ## Nikon Z7 lab / 尼康 Z7 实验
 
@@ -414,9 +439,11 @@ bundles include no decrypted payloads, recovered tables or proprietary artwork.
 
 Legacy Nikon FR/TX + ITRON emulation is a separate architecture. Recent Nikon
 encrypted formats, modern Canon FIR, other Insta360 models and Pentax formats
-are not covered by the tested readers. Fujifilm, Panasonic and OM System
-remain future platform work with no local boot claim.
+are not covered by the tested readers. The exact Fujifilm instax mini Evo 1.09
+SUNP update now has a checked offline reader; see [mini Evo analysis](instax-mini-evo.md).
+Other Fujifilm, Panasonic and OM System platforms remain future work with no local boot claim.
 
 老尼康 FR/TX + ITRON 是另一套架构。较新的尼康加密格式、现代佳能 FIR、其他
-Insta360 和宾得格式未被这些实测解析器覆盖。富士、松下、OM System
-仍需独立开发与验证。
+Insta360 和宾得格式未被这些实测解析器覆盖。富士 instax mini Evo 1.09
+已加入离线 SUNP 解包与签名验证，详见 [mini Evo 分析](instax-mini-evo.md)。
+其他富士、松下、OM System 平台仍需独立开发与验证。

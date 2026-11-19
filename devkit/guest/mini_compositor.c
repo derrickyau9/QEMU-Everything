@@ -201,6 +201,7 @@ static void write_pixels(int w,int h,int stride,uint32_t format,const void *pixe
     }
     close(fd);
 }
+#include "subsystem_display.h"
 static void capture_pixels(struct surface *s,int width,int height,int stride,uint32_t format,const void *pixels){
     if(width<=0 || height<=0 || width>4096 || height>4096 || stride<width*4 || stride>32768 || (size_t)width*height*4>32*1024*1024)return;
     if(getenv("DEVKIT_TRACE_DAMAGE")){
@@ -222,7 +223,7 @@ static void capture_pixels(struct surface *s,int width,int height,int stride,uin
         if(x>=x2 || y>=y2)continue;
         for(;y<y2;y++)memcpy(s->pixels+((size_t)y*width+x)*4,(const char*)pixels+(size_t)y*stride+x*4,(size_t)(x2-x)*4);
     }
-    if(s->resource==focus_surface)write_pixels(width,height,width*4,format,s->pixels);
+    if(s->resource==focus_surface && !subsystem_active)write_pixels(width,height,width*4,format,s->pixels);
 }
 #include "eagle_shm.h"
 static void capture_buffer(struct surface *s,struct wl_resource *buffer,const struct damage_rect *rects,unsigned count,int full){
@@ -390,6 +391,7 @@ static void pointer_input(const char *op,int x,int y){
     }
 }
 static void input_line(int fd,char *line){
+    if(subsystem_input(line))return;
     int x,y;char op[12];unsigned sequence=0;
     if(sscanf(line,"key %d %d",&x,&y)==2 && keyboard_resource && focus_surface && (x==1 || (x>=59 && x<=63)) && (y==0 || y==1)){
         struct {size_t size,alloc;void *data;} keys={0,0,NULL};
@@ -467,6 +469,11 @@ int main(int argc,char **argv){
         frame_fd=open(argv[3],O_WRONLY|O_CLOEXEC);
         if(frame_fd<0){perror("virtio frames");return 1;}
         puts("FAST_FRAMES_READY");
+    }
+    if(getenv("QE_SUBSYSTEM_DISPLAY")) {
+        subsystem_timer=wl_event_loop_add_timer(wl_display_get_event_loop(d),subsystem_tick,NULL);
+        if(!subsystem_timer)return 1;
+        wl_event_source_timer_update(subsystem_timer,100);
     }
     puts("MINI_COMPOSITOR_READY");fflush(stdout);wl_display_run(d);return 0;
 }

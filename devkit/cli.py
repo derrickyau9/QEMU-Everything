@@ -16,8 +16,22 @@ def main(argv=None):
     commands = parser.add_subparsers(dest='action', required=True)
     for name in ('inspect', 'import'):
         command = commands.add_parser(name); command.add_argument('file', type=Path)
+        if name == 'import':
+            command.add_argument('--bridge', action='store_true',
+                                 help='Import the X2D II 1.3.18.1 transition OTA from the 1.4.15.7 package')
     commands.add_parser('boards')
     commands.add_parser('cameras', help='Camera extraction and emulation research / 相机解包与模拟研究矩阵')
+    command = commands.add_parser('explore', help='MOLTEN bounded AArch64 research / 自适应执行研究')
+    command.add_argument('file', type=Path)
+    command.add_argument('--campaign', required=True, type=Path)
+    command.add_argument('--backend-manifest', required=True, type=Path)
+    command.add_argument('--goal', choices=('original-ui',), default='original-ui')
+    command.add_argument('--resume', action='store_true')
+    command = commands.add_parser('replay', help='Replay a frozen MOLTEN recipe without a solver / 无求解器重放')
+    command.add_argument('recipe', type=Path)
+    command.add_argument('--output', required=True, type=Path)
+    command.add_argument('--backend-manifest', type=Path)
+    command.add_argument('--verify-interaction', action='store_true')
     command = commands.add_parser('canon-lab', help='EOS 50D ROM/decryption/updater lab / 佳能 ROM、解密与升级程序实验')
     command.add_argument('arguments', nargs=argparse.REMAINDER)
     command = commands.add_parser('unpack', help='Offline camera extraction / 离线相机解包')
@@ -96,13 +110,38 @@ def main(argv=None):
             print(json.dumps(inspect_firmware(args.file, task), ensure_ascii=False, indent=2))
         elif args.action == 'import':
             from .library import import_firmware
-            print(import_firmware(args.file, home / 'library', task))
+            from .x2dii_ota import FinalOtaKeyRequired, parse_key
+            try:
+                device = import_firmware(args.file, home / 'library', task, bridge=args.bridge)
+            except FinalOtaKeyRequired:
+                if not sys.stdin.isatty():
+                    raise ValueError('Run import in a terminal to enter your ota.sig decryption key.') from None
+                from getpass import GetPassWarning, getpass
+                from warnings import catch_warnings, simplefilter
+                with catch_warnings():
+                    simplefilter('error', GetPassWarning)
+                    try:
+                        key = parse_key(getpass('Your ota.sig decryption key (hex): '))
+                    except GetPassWarning:
+                        raise ValueError('This terminal cannot hide key input. Use the GUI import prompt.') from None
+                device = import_firmware(args.file, home / 'library', task, ota_key=key)
+            print(device)
         elif args.action == 'boards':
             from .boot import BOARDS
             print(json.dumps(BOARDS, ensure_ascii=False, indent=2))
         elif args.action == 'cameras':
             from .camera_catalog import camera_catalog
             print(json.dumps(camera_catalog(), ensure_ascii=False, indent=2))
+        elif args.action == 'explore':
+            from .adaptive.campaign import explore
+            result = explore(args.file, args.campaign, args.backend_manifest, resume=args.resume,
+                             log=lambda text: print(text, file=sys.stderr, flush=True))
+            print(json.dumps(result, ensure_ascii=False, indent=2))
+            return 0 if result['outcome'] == 'SUCCESS_TESTED' else 2
+        elif args.action == 'replay':
+            from .adaptive.replay import replay
+            print(json.dumps(replay(args.recipe, args.output, verify_interaction=args.verify_interaction,
+                                    backend_manifest=args.backend_manifest), ensure_ascii=False, indent=2))
         elif args.action == 'canon-lab':
             from .canon_lab import main as canon_main
             return canon_main(args.arguments) or 0

@@ -13,6 +13,7 @@ from .guest.frame_stream import FrameStream
 from .models import model_id
 
 class Session(QThread):
+    guest_subsystem = False
     message = Signal(str)
     console = Signal(str)
     phase = Signal(str)
@@ -40,6 +41,24 @@ class Session(QThread):
             except queue.Full:
                 pass
 
+    def prepare_extra_payload(self):
+        pass
+
+    def build_command(self, *ports):
+        return command(self.device, self.runtime, *ports, network=self.network, mode=self.mode)
+
+    def session_step(self):
+        pass
+
+    def on_guest_line(self, line):
+        pass
+
+    def can_send_command(self):
+        return True
+
+    def on_command_sent(self, command):
+        pass
+
     def run(self):
         connection = fast = frames = process = None
         lock = None
@@ -66,6 +85,10 @@ class Session(QThread):
                 shutil.copy2(helper_dir / name, self.device / 'payload-stage' / name)
             if profile.get('abi') == 'arm32':
                 shutil.copy2(helper_dir / 'ion_compat.so', self.device / 'payload-stage/ion_compat.so')
+            self.prepare_extra_payload()
+            if not self.guest_subsystem:
+                for optional in ('subsystem_manager.sh','subsystem_audit.sh'):
+                    (self.device/'payload-stage/camera'/optional).unlink(missing_ok=True)
             prepare(self.device, self.runtime, self.task)
             with (self.device / 'framebuffer.raw').open('wb') as f:
                 f.truncate(32*1024**2)
@@ -79,8 +102,7 @@ class Session(QThread):
                     reservation.close()
             errors = (self.device / 'qemu.log').open('wb')
             log = (self.device / 'console.log').open('wb')
-            process = self.process = subprocess.Popen(command(self.device, self.runtime, *ports,
-                         network=self.network, mode=self.mode), stdout=errors,
+            process = self.process = subprocess.Popen(self.build_command(*ports), stdout=errors,
                         stderr=errors, creationflags=getattr(subprocess, 'CREATE_NO_WINDOW', 0))
             for attempt in range(100):
                 self.task.check()
@@ -176,6 +198,7 @@ class Session(QThread):
             self.message.emit('Guest app is ready / 应用已就绪' if self.mode == 'app' else 'Original UI is ready / 原厂界面已就绪')
             console_pending = bytearray()
             while not self.task.cancelled.is_set():
+                self.session_step()
                 if process.poll() is not None:
                     raise RuntimeError('QEMU stopped unexpectedly')
                 if frames.error:
@@ -186,8 +209,10 @@ class Session(QThread):
                 if fast in readable:
                     if not fast.recv(4096):
                         raise ConnectionError('Input disconnected')
-                if not self.commands.empty():
-                    send(self.commands.get_nowait())
+                if not self.commands.empty() and self.can_send_command():
+                    pending_command = self.commands.get_nowait()
+                    send(pending_command)
+                    self.on_command_sent(pending_command)
                 output = received() if connection in readable else b''
                 if output:
                     console_pending.extend(output)
@@ -196,6 +221,7 @@ class Session(QThread):
                         console_pending[:] = rest
                         if b'X2DII_UI_EXITED' in line:
                             raise RuntimeError('Guest UI exited; see console.log')
+                        self.on_guest_line(line.decode(errors='replace').rstrip())
                         self.console.emit(line.decode(errors='replace').rstrip())
                     if len(console_pending) > 65536:
                         self.console.emit(console_pending.decode(errors='replace'))

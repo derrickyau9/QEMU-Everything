@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "updated": "2026-10-11",
+  "updated": "2026-10-27",
   "families": [
     {
       "id": "hasselblad-ui",
@@ -106,6 +106,18 @@
       "boot_gap_en": "Separate QEMU platform required. Original UI component entry bypasses proprietary RTOS tasks; 20 RAM veneers provide software display, heap, mutex and clock. Finite deferred-free heap. Full cold boot, sensor and recording are unverified.",
       "boot_gap_zh": "需要独立 QEMU 平台；原厂 UI 组件入口绕过专有 RTOS 任务，20 处 RAM 适配提供软件显示、内存、互斥锁和时钟。堆空间有限，回收延迟到会话结束；完整冷启动、传感器和录制未验证。",
       "upstreams": [{"url": "https://gitlab.com/qemu-project/qemu", "revision": "v10.2.4", "license": "GPL-2.0 and included licenses; independent local board overlay"}]
+    },
+    {
+      "id": "sunp-burn",
+      "brand": "Fujifilm",
+      "family": "instax mini Evo / SUNP / MIPS32 ThreadX",
+      "status_en": "Exact mini Evo 1.09 update: updater, raw MIPS32 main image and two FAT16 resource volumes extracted. Additive checksums and RSA-2048/SHA-256 signature verified offline. Not Linux.",
+      "status_zh": "精确匹配 mini Evo 1.09：已提取升级程序、MIPS32 主程序及两个 FAT16 资源盘，离线验证加法校验和与 RSA-2048/SHA-256 签名。系统为 ThreadX。",
+      "official_url": "https://www.instax.com/mini_evo/en/support/firmware/",
+      "verified_samples": ["mini Evo 1.09 / 4f412d0868844321 (offline extraction and signature verification)"],
+      "boot_gap_en": "Original mapExe handler calls a return-value probe in isolated Unicorn emulation with libc/UART substitutes. Hardware console access, complete QEMU boot and Doom remain unverified.",
+      "boot_gap_zh": "独立 Unicorn 函数测试已验证原厂 mapExe 调用返回值探针，使用替代 libc/串口输出；真机控制台、完整 QEMU 启动与 Doom 尚未验证。",
+      "upstreams": [{"url": "https://github.com/mheistermann/spca-fun", "revision": "c1f2727499ad661d9b0d8879f37fe5e4b1561b4d", "license": "GPL-3.0; container-format reference, implementation not copied"}]
     }
   ]
 }

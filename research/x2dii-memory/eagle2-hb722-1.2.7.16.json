@@ -1,0 +1,336 @@
+{
+  "captured_at_utc": "2026-10-19T04:39:51.852930+00:00",
+  "identity": {
+    "device": "eagle2_hb722",
+    "firmware": "1.2.7.16"
+  },
+  "memory_reg_independently_verified": true,
+  "dt_described_ram_bytes": 17112760320,
+  "dt_ram_regions": [
+    {
+      "address": "0x0",
+      "size_bytes": 3892314112
+    },
+    {
+      "address": "0xec000000",
+      "size_bytes": 13220446208
+    }
+  ],
+  "linux_memtotal_bytes": 959807488,
+  "linux_memavailable_bytes_at_capture": 295555072,
+  "ion_reserved_bytes": 15740174336,
+  "ion_allocated_bytes_at_capture": 12528754688,
+  "ion_free_bytes_at_capture": 3211419648,
+  "ion_heaps": [
+    {
+      "heap": "carveout_heap1",
+      "allocated_bytes": 1015001088,
+      "free_bytes": 4214784,
+      "size_bytes": 1019215872
+    },
+    {
+      "heap": "carveout_heap10",
+      "allocated_bytes": 1060081664,
+      "free_bytes": 13660160,
+      "size_bytes": 1073741824
+    },
+    {
+      "heap": "carveout_heap11",
+      "allocated_bytes": 1041244160,
+      "free_bytes": 32497664,
+      "size_bytes": 1073741824
+    },
+    {
+      "heap": "carveout_heap12",
+      "allocated_bytes": 1041244160,
+      "free_bytes": 32497664,
+      "size_bytes": 1073741824
+    },
+    {
+      "heap": "carveout_heap13",
+      "allocated_bytes": 1041244160,
+      "free_bytes": 32497664,
+      "size_bytes": 1073741824
+    },
+    {
+      "heap": "carveout_heap14",
+      "allocated_bytes": 1041244160,
+      "free_bytes": 32497664,
+      "size_bytes": 1073741824
+    },
+    {
+      "heap": "carveout_heap15",
+      "allocated_bytes": 1041244160,
+      "free_bytes": 32497664,
+      "size_bytes": 1073741824
+    },
+    {
+      "heap": "carveout_heap16",
+      "allocated_bytes": 1041244160,
+      "free_bytes": 32497664,
+      "size_bytes": 1073741824
+    },
+    {
+      "heap": "carveout_heap17",
+      "allocated_bytes": 914104320,
+      "free_bytes": 159637504,
+      "size_bytes": 1073741824
+    },
+    {
+      "heap": "carveout_heap2",
+      "allocated_bytes": 252555264,
+      "free_bytes": 53628928,
+      "size_bytes": 306184192
+    },
+    {
+      "heap": "carveout_heap3",
+      "allocated_bytes": 0,
+      "free_bytes": 671088640,
+      "size_bytes": 671088640
+    },
+    {
+      "heap": "carveout_heap4",
+      "allocated_bytes": 27267072,
+      "free_bytes": 27258880,
+      "size_bytes": 54525952
+    },
+    {
+      "heap": "carveout_heap5",
+      "allocated_bytes": 686665728,
+      "free_bytes": 118640640,
+      "size_bytes": 805306368
+    },
+    {
+      "heap": "carveout_heap6",
+      "allocated_bytes": 458260480,
+      "free_bytes": 11501568,
+      "size_bytes": 469762048
+    },
+    {
+      "heap": "carveout_heap7",
+      "allocated_bytes": 1416749056,
+      "free_bytes": 1536040960,
+      "size_bytes": 2952790016
+    },
+    {
+      "heap": "carveout_heap8",
+      "allocated_bytes": 450605056,
+      "free_bytes": 85217280,
+      "size_bytes": 535822336
+    },
+    {
+      "heap": "carveout_heap9",
+      "allocated_bytes": 0,
+      "free_bytes": 335544320,
+      "size_bytes": 335544320
+    },
+    {
+      "heap": "system_heap",
+      "allocated_bytes": 0,
+      "free_bytes": 0,
+      "size_bytes": 0
+    }
+  ],
+  "reserved_regions": [
+    {
+      "node": "/reserved-memory/icc_rsv_mem@20000000",
+      "address": "0x20000000",
+      "size_bytes": 2097152,
+      "no_map": true,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/dsp@20200000",
+      "address": "0x20200000",
+      "size_bytes": 50331648,
+      "no_map": true,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/pstore@3cd00000",
+      "address": "0x3cd00000",
+      "size_bytes": 1048576,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/sec_rsv@3ce00000",
+      "address": "0x3ce00000",
+      "size_bytes": 33554432,
+      "no_map": true,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/atf@3ee00000",
+      "address": "0x3ee00000",
+      "size_bytes": 2097152,
+      "no_map": true,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/tzos@3f000000",
+      "address": "0x3f000000",
+      "size_bytes": 16777216,
+      "no_map": true,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion_dsp@40000000",
+      "address": "0x40000000",
+      "size_bytes": 54525952,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion4@43400000",
+      "address": "0x43400000",
+      "size_bytes": 1019215872,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/dsp0_sram@80000000",
+      "address": "0x80000000",
+      "size_bytes": 1048576,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion2@8DC00000",
+      "address": "0x8dc00000",
+      "size_bytes": 306184192,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion5@A4000000",
+      "address": "0xa4000000",
+      "size_bytes": 469762048,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion3@C0000000",
+      "address": "0xc0000000",
+      "size_bytes": 671088640,
+      "no_map": true,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion9@EC000000",
+      "address": "0xec000000",
+      "size_bytes": 335544320,
+      "no_map": true,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion3@100000000",
+      "address": "0x100000000",
+      "size_bytes": 805306368,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion7@130000000",
+      "address": "0x130000000",
+      "size_bytes": 2952790016,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/dsp12_sram@1E0000000",
+      "address": "0x1e0000000",
+      "size_bytes": 1048576,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion8@1E0100000",
+      "address": "0x1e0100000",
+      "size_bytes": 535822336,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion9@200000000",
+      "address": "0x200000000",
+      "size_bytes": 1073741824,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion10@240000000",
+      "address": "0x240000000",
+      "size_bytes": 1073741824,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion11@280000000",
+      "address": "0x280000000",
+      "size_bytes": 1073741824,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion12@2C0000000",
+      "address": "0x2c0000000",
+      "size_bytes": 1073741824,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion13@300000000",
+      "address": "0x300000000",
+      "size_bytes": 1073741824,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion14@340000000",
+      "address": "0x340000000",
+      "size_bytes": 1073741824,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion15@380000000",
+      "address": "0x380000000",
+      "size_bytes": 1073741824,
+      "no_map": false,
+      "reusable": false
+    },
+    {
+      "node": "/reserved-memory/ion16@3C0000000",
+      "address": "0x3c0000000",
+      "size_bytes": 1073741824,
+      "no_map": false,
+      "reusable": false
+    }
+  ],
+  "interpretation": [
+    "MemTotal is normal kernel-managed RAM, not free RAM after applications start.",
+    "ION carveout free space is not general-purpose free RAM; stopping or swapping an app does not automatically grow MemTotal.",
+    "ION allocated bytes are pool reservations, not a measurement of resident process anonymous memory.",
+    "Freezing processes preserves their memory; full suspend also prevents the independent userland from running.",
+    "Sleep interface exposes freeze/mem; disk hibernation is not exposed in this snapshot.",
+    "Dedicated ION buffers may be useful for adapted applications, but require lifetime/cache/ownership research before allocation."
+  ],
+  "camera_mutations_performed": [],
+  "lab": {
+    "translation_offset": "0x40000000",
+    "cpu": "cortex-a55",
+    "cpu_count": 4,
+    "source_summary_sha256": "57264a215017e423a1056ae29c346160ad2aa422a461fdc2a5a81a3e39daee6f",
+    "source_dtb_sha256": "3503b4fb68da55a46365470c97ff531509ab1a9fce6114f2784546c1ad08bee5",
+    "physical_camera_access": false,
+    "limitations": [
+      "QEMU virt board, not Eagle2 MMIO/interrupt routing",
+      "RAM addresses translated by +0x40000000; RAM hole has virtual backing",
+      "SDK kernel, not camera main kernel",
+      "ION heap accounting is captured evidence, not an implemented ION driver",
+      "No ISP/DSP/GPU/DMA/coherency/DDR timing emulation",
+      "Original GUI uses mocked camera services; memory load differs from camera"
+    ]
+  }
+}

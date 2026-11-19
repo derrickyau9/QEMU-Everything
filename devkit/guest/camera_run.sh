@@ -1,5 +1,8 @@
 #!/system/bin/sh
 camera_lib=/mnt/x2dii/camera/lib
+if [ -f /mnt/x2dii/camera/subsystem_manager.sh ]; then
+    export QE_SUBSYSTEM_DISPLAY=1
+fi
 unset LD_LIBRARY_PATH
 export XDG_RUNTIME_DIR=/dev/x2dii-runtime
 export XDG_CACHE_HOME=/dev/x2dii-cache
@@ -22,7 +25,9 @@ if [ -f /mnt/x2dii/camera/linker ]; then
     mount -o bind /mnt/x2dii/camera/lib /system/lib
 fi
 cp /mnt/x2dii/camera/etc/VERSION /system/etc/VERSION
-cp /mnt/x2dii/camera/etc/dji.json /system/etc/dji.json
+if [ -f /mnt/x2dii/camera/etc/dji.json ]; then
+    cp /mnt/x2dii/camera/etc/dji.json /system/etc/dji.json
+fi
 setprop persist.hbl.first_time_guide_completed 1
 fast_input=
 fast_frames=
@@ -119,7 +124,12 @@ if [ "$1" = live ] || [ "$1" = app ]; then
         exit 1
     fi
     echo X2DII_UI_SESSION_READY
-    wait "$camera_pid"
+    if [ -f /mnt/x2dii/camera/subsystem_manager.sh ] && [ "$1" = live ]; then
+        . /mnt/x2dii/camera/subsystem_manager.sh
+        subsystem_main
+    else
+        wait "$camera_pid"
+    fi
     echo X2DII_UI_EXITED
 else
 if [ "$1" = submenu ]; then

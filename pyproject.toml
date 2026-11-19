@@ -14,6 +14,7 @@ dependencies = ["PySide6==6.9.3", "cryptography==46.0.3", "pyelftools==0.33", "d
 [project.optional-dependencies]
 dev = ["pytest==8.4.2", "pyinstaller==6.16.0"]
 canon-lab = ["unicorn==2.1.4"]
+molten = ["capstone==5.0.6", "z3-solver==4.15.4.0"]
 
 [project.urls]
 Repository = "https://github.com/derrickyau9/QEMU-Everything"
@@ -31,10 +32,13 @@ qemu-everything = "devkit.cli:main"
 include = ["devkit*"]
 
 [tool.setuptools.package-data]
+"devkit.adaptive" = ["schemas/*.json"]
 devkit = ["assets/*", "helpers/*", "helpers/arm32/*", "helpers/linux-arm32/*", "guest/*.c", "guest/*.h", "guest/*.sh", "guest/*.conf", "*.json", "templates/*"]
 "devkit.camera_formats._sony_vendor" = ["LICENSE.txt"]
 
 [tool.setuptools.data-files]
+"share/qemu-everything/native/molten" = ["native/molten/*.py", "native/molten/*.c", "native/molten/*.inc"]
+"share/qemu-everything/research/fixtures/aarch64_menu" = ["research/fixtures/aarch64_menu/*.py", "research/fixtures/aarch64_menu/*.c"]
 "share/qemu-everything/boards/canon" = ["scripts/boards/canon/*.md", "scripts/boards/canon/*.sh", "scripts/boards/canon/*.py", "scripts/boards/canon/*.json"]
 "share/qemu-everything/boards/gopro" = ["scripts/boards/gopro/*.md", "scripts/boards/gopro/*.py", "scripts/boards/gopro/*.c", "scripts/boards/gopro/*.h", "scripts/boards/gopro/*.S", "scripts/boards/gopro/*.ld", "scripts/boards/gopro/*.json", "scripts/boards/gopro/*.sh", "scripts/boards/gopro/COPYING"]
 "share/qemu-everything/boards/insta360" = ["scripts/boards/insta360/*.py", "scripts/boards/insta360/*.c", "scripts/boards/insta360/*.dts", "scripts/boards/insta360/*.md", "scripts/boards/insta360/*.S", "scripts/boards/insta360/*.ld", "scripts/boards/insta360/COPYING"]
@@ -50,3 +54,4 @@ devkit = ["assets/*", "helpers/*", "helpers/arm32/*", "helpers/linux-arm32/*", "
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["molten_native: requires Linux, cross compiler, and MOLTEN_BACKEND_MANIFEST"]

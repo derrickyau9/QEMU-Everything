@@ -34,6 +34,38 @@ static void prop(Iter *array,const char *name,int32_t value){
     dbus_message_iter_close_container(&entry,&variant);
     dbus_message_iter_close_container(array,&entry);
 }
+static void prop_str(Iter *array,const char *name,const char *value){
+    Iter entry,variant;
+    dbus_message_iter_open_container(array,'e',NULL,&entry);
+    dbus_message_iter_append_basic(&entry,'s',&name);
+    dbus_message_iter_open_container(&entry,'v',"s",&variant);
+    dbus_message_iter_append_basic(&variant,'s',&value);
+    dbus_message_iter_close_container(&entry,&variant);
+    dbus_message_iter_close_container(array,&entry);
+}
+/* com.hasselblad.system:version_id is a QString on the wire and is what the
+   Settings page shows; the camera reads it from /system/etc/VERSION. */
+static const char *firmware_version(void){
+    static char v[64];
+    static int loaded;
+    if(!loaded){
+        loaded=1;
+        v[0]=0;
+        const char *paths[]={"/system/etc/VERSION","/mnt/x2dii/camera/etc/VERSION","/devkit/etc/VERSION",NULL};
+        for(int i=0;paths[i]&&!v[0];i++){
+            FILE *f=fopen(paths[i],"r");
+            if(!f)continue;
+            if(fgets(v,sizeof(v),f)){
+                char *p=v;
+                while(*p && *p!='\r' && *p!='\n')p++;
+                *p=0;
+            }
+            fclose(f);
+        }
+        if(!v[0])snprintf(v,sizeof(v),"unknown");
+    }
+    return v;
+}
 int main(int argc,char **argv){
     setbuf(stdout,NULL);
     DBusConnection *c=dbus_bus_get(0,NULL);if(!c)return 1;
@@ -45,6 +77,7 @@ int main(int argc,char **argv){
         if(dbus_bus_request_name(c,name,4,NULL)!=1){fprintf(stderr,"name unavailable: %s\n",name);return 1;}
     }
     puts("MOCK_SERVICES_READY");
+    printf("MOCK_VERSION system.version_id=%s\n",firmware_version());
     while(dbus_connection_read_write(c,100)){
         DBusMessage *m;
         while((m=dbus_connection_pop_message(c))){
@@ -68,6 +101,7 @@ int main(int argc,char **argv){
                         prop(&array,"system_state",1);prop(&array,"screen_status",0);
                         prop(&array,"language_index",0);prop(&array,"touch_screen_enabled",1);
                         prop(&array,"settings_mode",0);prop(&array,"tethered_mode",0);
+                        prop_str(&array,"version_id",firmware_version());
                     }
                     if(dest && !strcmp(dest,"com.hasselblad.exmcu"))prop(&array,"battery_level",78);
                     if(dest && !strcmp(dest,"com.hasselblad.sysman")){

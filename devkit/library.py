@@ -6,6 +6,7 @@ import tempfile
 from .core import Task, read_json, write_json
 from .inspection import inspect_firmware
 from .boot import boot_template
+from . import x2dii_ota
 
 
 def is_camera(profile):
@@ -31,21 +32,29 @@ def adapters():
     return result
 
 
-def import_firmware(source, library, task=None):
+def import_firmware(source, library, task=None, *, ota_key=None, bridge=False):
     task = task or Task()
     source, library = Path(source), Path(library)
     report = inspect_firmware(source, task)
     digest = report['sha256']
-    device = library / digest[:16]
+    final = digest == x2dii_ota.CIM_SHA256 and not bridge
+    if ota_key is not None and not final:
+        raise ValueError('The selected file is no longer the expected final OTA package.')
+    device = library / (x2dii_ota.FINAL_ENTRY_NAME if final else digest[:16])
     if (device / 'device.json').is_file():
         previous = read_json(device / 'device.json')
         if previous.get('sha256') != digest:
             raise ValueError('Library identifier collision; original input unchanged')
         task.report('Already in library / 已在固件库中')
         return device
+    if final and ota_key is None:
+        raise x2dii_ota.FinalOtaKeyRequired()
     from .firmware import PROFILES, import_firmware as import_camera
     if digest in PROFILES:
-        device = import_camera(source, library, task)
+        if digest == x2dii_ota.CIM_SHA256:
+            device = import_camera(source, library, task, ota_key=ota_key, bridge=bridge)
+        else:
+            device = import_camera(source, library, task)
         report['adapter'] = 'hasselblad-ui'
         write_json(device / 'inspection.json', report)
         return device

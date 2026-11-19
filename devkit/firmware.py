@@ -1,6 +1,5 @@
 """Import the UI filesystem from a user-supplied official full OTA package."""
 from pathlib import Path
-import hashlib
 import io
 import json
 import shutil
@@ -10,8 +9,8 @@ import bz2
 import tarfile
 from dissect.extfs import ExtFS
 from elftools.elf.elffile import ELFFile
-from . import cim
-from .core import ASSETS, Task, checked_child, write_json
+from . import cim, x2dii_ota
+from .core import ASSETS, Task, checked_child, read_json, write_json
 from .guest.software_ui import build as adapt_software, legacy_window
 
 TESTED_VERSION = "1.2.7.16"
@@ -20,12 +19,17 @@ PROFILES = {
     TESTED_SHA256: ('Hasselblad X2D II 100C', TESTED_VERSION, '1800000_PVF'),
     '9789d6a9843d388034bc12341ad9a97585c25cb98cf11a0da8b768399b4842f6':
         ('Hasselblad X2D II 100C', '1.3.16.2', '1800000_PVF'),
+    x2dii_ota.CIM_SHA256: ('Hasselblad X2D II 100C', x2dii_ota.VERSION, '1800000_PVF'),
     '688eb3dec9dba21ac84ed6f11e57926ca4f1b68a9ddaaf2969083bfa8a38da24':
         ('Hasselblad X2D 100C', '1.0.5', '1800000_PVF'),
     '5ae67d16a24b00f9300e3e9c1323e7d149248ad36975e12c4fa8da633b438e03':
         ('Hasselblad X2D 100C', '4.2.0', '1800000_PVF'),
     '1bb69d26627d3af69dec75fd78653cd9769bd205f54ee4d6b1c5beae87b98cda':
         ('Hasselblad X1D II / 907X 50C', '1.5.2', '1700000_PVF'),
+}
+# This release ships a bootable transition OTA alongside the final encrypted OTA.
+BRIDGE_SYSTEM_VERSIONS = {
+    x2dii_ota.CIM_SHA256: '1.3.18.1',
 }
 MAX_IMAGE = 2 * 1024**3
 for digest, version in [
@@ -186,7 +190,10 @@ def stage(root, payload, task):
         shutil.copytree(root / src, out / dest)
     (out / "etc").mkdir()
     for name in ("VERSION", "dji.json"):
-        shutil.copy2(root / "etc" / name, out / "etc" / name)
+        # 1.4.15.7 dropped /etc/dji.json; carry it across only when the firmware ships it.
+        etc_file = root / "etc" / name
+        if etc_file.exists():
+            shutil.copy2(etc_file, out / "etc" / name)
     for src, dest in (("camera_run.sh", "run.sh"), ("dbus-local.conf", "dbus-local.conf")):
         (out / dest).write_bytes((ASSETS / "guest" / src).read_bytes().replace(b"\r\n", b"\n"))
     for name in ("mini_compositor", "mock_services", "dbus_launcher"):
@@ -198,7 +205,37 @@ def stage(root, payload, task):
     write_json(out / "dependencies.json", sorted(seen))
     return abi
 
-def import_firmware(source, library, task=None):
+def reconstruct_ota(source, work, task):
+    dat = work / 'system.dat'
+    with zipfile.ZipFile(source) as archive:
+        dat_member = 'system.new.dat.br' if 'system.new.dat.br' in archive.namelist() else 'system.new.dat'
+        required = ('system.transfer.list', dat_member)
+        for member_name in required:
+            matches = [item for item in archive.infolist() if item.filename == member_name]
+            if len(matches) != 1 or matches[0].file_size > MAX_IMAGE:
+                raise ValueError(f'Missing or oversized OTA member: {member_name}')
+        transfer = archive.read(required[0]).decode('ascii')
+        task.report('Expanding system blocks / 还原系统分区…')
+        decoder = brotli.Decompressor() if dat_member.endswith('.br') else None
+        expanded = 0
+        with archive.open(dat_member) as compressed, dat.open('wb') as output:
+            while chunk := compressed.read(65536):
+                task.check()
+                result = decoder.process(chunk) if decoder else chunk
+                expanded += len(result)
+                if expanded > MAX_IMAGE:
+                    raise ValueError('OTA expansion limit exceeded')
+                output.write(result)
+        if decoder and not decoder.is_finished():
+            raise ValueError('Truncated Brotli stream')
+    image = work / 'system.img'
+    with dat.open('rb') as stream:
+        reconstruct(transfer, stream, image, task)
+    dat.unlink()
+    return image
+
+
+def import_firmware(source, library, task=None, *, ota_key=None, bridge=False):
     task = task or Task()
     source, library = Path(source), Path(library)
     if not 2048 <= source.stat().st_size <= 1024**3:
@@ -208,15 +245,22 @@ def import_firmware(source, library, task=None):
     public, encrypted, iv, private, items = cim.load_container(raw)
     if not public['size_matches']:
         raise ValueError("Truncated firmware container")
-    digest = hashlib.sha256(raw).hexdigest()
+    digest = public['sha256']
     if digest not in PROFILES:
         raise ValueError("This firmware has not been validated for the DevKit. Original file unchanged.")
     name, expected_version, expected_product = PROFILES[digest]
     if public['product'] != expected_product:
         raise ValueError("Firmware product identifier does not match its validated profile")
-    device = library / digest[:16]
+    final = digest == x2dii_ota.CIM_SHA256 and not bridge
+    if ota_key is not None and not final:
+        raise ValueError('The selected file is no longer the expected final OTA package.')
+    device = library / (x2dii_ota.FINAL_ENTRY_NAME if final else digest[:16])
     if (device / "device.json").exists():
+        if read_json(device / 'device.json').get('sha256') != digest:
+            raise ValueError('Library identifier collision; original input unchanged')
         return device
+    if final and ota_key is None:
+        raise x2dii_ota.FinalOtaKeyRequired()
     library.mkdir(parents=True, exist_ok=True)
     import tempfile
     with tempfile.TemporaryDirectory(prefix="import-", dir=library) as temporary:
@@ -232,50 +276,51 @@ def import_firmware(source, library, task=None):
             task.check(); prepared.rename(device)
             task.report('Firmware imported / 固件已导入')
             return device
-        ota = [i for i in items if i['name'] == 'ota.zip']
+        ota_name = 'ota.sig' if final else 'ota.zip'
+        ota = [i for i in items if i['name'] == ota_name]
         if len(ota) != 1:
-            raise ValueError("Expected one full OTA component")
+            raise ValueError(f'Expected one {ota_name} component')
         item = ota[0]
         task.report("Unpacking the local OTA / 解包本地 OTA…")
         data = cim.decrypt_component(raw, item, iv) if encrypted else raw[item['offset_in_cim']:item['offset_in_cim']+item['length']]
         del raw
-        with zipfile.ZipFile(io.BytesIO(data)) as archive:
-            dat_member = 'system.new.dat.br' if 'system.new.dat.br' in archive.namelist() else 'system.new.dat'
-            required = ("system.transfer.list", dat_member)
-            for member_name in required:
-                matches = [i for i in archive.infolist() if i.filename == member_name]
-                if len(matches) != 1 or matches[0].file_size > MAX_IMAGE:
-                    raise ValueError(f"Missing or oversized OTA member: {member_name}")
-            transfer = archive.read(required[0]).decode("ascii")
-            task.report("Expanding system blocks / 还原系统分区…")
-            decoder = brotli.Decompressor() if dat_member.endswith('.br') else None
-            expanded = 0
-            dat = work / "system.dat"
-            with archive.open(required[1]) as compressed, dat.open("wb") as output:
-                while chunk := compressed.read(65536):
-                    task.check()
-                    result = decoder.process(chunk) if decoder else chunk
-                    expanded += len(result)
-                    if expanded > MAX_IMAGE:
-                        raise ValueError("OTA expansion limit exceeded")
-                    output.write(result)
-            if decoder and not decoder.is_finished():
-                raise ValueError("Truncated Brotli stream")
-        del data
-        with dat.open("rb") as stream:
-            reconstruct(transfer, stream, work / "system.img", task)
+        if final:
+            archive_path = work / 'final.zip'
+            task.report('Decrypting final OTA on this computer / 正在本机解密最终版 OTA…')
+            x2dii_ota.decrypt_zip(data, ota_key, archive_path, task)
+            del data
+            image = reconstruct_ota(archive_path, work, task)
+            archive_path.unlink()
+        else:
+            image = reconstruct_ota(io.BytesIO(data), work, task)
+            del data
         task.report("Reading the UI filesystem / 提取 UI 文件…")
-        extract_system(work / "system.img", work / "system_root", task)
+        extract_system(image, work / "system_root", task)
         root = work / "system_root"
         version = (root / "etc/VERSION").read_text().strip()
-        if version != expected_version:
+        bridge_version = None if final else BRIDGE_SYSTEM_VERSIONS.get(digest)
+        if version != (bridge_version or expected_version):
             raise ValueError(f"Firmware version mismatch: {version}; original file unchanged.")
+        if final and b'ro.product.device=eagle2_hb722' not in (root / 'build.prop').read_bytes().splitlines():
+            raise ValueError('Expected an X2D II system image (eagle2_hb722)')
         task.report("Preparing original UI / 准备原厂 UI…")
         prepared = work / "prepared"
         prepared.mkdir()
         abi = stage(root, prepared / "payload-stage", task)
-        write_json(prepared / 'device.json',profile_metadata(name,version,digest,source.name,abi))
+        profile = profile_metadata(name,version,digest,source.name,abi)
+        if bridge_version:
+            profile.update(release_version=expected_version, ota_stage='bridge')
+        if final:
+            if abi != 'arm64':
+                raise ValueError('The final camera UI must be AArch64')
+            profile.update(ota_stage='final', validated=False, ui_status='experimental')
+        write_json(prepared / 'device.json', profile)
         task.check()
-        prepared.rename(device)
+        try:
+            prepared.rename(device)
+        except OSError:
+            # A concurrent import may have completed the same library entry.
+            if not final or read_json(device / 'device.json').get('sha256') != digest:
+                raise
     task.report("Firmware ready / 固件准备完成")
     return device

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "MOLTEN native event v1",
+  "type": "object",
+  "required": ["schema_version", "campaign_id", "world_id", "seq", "virtual_time", "vcpu", "address_space_id", "component_sha256", "pc_offset", "kind", "address", "width_bits", "model_version", "intervention_prefix", "checkpoint", "causal_parent", "registers", "response"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "campaign_id": {"type": "string"},
+    "world_id": {"type": "string"},
+    "seq": {"type": "integer", "minimum": 0},
+    "virtual_time": {"type": "integer", "minimum": 0},
+    "vcpu": {"const": 0},
+    "address_space_id": {"const": "baremetal:identity"},
+    "component_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "pc_offset": {"type": "integer", "minimum": 0},
+    "kind": {"enum": ["mmio_write", "mmio_read", "mmio_read_unresolved", "frame", "input_poll"]},
+    "address": {"type": "string", "pattern": "^0x[0-9a-f]+$"},
+    "width_bits": {"const": 32},
+    "model_version": {"type": ["string", "null"]},
+    "intervention_prefix": {"enum": ["P0", "P1", "P2"]},
+    "checkpoint": {"const": "restart-prefix"},
+    "causal_parent": {"type": ["integer", "null"]},
+    "registers": {"type": "array", "minItems": 32, "maxItems": 32, "items": {"type": "string", "pattern": "^0x[0-9a-f]+$"}},
+    "response": {"oneOf": [{"type": "integer", "minimum": 0, "maximum": 4294967295}, {"const": "stop"}]}
+  }
+}

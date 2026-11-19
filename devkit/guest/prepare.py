@@ -81,7 +81,11 @@ def command(device, runtime, console_port, input_port, frame_port, *, network=Fa
     if network and not network_supported(profile, mode):
         raise ValueError('QEMU networking is supported only for X2D II ARM64 third-party app sessions')
     hw_version = MODELS[model_id(profile)]['hardware']
-    args = [str(_qemu(qemu, 'qemu-system-aarch64')), '-machine', 'virt', '-cpu', 'cortex-a57',
+    # cortex-a55 rather than cortex-a57: the 1.4.15.7 guest libraries (libc++.so)
+    # use ARMv8.1 LSE atomics (ldadd), absent from cortex-a57 and not enableable
+    # per-feature in this QEMU build. 1.3.18.1 and older contain no LSE.
+    # 'max' also carries LSE but does not boot the Android 9 guest kernel.
+    args = [str(_qemu(qemu, 'qemu-system-aarch64')), '-machine', 'virt', '-cpu', 'cortex-a55',
             '-m', '2048', '-smp', '2', '-accel', 'tcg,thread=multi,tb-size=512', '-display', 'none',
             '-monitor', 'none', '-no-reboot',
             '-serial', f'tcp:127.0.0.1:{console_port},server=on,wait=off',

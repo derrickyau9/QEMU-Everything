@@ -13,14 +13,19 @@ name=args.name
 if not name.replace('-','').isalnum(): raise SystemExit('Invalid build name')
 board_data = []
 board_files = []
+doc_files = []
 # Use the same public Git inventory as the source bundle. In particular, do
-# not collect JSON/Markdown from ignored board-local build or research caches.
-sources=subprocess.check_output(['git','ls-files','--cached','--others','--exclude-standard','-z'],cwd=root).decode().split('\0')
+# not collect files from ignored board-local build or research caches.
+sources=subprocess.check_output(['git','ls-files','--cached','-z'],cwd=root).decode().split('\0')
 for file in sorted(set(sources)):
-    if not file or not file.startswith('scripts/boards/'):
+    if not file:
         continue
     path = root / file
-    if path.is_file() and '__pycache__' not in path.parts and (path.suffix in ('.py', '.sh', '.c', '.h', '.inc', '.dts', '.md', '.json', '.S', '.ld') or path.name == 'COPYING'):
+    if not path.is_file():
+        continue
+    if file.startswith('docs/'):
+        doc_files.append(path)
+    elif file.startswith('scripts/boards/') and '__pycache__' not in path.parts and (path.suffix in ('.py', '.sh', '.c', '.h', '.inc', '.dts', '.md', '.json', '.S', '.ld') or path.name == 'COPYING'):
         board_files.append(path)
         board_data.extend(['--add-data', f'{path.relative_to(root)};{path.parent.relative_to(root)}'])
 subprocess.run([sys.executable,'-m','PyInstaller','--noconfirm','--clean','--windowed','--onedir',
@@ -32,6 +37,11 @@ subprocess.run([sys.executable,'-m','PyInstaller','--noconfirm','--clean','--win
     '--add-data','devkit/guest/dbus-local.conf;devkit/guest','--add-data','devkit/downloads.json;devkit',
     '--add-data','devkit/guest/legacy_run.sh;devkit/guest','--add-data','devkit/guest/linux_ui.sh;devkit/guest',
     '--add-data','devkit/guest/network.sh;devkit/guest',
+    '--add-data','devkit/guest/xfce_start.sh;devkit/guest',
+    '--add-data','devkit/guest/memory_probe.sh;devkit/guest',
+    '--add-data','devkit/guest/memory_failure.sh;devkit/guest',
+    '--add-data','devkit/guest/subsystem_manager.sh;devkit/guest',
+    '--add-data','devkit/guest/subsystem_audit.sh;devkit/guest',
     '--add-data','devkit/linux-downloads.json;devkit',
     '--add-data','devkit/camera_catalog.json;devkit',
     *board_data,
@@ -41,9 +51,8 @@ output=root/'dist'/name
 for file in ('LICENSE','README.md','README.zh-CN.md','THIRD_PARTY_NOTICES.md'):
     shutil.copy2(root/file,output/file)
 shutil.copytree(root/'third-party-licenses',output/'third-party-licenses',dirs_exist_ok=True)
-shutil.copytree(root/'docs',output/'docs',dirs_exist_ok=True)
 # Keep the public docs' relative links readable outside the frozen interpreter.
-for path in board_files:
+for path in doc_files + board_files:
     target = output / path.relative_to(root)
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(path, target)

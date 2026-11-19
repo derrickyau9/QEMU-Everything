@@ -17,6 +17,11 @@ This is the new QEMU Everything repository. Use the source launcher below until 
 3. A recognized Hasselblad `.cim` uses the existing **original UI** adapter. Compatible generic kernels and disk images use a **boot profile**. Unknown or encrypted updates remain available for inspection and support development.
 4. Review the selected boot profile, prepare the required runtime, and start. Generic guests use QEMU's own display window and the workbench console. Camera UI sessions retain embedded touch input and screenshots.
 
+You can import **Hasselblad X2D II 100C firmware 1.4.15.7** offline. Drop your own official
+`.cim` firmware package into the workbench and enter your own `ota.sig` decryption
+key when prompted. The project does not distribute the firmware or the key.
+[Firmware import guide](docs/CAMERA_FIRMWARE.md#hasselblad-x2d-ii-14157)
+
 [General firmware guide](docs/GENERAL_FIRMWARE.md) · [Multi-brand camera research](docs/CAMERA_FIRMWARE.md) · [Architecture](docs/ARCHITECTURE.md)
 
 For a supported Hasselblad UI, first use prompts for the Android SDK license before downloading the guest runtime. Click to tap, drag to swipe, and use **Stop** to close the owned QEMU process. Later launches use cached firmware and runtime offline.
@@ -51,6 +56,7 @@ The camera UI runtime download is approximately **615 MB**. Allow **8 GB free di
 | --- | --- |
 | Windows x64 host | Supported; portable Qt application |
 | macOS Apple Silicon | Supported from source after the macOS setup in [docs/MACOS.md](docs/MACOS.md); no portable package yet |
+| X2D II 100C 1.4.15.7 | Offline import supported. Original UI in QEMU is experimental. |
 | X2D II 1.2.7.16 | Original UI, menu navigation and Display submenu verified |
 | X2D II 1.3.16.2 | See [verification record](docs/VERIFICATION.md) |
 | Additional profiles | X1D, X1D II, X2D and 907X 50C; see the preview matrix below |
